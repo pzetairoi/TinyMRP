@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block page_content %}
+<!-- 
+<body>
+    <form action="/part/uploader" method="POST"
+          enctype="multipart/form-data">
+        <input type="file" name="file" />
+        <input type="submit" />
+    </form> -->
+
+
+    <body>
+      
+<form method="post" enctype="multipart/form-data">
+    {{ bomform.hidden_tag() }}
+    {{ bomform.file }}
+    <input type="submit" value="Upload BOM">
+    </form>
+
+
+
+                    {% if upload  %}
+
+<p class="lead">Upload successful</p>
+<a href="/part" class="btn btn-primary">Back to database</a>
+                    {% endif %}
+
+</body>
+  {% endblock %}

@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
+
+{% block title %}TinyMRP Jobs{% endblock %}
+
+
+{% block page_content %}
+
+
+<div class="table-responsive" >
+        <table id="datatable" class="display">
+        <thead>
+            <tr>
+                <th>Jobnumber</th>
+                <th>Description</th>
+                <th>Creation date</th>
+                <th>Customer</th>
+                <th>user_id</th>
+                <th>user</th>
+            </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+    </table>
+</div>
+
+
+
+{% endblock %}
+
+{% block morescripts %}
+<!--Datatables script -->
+<script type = "text/javascript"> 
+   var table= $(document).ready( function () {
+        $('#datatable').DataTable({
+            ajax: 'jobdata',
+            deferRender: true,
+            columns: [
+                        { data: 'jobnumber' },
+                        { data: 'jobnumber' },
+                        { data: 'jobnumber' },
+                        { data: 'jobnumber' },
+                        { data: 'test' },
+                        
+                        ],
+            
+                        columnDefs: [ {
+                "targets": -1,
+                "data": null ,
+                "defaultContent": "<button>Click!</button>"
+                }]
+            });
+
+        $('#datatable tbody').on( 'click', 'tr', function () {
+            if ( $(this).hasClass('selected') ) {
+                $(this).removeClass('selected');
+            }
+            else {
+                table.$('tr.selected').removeClass('selected');
+                $(this).addClass('selected');
+            }
+        } );
+
+
+            
+        $('#datatable tbody').on( 'click', 'button', function () {
+        var dato = table.row( $(this).parents('tr') ).data();
+        alert( dato[1] );
+            } );
+
+        
+         } );
+
+
+
+
+    </script> 
+
+{% endblock %}
+
+
+
+    
