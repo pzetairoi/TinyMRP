@@ -2,8 +2,10 @@
 
 # C extensions
 *.so
+*.sqlite
 
 # Packages
+
 *.egg
 *.egg-info
 dist
