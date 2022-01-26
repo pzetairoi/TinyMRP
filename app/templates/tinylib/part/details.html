@@ -606,21 +606,34 @@ img {
 {% if flatbom %}
 
 <hr />
+<div class="row">
 <h3> Process summary</h3>
 <p> Components that are part of purchased,welded or machined assemblies will not appear in the tables below, however they will be picked on the "any part" drawing pack or visual summaries.<p>
 
-<div class="card ">
-    <div class="card-header">
-        <ul class="nav nav-tabs card-header-tabs pull-right" id="myTab" role="tablist">
+
+    <div class="panel with-nav-tabs panel-default">        
+            
+            <div class="panel-heading">
+            
+
+    
+
+
+                <ul class="nav nav-tabs">
 
             {% for pro in legend  if not pro.process=="others"%}
 
-            <li class="nav-pro">
+            
                 {% if loop.index == 1 %}
-                <a class="nav-link active" id={{"a"+pro.process| replace(' ', '')+"-tab"}} data-toggle="tab" href={{"#"+"a"+pro.process| replace(' ', '')}} role="tab" aria-controls={{"a"+pro.process| replace(' ', '')}} aria-selected="true">
+                
+   
+                    <li class="active">
+                    <a data-toggle="tab" href={{"#"+"a"+pro.process| replace(' ', '')}} id={{"a"+pro.process| replace(' ', '')+"-tab"}}>
                     {% else %}
-                    <a class="nav-link" id={{"a"+pro.process| replace(' ', '')+"-tab"}} data-toggle="tab" href={{"#"+"a"+pro.process| replace(' ', '')}} role="tab" aria-controls={{"a"+pro.process| replace(' ', '')}} aria-selected="false">
-                        {% endif %}
+                    <li class="nav-item">
+                    <a data-toggle="tab" href={{"#"+"a"+pro.process| replace(' ', '')}} id={{"a"+pro.process| replace(' ', '')+"-tab"}}>
+ 
+                    {% endif %}
 
 
                         <img src="{{url_for('static', filename=pro.icon)}}" class="card-img-top" alt="..." style="width: 2.0rem; "> {{pro.process}}
@@ -633,7 +646,7 @@ img {
             {% endfor %}
 
 
-            <li class="nav-pro">
+            <li class="nav-item">
 
                 <a class="nav-link" id={{"notapproved"+"-tab"}} data-toggle="tab" href={{"#"+"notapproved"}} role="tab" aria-controls={{"notapproved"}} aria-selected="false">
 
@@ -646,7 +659,7 @@ img {
 
 
             {% if "others" in processes %}
-            <li class="nav-pro">
+            <li class="nav-item">
 
                 <a class="nav-link" id={{"others"+"-tab"}} data-toggle="tab" href={{"#"+"others"}} role="tab" aria-controls={{"others"}} aria-selected="false">
 
@@ -667,11 +680,9 @@ img {
         <div class="tab-content" id="myTabContent">
             {% for pro in legend  if not pro.process=="others" %}
 
-            {% if loop.index == 1 %}
-            <div class="tab-pane fade show active" id={{"a"+pro.process| replace(' ', '')}} role="tabpanel" aria-labelledby={{"a"+pro.process| replace(' ', '')+"-tab"}}>
-                {% else %}
-                <div class="tab-pane fade" id={{"a"+pro.process| replace(' ', '')}} role="tabpanel" aria-labelledby={{"a"+pro.process| replace(' ', '')+"-tab"}}>
-                    {% endif %}
+
+                <div class="tab-pane fade in active" id={{"a"+pro.process| replace(' ', '')}} role="tabpanel" aria-labelledby={{"a"+pro.process| replace(' ', '')+"-tab"}}>
+            
 
                     {% if part.revision!=''%}
                     
@@ -979,7 +990,7 @@ img {
 
 
         {% endif %}
-
+</div>
 
 
         {% endblock %}

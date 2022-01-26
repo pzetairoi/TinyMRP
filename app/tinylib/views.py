@@ -190,7 +190,8 @@ def tree_dict (partin):
 
 
 @tinylib.route('/part', methods=('GET', 'POST'))
-@tinylib.route('/part/page/<int:page>', methods=('GET', 'POST'))
+#@tinylib.route('/part/page/<int:page>', methods=('GET', 'POST'))
+@login_required
 def allparts(page=1):
     
     ##Simple search snippet to add to every view   methods=['GET', 'POST'])
@@ -204,9 +205,10 @@ def allparts(page=1):
     print(page)
     
     
-    allparts=Part.query.filter(Part.asset!="").filter(Part.asset!="FALSE").filter(Part.asset!="False").filter(Part.process!="hardware").order_by(Part.id.desc())
-    allparts=allparts.filter(not_(Part.partnumber.like("opy of")))
-    allparts=allparts.filter(or_(Part.partnumber.like("AWS%"),Part.partnumber.like("OEM%")))
+    #allparts=Part.query.filter(Part.asset!="").filter(Part.asset!="FALSE").filter(Part.asset!="False").filter(Part.process!="hardware").order_by(Part.id.desc())
+    allparts=Part.query.filter(Part.process!="hardware").order_by(Part.id.desc())
+    total=Part.query.count()
+    allparts=allparts.filter(or_(Part.id>total-30,Part.id<total-30))
     pagination = allparts.paginate(
         page, pagination_items,
         error_out=False)
@@ -227,6 +229,7 @@ def allparts(page=1):
 
 @tinylib.route('/part/search', methods=('GET', 'POST'))
 @tinylib.route('/part/search/<searchstring>/<int:page>', methods=('GET', 'POST'))
+@login_required
 def search(searchstring="aws",page=1):
     searchform= SearchSimple()
     search="%"+ searchstring+"%"
@@ -317,6 +320,7 @@ def create():
 
 #Keeping previous link specially for links from outside
 @tinylib.route('/part/<partnumber>_rev_<revision>', methods=('GET', 'POST'))
+@login_required
 def details(partnumber,revision=""):
     searchform= SearchSimple()
     return redirect( url_for('tinylib.partnumber',partnumber=partnumber,revision=revision, searchform=searchform,detail="quick") )
@@ -325,6 +329,7 @@ def details(partnumber,revision=""):
 
 #Detail valid inputs: "quick" and "full"
 @tinylib.route('/part/detail/<detail>:<partnumber>_rev_<revision>', methods=('GET', 'POST'))
+@login_required
 #@tinylib.route('/part/<partnumber>_rev_<revision>/page/<int:page>', methods=('GET', 'POST'))
 def partnumber(partnumber,revision="",detail="full",page=1):
     commentform=PartComment()
