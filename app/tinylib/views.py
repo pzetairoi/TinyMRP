@@ -186,13 +186,88 @@ def tree_dict (partin):
         return partdict
 
 
-    ##Simple search snippet to add to every view   methods=['GET', 'POST'])
 
 
-@tinylib.route('/part', methods=('GET', 'POST'))
-#@tinylib.route('/part/page/<int:page>', methods=('GET', 'POST'))
+@tinylib.route('/api/part', methods=('GET', 'POST'))
 @login_required
-def allparts(page=1):
+def partdata():
+    query = Part.query
+
+    #Global search filter
+    search = request.args.get('search[value]')
+    if search:
+        query = query.filter(db.or_(
+            Part.partnumber.like(f'%{search}%'),
+            Part.description.like(f'%{search}%')
+        ))
+    
+    #Cols search filter
+    search = request.args.get('columns[1][search][value]')
+    if search:  query = query.filter(Part.partnumber.like(f'%{search}%'))
+    search = request.args.get('columns[2][search][value]')
+    if search:  query = query.filter(Part.revision.like(f'%{search}%'))
+    search = request.args.get('columns[3][search][value]')
+    if search:  query = query.filter(Part.description.like(f'%{search}%'))
+    search = request.args.get('columns[4][search][value]')
+    if search:  query = query.filter(Part.process.like(f'%{search}%'))
+    search = request.args.get('columns[5][search][value]')
+    if search:  query = query.filter(Part.process2.like(f'%{search}%'))
+    search = request.args.get('columns[6][search][value]')
+    if search:  query = query.filter(Part.process3.like(f'%{search}%'))
+    search = request.args.get('columns[7][search][value]')
+    if search:  query = query.filter(Part.finish.like(f'%{search}%'))
+
+
+
+
+    
+    total_filtered = query.count()
+    query = query.order_by(Part.id.desc())
+
+    # sorting
+    order = []
+    i = 0
+    while True:
+        col_index = request.args.get(f'order[{i}][column]')
+
+
+        if col_index is None:
+            break
+        col_name = request.args.get(f'columns[{col_index}][data]')
+        if col_name not in ['partnumber', 'description', 'process']:
+            col_name = 'partnumber'
+
+        descending = request.args.get(f'order[{i}][dir]') == 'desc'
+        col = getattr(Part, col_name)
+        if descending:
+            col = col.desc()
+        order.append(col)
+        i += 1
+    if order:
+        query = query.order_by(*order)
+
+    
+    # pagination
+    start = request.args.get('start', type=int)
+    length = request.args.get('length', type=int)
+    query = query.offset(start).limit(length)
+    
+
+    tabledata={'data': [part.to_dict() for part in query],
+        'recordsFiltered': total_filtered,
+        'recordsTotal': query.count(),
+        'draw': request.args.get('draw', type=int),
+    }
+
+
+    # response
+    return jsonify(tabledata)
+
+
+
+@tinylib.route('/inventory', methods=('GET', 'POST'))
+@login_required
+def allparts():
     
     ##Simple search snippet to add to every view   methods=['GET', 'POST'])
     searchform= SearchSimple()
@@ -201,28 +276,55 @@ def allparts(page=1):
         session['search']=searchstring
         return redirect(url_for('tinylib.search',searchstring=searchstring,page=1, searchform=searchform ))
          
-    page = request.args.get('page', page, type=int)
-    print(page)
-    
+   
     
     #allparts=Part.query.filter(Part.asset!="").filter(Part.asset!="FALSE").filter(Part.asset!="False").filter(Part.process!="hardware").order_by(Part.id.desc())
-    allparts=Part.query.filter(Part.process!="hardware").order_by(Part.id.desc())
+    allparts=Part.query
     total=Part.query.count()
     allparts=allparts.filter(or_(Part.id>total-30,Part.id<total-30))
-    pagination = allparts.paginate(
-        page, pagination_items,
-        error_out=False)
-    parts = pagination.items
 
-
-
-    for part in parts:
-        part.updatefilespath(webfileserver)
-        #print (part.pdf)
    
     print(config['PROCESS_LEGEND'])
 
-    return render_template('tinylib/part/allparts.html',title="Part list", parts=parts,pagination=pagination,page=1, searchform=searchform, legend=config['PROCESS_LEGEND'])
+    return render_template('tinylib/part/inventory.html',title="Part list", searchform=searchform, legend=config['PROCESS_LEGEND'])
+
+
+
+
+# @tinylib.route('/part', methods=('GET', 'POST'))
+# #@tinylib.route('/part/page/<int:page>', methods=('GET', 'POST'))
+# @login_required
+# def allparts(page=1):
+    
+#     ##Simple search snippet to add to every view   methods=['GET', 'POST'])
+#     searchform= SearchSimple()
+#     if searchform.validate_on_submit() :
+#         searchstring=searchform.search.data
+#         session['search']=searchstring
+#         return redirect(url_for('tinylib.search',searchstring=searchstring,page=1, searchform=searchform ))
+         
+#     page = request.args.get('page', page, type=int)
+#     print(page)
+    
+    
+#     #allparts=Part.query.filter(Part.asset!="").filter(Part.asset!="FALSE").filter(Part.asset!="False").filter(Part.process!="hardware").order_by(Part.id.desc())
+#     allparts=Part.query.filter(Part.process!="hardware").order_by(Part.id.desc())
+#     total=Part.query.count()
+#     allparts=allparts.filter(or_(Part.id>total-30,Part.id<total-30))
+#     pagination = allparts.paginate(
+#         page, pagination_items,
+#         error_out=False)
+#     parts = pagination.items
+
+
+
+#     for part in parts:
+#         part.updatefilespath(webfileserver)
+#         #print (part.pdf)
+   
+#     print(config['PROCESS_LEGEND'])
+
+#     return render_template('tinylib/part/allparts.html',title="Part list", parts=parts,pagination=pagination,page=1, searchform=searchform, legend=config['PROCESS_LEGEND'])
 
 
 
@@ -1371,6 +1473,7 @@ def createjob():
         job= Job(   jobnumber = jobform.jobnumber.data,
                     description = jobform.description.data,
                     customer =jobform.customer.data,
+                    
                     user_id =current_user._get_current_object().id,
                     # date_due=   jobform.date_due.data,
                     )
@@ -1467,6 +1570,51 @@ def downloads():
     
     return render_template('tinylib/downloads.html', searchform=searchform)
 
+@tinylib.route('/jobapi/delete', methods=['GET','POST'])
+def deletejob():
+    
+    request_data =request.values.get('jobnumber')
+    print(request_data)
+    request_data =request.values.get('id')
+    print(request_data)
+    request_data =request.values.get('description')
+    print(request_data)
+    request_data =request.values.get('customer')
+    print(request_data)
+
+    jobnumber=request.values.get('jobnumber')
+    jobid=request.values.get('id')
+
+    
+    database_job=db.session.query(Job).filter(Job.id==jobid).first()
+    if database_job:
+        db.session.delete(database_job)
+        db.session.commit() 
+           
+
+
+    return jsonify(request_data)
+
+@tinylib.route('/jobapi/update', methods=['GET','POST'])
+def updatejob():
+    
+    jobid=request.values.get('id')
+    jobnumber=request.values.get('jobnumber')
+    jobdescription=request.values.get('description')
+    jobcustomer=request.values.get('customer')
+
+    print (jobid,jobnumber,jobdescription,jobcustomer)
+
+    database_job=db.session.query(Job).filter(Job.id==jobid).first()
+    database_job.id=jobid
+    database_job.jobnumber=jobnumber
+    database_job.description=jobdescription
+    database_job.customer=jobcustomer
+    db.session.commit() 
+           
+
+
+    return jsonify("Success")
 
 
 @tinylib.route('/jobdata', methods=['GET', 'POST'])
@@ -1476,7 +1624,7 @@ def data():
     print("dsafad")
     for job in jobs:
         jobdict=job.__dict__
-        jobdict['user']=job.user.username
+        #jobdict['user']=job.user.username
         # print(jobdict)
 
         jobdict.pop('_sa_instance_state')

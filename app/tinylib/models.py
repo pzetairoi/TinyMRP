@@ -2,6 +2,8 @@
 # create config variables (to be cleaned in the future)
 
 from flasky import db
+from flask_login import login_required, current_user
+
 from config import config as config_set
 
 from app.models import User
@@ -1033,7 +1035,31 @@ class Part(db.Model):
 
         return self.__dict__
 
+    def to_dict(self):
+        self.updatefilespath(webfileserver)
 
+        
+        if self.revision=="":
+            urllink=url_for('tinylib.partnumber',partnumber=self.partnumber,revision="%25",detail="quick")
+        else:
+            urllink=url_for('tinylib.partnumber',partnumber=self.partnumber,revision=self.revision,detail="quick")
+
+        weblink= '<a href="'+ urllink +  '">' + """<img src="http://""" + self.pngpath + """" width=auto height=30rm></a>"""
+        
+     
+
+
+        return {
+            'id': self.id,
+            'pngpath': weblink,
+            'partnumber': self.partnumber,
+            'revision': self.revision,
+            'description': self.description,
+            'process': self.process,
+            'process2': self.process2,
+            'process3': self.process3,
+            'finish': self.finish
+        }
         
     
     def getchildren (self):
@@ -1585,10 +1611,10 @@ class Job(db.Model):
     date_due=db.Column(db.DateTime)
     date_modify=db.Column(db.DateTime)
     date_finish=db.Column(db.DateTime)
-    scope=relationship('Jobbom',                         
-                        backref='job', 
-                        lazy='dynamic')
-    user=relationship('User', backref = "job")
+    #scope=relationship('Jobbom',                         
+                        # backref='job', 
+                        # lazy='dynamic')
+    #user=relationship('User', backref = "job")
 
 
     def __init__(self, id="",jobnumber="",description="",user="",customer="",user_id="",date_create="",date_due="",date_modify="",date_finish="", **kwargs):
@@ -1615,7 +1641,7 @@ class Jobbom(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     job_id = db.Column(db.Integer, ForeignKey('job.id') , nullable=False)
     part_id = db.Column(db.Integer, ForeignKey('part.id') , nullable=False)
-    user_id = db.Column(db.Integer, ForeignKey('users.id') , nullable=False)
+    #user_id = db.Column(db.Integer, ForeignKey('users.id') , nullable=False)
     qty =db.Column(db.Integer)
 
     def __init__(self, job_id="",part_id="",user_id="",qty="", **kwargs):

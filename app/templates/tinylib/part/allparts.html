@@ -116,57 +116,30 @@
     </p>
 
     <div class="container-fluid">
-
-        <div class="row row-cols-auto">
-            {% for part in parts %}
-
-
-            <div class="card text-center" style="width: 12rem;">
-                <a href="http://{{part['edrpath']}}">
-
-                    <img src="http://{{part['pngpath']}}" href="http://{{part['edrpath']}}" style="background-color: transparent;" class="card-img-top" alt="...">
-                </a>
-
-
-                <div class="card-body">
-
-                    {% if part['revision']  == "": %}
-                    <a class="btn btn-primary" href="{{ url_for('tinylib.details',partnumber=part.partnumber,revision="%") }}" style="background-color:rgb({{part['process_colors'][0]}});"> {{ part['partnumber'] }} </a>
-                    {% else %}
-                    <a class="btn btn-primary" href="{{ url_for('tinylib.details',partnumber=part.partnumber,revision=part.revision) }}" style="background-color:rgb({{part['process_colors'][0]}});">{{ part['partnumber'] }}  </a>
-                    {% endif %}
-
-
-
-                    <p class="card-text">{{ part['description'] }}</p>
-                    <p class="card-text">
-                        {% for iconpath in part.process_icons %}
-                        <img src="{{url_for('static', filename=iconpath)}}" class="card-img-top" alt="..." style="width: 2rem;">
-                        {% endfor %}
-                    </p>
-
-                    {% if part['pdf']  %}
-                    <a href="http://{{ part['pdfpath'] }}" class="btn btn-primary">DRAWING PDF</a>
-                    {% endif %}
-
-                    {% if part['eprt']  %}
-                    <a href="http://{{ part['eprtpath'] }}" class="btn btn-primary">3D</a>
-                    {% endif %}
-
-                    {% if part['easm']  %}
-                    <a href="http://{{ part['easmpath'] }}" class="btn btn-primary">3D</a>
-                    {% endif %}
-
-                    {% if part['datasheet_available']  %}
-                    <a href="http://{{ part['datasheet_link'] }}" class="btn btn-primary">Datasheet</a>
-                    {% endif %}
-
-                </div>
-
-            </div>
-            {% endfor %}
-
-        </div>
+        <table id="dati" class="table table-striped">
+            <thead>
+              <tr>
+                <th>partnumber</th>
+                <th>revision</th>
+                <th>description</th>
+                <th>process</th>
+                <th>finish</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- {% for part in parts %}
+                <tr>
+                  <td>{{ part.partnumber }}</td>
+                  <td>{{ part.revision }}</td>
+                  <td>{{ part.description }}</td>
+                  <td>{{ part.process }}</td>
+                  <td>{{ part.finish }}</td>
+                </tr>
+              {% endfor %} -->
+            </tbody>
+          </table>
+    
+       
     </div>
 
 
@@ -174,5 +147,29 @@
 
 
     {% endblock %}
+
+
+    
+    {% block morescripts %}
+ 
+
+    <!--Datatables script -->
+    <script>
+        $(document).ready(function () {
+          $('#dati').DataTable({
+            ajax: '/vault/api/part',
+            serverSide: true,
+            columns: [
+              {data: 'partnumber'},
+              {data: 'revision'},
+              {data: 'description', orderable: false},
+              {data: 'process', orderable: false},
+              {data: 'finish'}
+            ],
+          });
+        });
+      </script>
+    
+    {% endblock %}  
 
 

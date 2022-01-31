@@ -48,7 +48,7 @@
                         Engineering <b class="caret"></b>
                     </a>
                     <ul class="dropdown-menu">
-                        <li> <a href="{{ url_for('tinylib.allparts') }}">Engineering database</a></li>
+                        <li> <a href="{{ url_for('tinylib.allparts') }}">Inventory database</a></li>
                         {% if current_user.can(Permission.MODERATE) %}
                         <li> <a href="{{ url_for('tinylib.upload_file') }}">Upload Bom</a></li>
                         <li> <a href="{{ url_for('tinylib.excelcompile') }}">Compile XLS</a></li>
@@ -111,7 +111,25 @@
 
     {% block page_content %}{% endblock %}
 </div>
+
+
+{% if legend %}
+          <hr />
+          <div class="container">
+          <h4> Process related icons and color code:</h4>
+            <div class="btn-group btn-group-justified">
+                {% for item in legend %}
+                <a class="btn btn-info" style="background-color: rgb({{item.color}})" >  
+                    <img  src="{{url_for('static', filename=item.icon)}}" style="width: 2.0rem; "> 
+                    {{item.process}}
+                </a>
+                {% endfor %}
+          </div> 
+</div>
+{% endif %}
 {% endblock %}
+
+
 
 {% block scripts %}
     {{ super() }}
