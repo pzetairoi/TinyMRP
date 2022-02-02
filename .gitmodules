@@ -1,3 +1,9 @@
 [submodule "app/static/js/three.js"]
 	path = app/static/js/three.js
 	url = https://github.com/mrdoob/three.js.git
+[submodule "app/static/misc/vbalibs/VBA-JSON"]
+	path = app/static/misc/vbalibs/VBA-JSON
+	url = https://github.com/VBA-tools/VBA-JSON
+[submodule "app/static/misc/VBA-JSON"]
+	path = app/static/misc/VBA-JSON
+	url = https://github.com/VBA-tools/VBA-JSON
