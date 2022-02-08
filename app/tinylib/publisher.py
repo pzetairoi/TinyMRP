@@ -66,7 +66,7 @@ from reportlab.graphics import renderPM
 
 
 # boxy_line.py
-from reportlab.lib.pagesizes import A4
+
 from reportlab.platypus import Flowable, SimpleDocTemplate, Spacer
 from reportlab.lib.units import inch
 from reportlab.lib import colors
@@ -193,14 +193,26 @@ def makeParaRight(text):
 
 def index_page(canvas,doc):
     
-    logo="app/static/images/"+'logo.png'
+    logo="app/static/images/logo.png"
+    # logo="/Fileserver/Deliverables/png/TMRP-011053_REV_1.png" 
     PAGE_HEIGHT = A4[1]
     PAGE_WIDTH = A4[0]
  
-    canvas.setFillColor(colors.white)
-    # canvas.rect(0, PAGE_HEIGHT-90, PAGE_WIDTH, 90, stroke=1, fill=1)
-    canvas.drawImage(logo,inch*0.5-PAGE_WIDTH, PAGE_HEIGHT-50,height=0.5*inch, 
+    #canvas.setFillColor(colors.red)
+    #canvas.rect(0, PAGE_HEIGHT-90, PAGE_WIDTH, 90, stroke=1, fill=1)
+    canvas.drawImage(logo,2.5*inch-PAGE_WIDTH, PAGE_HEIGHT-60,height=0.5*inch, 
                      preserveAspectRatio=True, mask='auto')
+
+    # canvas.drawImage(logo,-PAGE_WIDTH/2, PAGE_HEIGHT/2,height=5*inch, 
+    #                  preserveAspectRatio=True, mask='auto')
+
+    canvas.drawImage(logo,2.4*inch-PAGE_WIDTH, 25,height=0.25*inch, 
+                    preserveAspectRatio=True, mask='auto')
+
+    canvas.setFillColorRGB(0,0,0.5)                     
+    canvas.drawString (1.0*inch*0.8,30+2*mm,"Created with TinyMRP")
+    canvas.drawString (1.0*inch*0.8,30-2*mm,"www.tinymrp.com")
+
 
     canvas.saveState()
 
@@ -219,8 +231,8 @@ def process_page(process):
     def process_genericpage(canvas,doc):
         #inputs process, process icon, and 
         logo="app/static/images/"+'logo.png'
-        PAGE_HEIGHT = A4[1]
-        PAGE_WIDTH = A4[0]
+        PAGE_HEIGHT = A3[1]
+        PAGE_WIDTH = A3[0]
      
         
         
@@ -278,7 +290,9 @@ def pdf_pagenum(pdf_page,page_number,color=colors.grey):
     c=canvas.Canvas(tempfile)
 
 
-    #Draw rectangle and foot depending on orientation
+    #Draw logo, rectangle and foot depending on orientation
+    logo="app/static/images/logo.png"
+
     if PAGE_WIDTH<PAGE_HEIGHT:
                     
         # c.rotate(90)
@@ -290,6 +304,13 @@ def pdf_pagenum(pdf_page,page_number,color=colors.grey):
         c.setFont("Helvetica-Bold", 12)
         c.setFillColorRGB(0,0.8,0)
         c.drawCentredString(PAGE_WIDTH-x,yvert-2*mm,footnote)
+        c.drawImage(logo,2.5*inch-PAGE_WIDTH/2, yvert-2*mm,height=0.25*inch, 
+                     preserveAspectRatio=True, mask='auto')
+        
+        c.setFillColorRGB(0,0,0.5)
+        
+        c.drawString (1.0*inch*0.85,yvert+2*mm,"Created with TinyMRP")
+        c.drawString (1.0*inch*0.85,yvert-2*mm,"www.tinymrp.com")
        
     else:
         
@@ -300,6 +321,13 @@ def pdf_pagenum(pdf_page,page_number,color=colors.grey):
         c.setFont("Helvetica-Bold", 12)
         c.setFillColor(colors.white)
         c.drawCentredString(PAGE_WIDTH-x,y-2*mm,footnote)
+        c.drawImage(logo,2.5*inch-PAGE_WIDTH/2, y-2*mm,height=0.25*inch, 
+                     preserveAspectRatio=True, mask='auto')
+
+        c.setFillColorRGB(0,0,0.5)                     
+        c.drawString (1.0*inch*0.85,y+2*mm,"Created with TinyMRP")
+        c.drawString (1.0*inch*0.85,y-2*mm,"www.tinymrp.com")
+        
       
     #Save page
     c.showPage()
@@ -320,7 +348,9 @@ def pdf_pagenum(pdf_page,page_number,color=colors.grey):
 
 
 def IndexPDF(solidbom,outputfolder="",savevisual=False,sort=True,norefpart=False):
-    
+
+
+      
     if outputfolder=="":
         outputfolder=solidbom.folderout
 

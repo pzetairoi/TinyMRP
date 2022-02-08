@@ -186,6 +186,18 @@ def tree_dict (partin):
         return partdict
 
 
+@tinylib.route('/api/test/partnumber=<partnumber>/revision=<revision>', methods=('GET', 'POST'))
+def gettinyid(partnumber,revision):
+    query = Part.query
+    part = query.filter(db.or_(
+            Part.partnumber.like(f'%{partnumber}%'),
+            Part.description.like(f'%{revision}%')
+        )).first()
+
+    # response
+    return jsonify(part.to_dict())
+
+
 
 
 @tinylib.route('/api/part', methods=('GET', 'POST'))
@@ -195,6 +207,8 @@ def partdata():
 
     #Global search filter
     search = request.args.get('search[value]')
+
+
     if search:
         query = query.filter(db.or_(
             Part.partnumber.like(f'%{search}%'),
@@ -262,6 +276,8 @@ def partdata():
 
     # response
     return jsonify(tabledata)
+    
+
 
 
 
@@ -652,6 +668,8 @@ def upload_file():
    
 
     
+    
+
     if bomform.validate_on_submit():
         f = secure_filename(bomform.file.data.filename)
         
@@ -659,15 +677,22 @@ def upload_file():
         targetfile= folder+ "/" + config['UPLOAD_PATH']+ "/" + secure_filename(f)
         print(targetfile)
         print(folderout)
+
         
-        try:
-            os.remove(targetfile)
-        except:
-            flash("Couldn't erase upload file ", targetfile)
+        
+
+
+
+
         bomform.file.data.save(targetfile)
+
         
         
+        #return "targetfile---" + targetfile + "*****  deliverables_folder----" + deliverables_folder+ "*******  fileserver_path---" + fileserver_path+ "*******  folderout---" + folderout
+
         bom_in=solidbom(targetfile,deliverables_folder,fileserver_path+folderout)
+
+        
 
 
         if bom_in.revision=="":
@@ -676,6 +701,11 @@ def upload_file():
 
         flash("BOM uploaded successfully")
         # return render_template('tinylib/upload.html',upload=True, searchform=searchform , bomform=bomform)
+
+        try:
+            os.remove(targetfile)
+        except:
+            flash("Couldn't erase upload file ", targetfile)
 
         if bom_in.revision=="":
             bom_in.revision="%25"
