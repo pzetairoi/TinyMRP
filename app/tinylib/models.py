@@ -448,7 +448,7 @@ class solidbom():
         ###Remove all the entries with no file related to it
         ###This will hasve to be revised if the cut list and sheet metal properties
         ### are to be counted
-        self.data.dropna(subset = ["file"], inplace=True)
+        #self.data.dropna(subset = ["file"], inplace=True)
 
 
         #Transform to right data type based on init lists:
