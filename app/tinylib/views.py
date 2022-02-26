@@ -26,7 +26,7 @@ from config import config as config_set
 config=config_set['tinymrp'].__dict__
 
 
-print(config)
+#print(config)
 
 folderout=config['FOLDEROUT']
 fileserver_path=config['FILESERVER_PATH']

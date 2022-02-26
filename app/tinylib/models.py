@@ -958,21 +958,28 @@ class Bom(db.Model):
 
 
 
-def deletepart(database_part):
+def deletepart(database_part,echo=False):
               
-    bomentries=db.session.query(Bom).filter(Bom.father_id==database_part.id)
+    bomentries=db.session.query(Bom).filter(or_(Bom.father_id==database_part.id,Bom.child_id==database_part.id))
     for bomline in bomentries:
+        this=bomline.id
         db.session.delete(bomline)
+        if echo: print("deleted-",this)
     db.session.commit()
-
-    bomentries=db.session.query(Bom).filter(Bom.child_id==database_part.id)
-    for bomline in bomentries:
-        db.session.delete(bomline)
-    db.session.commit()
-
+    # bomentries=db.session.query(Bom).filter(Bom.child_id==database_part.id)
+    # for bomline in bomentries:
+    #     this=bomline.id
+    #     db.session.delete(bomline)
+    #     if echo: print("deleted-",this)
+    # db.session.commit()
+    this=database_part.id
+    
     db.session.delete(database_part)
-    db.session.commit() 
-    db.session.close()
+    if echo: print("part deleted-",this)
+
+    db.session.commit()
+    if echo: print("all deleted from ",this)
+    #db.session.close()
  
 
 class Part(db.Model):
