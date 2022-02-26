@@ -16,7 +16,7 @@ import click
 from flask_migrate import Migrate, upgrade
 from app import create_app, db
 from app.models import User, Follow, Role, Permission, Post, Comment
-from app.tinylib.models import Part, solidbom, Bom, Job, Jobbom 
+from app.tinylib.models import Part, solidbom, Bom, Job, Jobbom, deletepart
 #dsafdasddfasf
 
 app = create_app(os.getenv('FLASK_CONFIG') or 'default')
@@ -27,7 +27,7 @@ migrate = Migrate(app, db)
 def make_shell_context():
     return dict(db=db, User=User, Follow=Follow, Role=Role,
                 Permission=Permission, Post=Post, Comment=Comment,
-                Part=Part, Bom=Bom, Job=Job, Jobbom=Jobbom
+                Part=Part, Bom=Bom, Job=Job, Jobbom=Jobbom, deletepart=deletepart
                 )
 
 

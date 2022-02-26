@@ -955,7 +955,26 @@ class Bom(db.Model):
     def __str__ (self):
         self.getchild()
         return f'BOM( {self.child.partnumber} , {self.child.revision} ,quantity {self.qty})'    
-             
+
+
+
+def deletepart(database_part):
+              
+    bomentries=db.session.query(Bom).filter(Bom.father_id==database_part.id)
+    for bomline in bomentries:
+        db.session.delete(bomline)
+    db.session.commit()
+
+    bomentries=db.session.query(Bom).filter(Bom.child_id==database_part.id)
+    for bomline in bomentries:
+        db.session.delete(bomline)
+    db.session.commit()
+
+    db.session.delete(database_part)
+    db.session.commit() 
+    db.session.close()
+ 
+
 class Part(db.Model):
     # Defines the Table Name user
     __tablename__ = "part"
