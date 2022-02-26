@@ -1,0 +1,66 @@
+
+#Add crontab scheduled erase temp folders using the default user (tinymrp)
+crontab -e 
+#option 1 for nano
+#Every week at sudnay midnight the temp files will be erased
+0     0       *       *       0       /TinyMRP/server_config/tinymrp_cleantempfolders.sh
+
+
+##Add crontab scheduled update repository using the sudo user (sudo with tinymrp)
+#update once per WEEK at 00:01 every sunday at midnight
+#option 1 for nano
+sudo crontab -e
+1     0       *       *       0       /TinyMRP/server_config/tinymrp_update.sh
+
+
+
+#To change the timezone
+sudo timedatectl set-timezone Australia/Victoria
+
+
+
+##################################################
+###### Anydesk - remote desktop #######
+##################################################
+
+sudo apt update
+sudo apt install wget -y
+wget -qO - https://keys.anydesk.com/repos/DEB-GPG-KEY | sudo apt-key add -
+echo "deb http://deb.anydesk.com/ all main" | sudo tee /etc/apt/sources.list.d/anydesk-stable.list
+sudo apt update
+sudo apt install anydesk -y
+
+##################################################
+##################################################
+
+
+
+
+##################################################
+###### Backup TinyMRP and system #######
+##################################################
+###TinyMRP backup every day
+#Just backing up the database with deja-dup (has graphical interface)
+#https://adamtheautomator.com/ubuntu-backup/
+
+sudo snap install deja-dup --classic
+
+#Then use it to backup the TinyMRP folder every day
+
+
+
+
+#### System Backup every week
+## Add the repository to apt-get to make it available to download
+sudo add-apt-repository ppa:teejee2008/ppa
+
+## Download all available packages
+sudo apt update
+
+## Download and install the Timeshift package
+sudo apt install timeshift
+
+#Then use it to backup the system every week 
+
+##################################################
+##################################################
