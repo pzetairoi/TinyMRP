@@ -18,17 +18,12 @@ login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
 
 
-s3 = FlaskS3()
-
-
-
 def create_app(config_name):
     app = Flask(__name__)
     app.config.from_object(config[config_name])
     config[config_name].init_app(app)
     
-    #Amazon s3 integration
-    s3.init_app(app)
+
 
     bootstrap.init_app(app)
     mail.init_app(app)
