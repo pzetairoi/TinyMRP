@@ -8,7 +8,7 @@ from ..decorators import permission_required
 from . import tinylib
 from ..main.forms import SearchSimple
 from ..models import User, Permission
-from .awsbucket import upload_file, download_file, list_files
+#from .awsbucket import upload_file, download_file, list_files
 
 
 
