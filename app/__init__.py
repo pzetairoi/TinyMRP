@@ -7,10 +7,6 @@ from flask_login import LoginManager
 from flask_pagedown import PageDown
 from config import config
 
-#Amazon S3 integration 
-from flask_s3 import FlaskS3
-
-
 
 bootstrap = Bootstrap()
 mail = Mail()
