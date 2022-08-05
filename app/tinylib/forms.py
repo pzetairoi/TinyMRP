@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, HiddenField, BooleanField, SelectField,\
     SubmitField, DateField, FieldList,FormField,SelectMultipleField
-from wtforms.validators import DataRequired, Length, Email, Regexp
+from wtforms.validators import DataRequired,InputRequired, Length, Email, Regexp
 from wtforms import ValidationError
 from flask_pagedown.fields import PageDownField
 from ..models import Role, User
@@ -11,8 +11,10 @@ from .models import Part, Job, mongoJob, mongoPart, mongoOrder, mongoSupplier
 
 #Testing flask WTF to make forms easier
 from flask_wtf.file import FileField, FileRequired, FileAllowed
-from wtforms import StringField, SubmitField,SelectField,TextAreaField, RadioField
+from wtforms import StringField, SubmitField,SelectField,TextAreaField,\
+                     RadioField, BooleanField,HiddenField
 from wtforms.validators import DataRequired
+from wtforms import widgets, SelectMultipleField
 
 from datetime import datetime, date
 
@@ -130,3 +132,37 @@ class PartReport(FlaskForm):
     category=RadioField('Comment type',choices=[('improvement','improvement'),('mistake','mistake'),('procurement','procurement')])
     pic_path = FileField('Attach file',validators=[FileAllowed(['jpg', 'png'], 'Images only!')])
     submit = SubmitField('Submit')    
+
+
+
+class MultiCheckboxField(SelectMultipleField):
+    widget = widgets.ListWidget(prefix_label=False)
+    option_widget = widgets.CheckboxInput()
+
+class Compile(FlaskForm):
+
+    # body = TextAreaField('Add a comment', validators=[DataRequired()])
+    checkbox = BooleanField('Private?')
+    category=RadioField('Comment type')#,choices=[('improvement','improvement'),('mistake','mistake'),('procurement','procurement')])
+    
+    standard_sets=SelectField("Standard compilation sets:",choices=[('procurementpack','Procurement Pack'),
+                            ('assemblypack','Assembly pack'),('purchasepack','Purchase pack')])
+    # pic_path = FileField('Attach file',validators=[FileAllowed(['jpg', 'png'], 'Images only!')])
+    submit = SubmitField('Submit')  
+    processes = MultiCheckboxField('Process filter ')
+    files = MultiCheckboxField('Files filter')
+    export_opt= MultiCheckboxField('Doc Packs',choices=[('visual','Visual List'),
+                ('files','Selected files'),('binder','PDF binder'),('excel','Excel BOM'),
+                ('folderprocess','Processes folders')])
+                # ,('binderprocess','Binder for processes'),
+                # ('visualprocess','Visual list for processes'),('excelprocess','Processes Excel BOM')])
+    bom_opt= RadioField('Depth of compiliation',choices=[('toplevel','Top Level only'),('full','Full BOM')],
+                        default='toplevel')
+    consumed_opt= RadioField('Consumed components',
+                             choices=[('hide','Hide consumed'),('show','Show consumed')],
+                             default='hide')
+    partnumber=HiddenField()
+    revision=HiddenField()
+
+
+

@@ -7,7 +7,7 @@ allparts=db.session.query(Part)
 for part in allparts:
     part.updatefilespath(fileserver_path)
     if exists(part.pngpath):
-        print(part.pngpath)
+        #print(part.pngpath)
     else:
         deletepart(part,echo=True)
 
@@ -20,6 +20,6 @@ allparts=db.session.query(Part)
 for part in allparts:
     part.updatefilespath(fileserver_path)
     if part.png:
-        print(part.pngpath)
+        #print(part.pngpath)
     else:
         deletepart(part,echo=True)

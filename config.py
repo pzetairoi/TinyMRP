@@ -14,12 +14,12 @@ class TinyConfig:
     def loadconfiguration(filein='TinyMRP_conf.xlsm'):
 
             excelfile=pd.ExcelFile(filein)
-            PROCESS_CONF=excelfile.parse('process')
-            PROPERTY_CONF=excelfile.parse('property')
-            VARIABLES_CONF=excelfile.parse('variables')
-            processfields_conf=excelfile.parse('processfields')
+            PROCESS_CONF=excelfile.parse('process').fillna('')
+            PROPERTY_CONF=excelfile.parse('property').fillna('')
+            VARIABLES_CONF=excelfile.parse('variables').fillna('')
+            processfields_conf=excelfile.parse('processfields').fillna('')
 
-            FILES_CONF=excelfile.parse('files')
+            FILES_CONF=excelfile.parse('files').fillna('')
             FILES_CONF=FILES_CONF.set_index('filetype').to_dict('index')
 
 
@@ -44,7 +44,7 @@ class TinyConfig:
                             fieldorder.append(str(processfields_conf[process][property]))
                     except:
                         pass
-                        # print("Issue with " , process , property)
+                        # #print("Issue with " , process , property)
                 
                 #Range the list so the print out is ordered
                 def myFunc(e):
@@ -54,7 +54,7 @@ class TinyConfig:
                     fieldlist.sort(key=myFunc)
                 except:
                     pass
-                    # print("Couldnt sort ",process)
+                    # #print("Couldnt sort ",process)
                 
                 fieldlist= [x['prop'] for x in fieldlist]
 
@@ -63,7 +63,7 @@ class TinyConfig:
                     #PROCESS_CONF[process]['fieldsorder']=fieldorder
                 except:
                     pass
-                    # print("List issue with " , process , property)
+                    # #print("List issue with " , process , property)
                 #print(process,fieldlist)
 
             #print(PROCESS_CONF)
@@ -102,6 +102,7 @@ class TinyConfig:
         DELIVERABLES[filetype]={}
         DELIVERABLES[filetype]['path']=(DELIVERABLES_PATH+"/"+FILES_CONF[filetype]['folder']+"/").replace("""//""","/")
         DELIVERABLES[filetype]['list']=FILES_CONF[filetype]['list']
+        DELIVERABLES[filetype]['field']=FILES_CONF[filetype]['field']
         filemod=str(FILES_CONF[filetype]['filemod'])
         if filemod!='nan' and filemod!="": 
             DELIVERABLES[filetype]['filemod']=filemod
@@ -113,6 +114,22 @@ class TinyConfig:
             if str(FILES_CONF[filetype][reffield])!='nan':
                 DELIVERABLES[filetype]['extension'].append(FILES_CONF[filetype][reffield])
 
+    
+    #Fileset to be incloudedc in all the datatables export filelist, it is repeated
+    #witht the code above, the whole config needs a clean up
+    fileset=[]
+    allfiles=[]
+    for filetype in FILES_CONF.keys():
+        refdict=FILES_CONF[filetype]
+        if FILES_CONF[filetype]['list']=='yes':            
+            refdict['filetype']=filetype
+            fileset.append(refdict)
+        allfiles.append(refdict)
+
+
+    ALLFILES=allfiles
+    FILESET=fileset
+
 
 
 
@@ -120,7 +137,7 @@ class TinyConfig:
 
 
     # Process releated configuration icons, images , colours etc
-    # print(PROCESS_CONF.keys())
+    # #print(PROCESS_CONF.keys())
     # PROCESS_DESCRIPTION=[ [x,PROCESS_CONF[x]['icon'], PROCESS_CONF[x]['color']] for x in PROCESS_CONF.keys()]
     PROCESS_DESCRIPTION=[]
 
@@ -156,28 +173,30 @@ class Config(TinyConfig):
     
     #Email configuration
 
-    #Dummy python email
-    MAIL_SERVER = 'localhost'
-    MAIL_PORT = 25
-    MAIL_USE_TLS = False
-    MAIL_USERNAME = None
-    MAIL_PASSWORD = None
-    # MAIL_PORT = int(os.environ.get('MAIL_PORT', '465'))
+    # #Dummy python email
+    # MAIL_SERVER = 'localhost'
+    # MAIL_PORT = 25
+    # MAIL_USE_TLS = False
+    # MAIL_USERNAME = None
+    # MAIL_PASSWORD = None
+
+
+    MAIL_PORT = int(os.environ.get('MAIL_PORT', '465'))
     
-    # #For external mail server
-    # # MAIL_SERVER = os.environ.get('MAIL_SERVER', 'mail.privateemail.com')
-    # MAIL_SERVER = 'mail.privateemail.com'
-    # MAIL_PORT = int('587')
-    # MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'true').lower() in \
-    #    ['true', 'on', '1']
-    # MAIL_USERNAME = "no-reply@tinymrp.com"
-    # MAIL_PASSWORD ="Tespro"
-    # # MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
-    # # MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+    #For external mail server
+    # MAIL_SERVER = os.environ.get('MAIL_SERVER', 'mail.privateemail.com')
+    MAIL_SERVER = 'mail.privateemail.com'
+    MAIL_PORT = int('587')
+    MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'true').lower() in \
+       ['true', 'on', '1']
+    MAIL_USERNAME = "admin@tinymrp.com"
+    MAIL_PASSWORD ="Tespro"
+    # MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
+    # MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
 
     FLASKY_MAIL_SUBJECT_PREFIX = '[TinyMRP]'
-    FLASKY_MAIL_SENDER = 'TinyMRP admin <no-reply@tinymrp.com>'
-    FLASKY_ADMIN = 'fcoquesada@gmail.com'
+    FLASKY_MAIL_SENDER = 'TinyMRP NO-REPLY <admin@tinymrp.com>'
+    FLASKY_ADMIN = 'hola <fcoquesada@gmail.com>'
     SSL_REDIRECT = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_RECORD_QUERIES = True
@@ -195,7 +214,7 @@ class Config(TinyConfig):
 
     
 class DevelopmentConfig(Config):
-    print("development config")
+    #print("development config")
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = os.environ.get('DEV_DATABASE_URL') or \
         'sqlite:///' + os.path.join(basedir, 'data-dev.sqlite')

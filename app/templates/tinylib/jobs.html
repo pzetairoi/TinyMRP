@@ -53,7 +53,7 @@
                         { data: 'customer', class: 'editable text'  },
                         {//edit button creation    
                 render: function (data, type, row) {    
-                    return [createButton('manage', row.id),createButton('edit', row.id),createButton('delete', row.id)];    
+                    return [createButton('manage', row.id),createButton('orders', row.id),createButton('edit', row.id),createButton('delete', row.id)];    
                 }},
                         // {},{},{},{},{},
                         ],
@@ -89,6 +89,9 @@ function createButton(buttonType, rowID) {
             break;
         case "manage":
             buttonText="Manage";
+            break;
+        case "orders":
+            buttonText="orders";
             break;
 
     }
@@ -304,6 +307,30 @@ $('#datatable').on('click', 'tbody td .manage', function (e) {
    
 });   
 
+
+$('#datatable').on('click', 'tbody td .orders', function (e) {    
+    fnResetControls();    
+    var dataTable = $('#datatable').DataTable();    
+    var clickedRow = $($(this).closest('td')).closest('tr');    
+    
+    // console.log(clickedRow)
+    console.log(clickedRow[0].cells[1].innerText);
+    var jobnumberc=clickedRow[0].cells[1].innerText;
+    console.log(jobnumberc)
+
+
+    $.post(    '{{ url_for('tinylib.job_orders_link')}}',
+    {jobnumber: jobnumberc,ordernumber:'all'},
+    function (data) {
+        console.log(data)
+        window.open(data)
+
+    }
+);
+    //window.open(linkstring)
+    
+   
+});   
     </script> 
 
 {% endblock %}

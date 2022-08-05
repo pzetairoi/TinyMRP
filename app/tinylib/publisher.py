@@ -29,7 +29,7 @@ property_conf=config['PROPERTY_CONF']
 import requests, io
 
 # from models import Part
-from .models import Part, solidbom, thumbnail, file_exists, create_folder_ifnotexists, qr_code
+from .models import Part, mongoPart, solidbom, thumbnail, file_exists, create_folder_ifnotexists, qr_code
 
 print("loaded PUBLISHER")
 
@@ -115,6 +115,8 @@ import os
 import fnmatch
 from pathlib import Path
 from datetime import datetime, date #for timestamps
+from werkzeug.utils import secure_filename
+import shutil
 
 #PDF libraries
 import PyPDF2
@@ -171,8 +173,13 @@ def makeParaRight(text):
     return output
 
 
-
-
+def tempFile_toWeb(file):
+        path, filename = os.path.split(file)
+        finalfile=fileserver_path+deliverables_folder+"temp/"+filename
+        shutil.copy2(Path(file),Path(finalfile) )
+        os.remove(file)
+        weblink="http://"+finalfile.replace(fileserver_path,webfileserver)
+        return weblink
 
 
 
@@ -220,18 +227,20 @@ def index_page(canvas,doc):
  
     #canvas.setFillColor(colors.red)
     #canvas.rect(0, PAGE_HEIGHT-90, PAGE_WIDTH, 90, stroke=1, fill=1)
-    canvas.drawImage(logo,2.5*inch-PAGE_WIDTH, PAGE_HEIGHT-60,height=0.5*inch, 
-                     preserveAspectRatio=True, mask='auto')
-
-    # canvas.drawImage(logo,-PAGE_WIDTH/2, PAGE_HEIGHT/2,height=5*inch, 
+    # canvas.drawImage(logo,2.5*inch-PAGE_WIDTH, PAGE_HEIGHT-60,height=0.5*inch, 
     #                  preserveAspectRatio=True, mask='auto')
 
-    canvas.drawImage(logo,2.4*inch-PAGE_WIDTH, 25,height=0.25*inch, 
-                    preserveAspectRatio=True, mask='auto')
+    canvas.drawImage(logo,40*mm, 3*mm,height=0.3*inch, 
+                     preserveAspectRatio=True, mask='auto')
+
+    # canvas.drawImage(logo,2.4*inch-PAGE_WIDTH, 25,height=0.25*inch, 
+                    # preserveAspectRatio=True, mask='auto')
 
     canvas.setFillColorRGB(0,0,0.5)                     
-    canvas.drawString (1.0*inch*0.8,30+2*mm,"Created with TinyMRP")
-    canvas.drawString (1.0*inch*0.8,30-2*mm,"www.tinymrp.com")
+    # canvas.drawString (1.0*inch*0.8,30+2*mm,"Created with TinyMRP")
+    # canvas.drawString (1.0*inch*0.8,30-2*mm,"www.tinymrp.com")
+    canvas.drawCentredString (PAGE_WIDTH/2,4*mm,"Made with TinyMRP               www.tinymrp.com")
+    
 
 
     canvas.saveState()
@@ -329,8 +338,13 @@ def pdf_pagenum(pdf_page,page_number,color=colors.grey):
         
         c.setFillColorRGB(0,0,0.5)
         
-        c.drawString (1.0*inch*0.85,yvert+2*mm,"Created with TinyMRP")
-        c.drawString (1.0*inch*0.85,yvert-2*mm,"www.tinymrp.com")
+        # c.drawString (1.0*inch*0.85,yvert+2*mm,"Created with TinyMRP")
+        # c.drawString (1.0*inch*0.85,yvert-2*mm,"Created with TinyMRP - www.tinymrp.com")
+        c.drawCentredString (PAGE_WIDTH/2,3*mm,"Made with TinyMRP               www.tinymrp.com")
+        # drawCentredString
+
+        c.drawImage(logo,144*mm, 2*mm,height=0.3*inch, 
+                     preserveAspectRatio=True, mask='auto')
        
     else:
         
@@ -341,12 +355,16 @@ def pdf_pagenum(pdf_page,page_number,color=colors.grey):
         c.setFont("Helvetica-Bold", 12)
         c.setFillColor(colors.white)
         c.drawCentredString(PAGE_WIDTH-x,y-2*mm,footnote)
-        c.drawImage(logo,2.5*inch-PAGE_WIDTH/2, y-2*mm,height=0.25*inch, 
+        c.drawImage(logo,2.5*inch-PAGE_WIDTH/2,3*mm,height=0.25*inch, 
                      preserveAspectRatio=True, mask='auto')
 
         c.setFillColorRGB(0,0,0.5)                     
-        c.drawString (1.0*inch*0.85,y+2*mm,"Created with TinyMRP")
-        c.drawString (1.0*inch*0.85,y-2*mm,"www.tinymrp.com")
+        # c.drawString (1.0*inch*0.85,y+2*mm,"Created with TinyMRP")
+        # c.drawString (1.0*inch*0.85,y-2*mm,"Created with TinyMRP - www.tinymrp.com")
+        c.drawCentredString (PAGE_WIDTH/2,3*mm,"Made with TinyMRP               www.tinymrp.com")
+
+        c.drawImage(logo,144*mm,2*mm,height=0.3*inch, 
+                     preserveAspectRatio=True, mask='auto')
         
       
     #Save page
@@ -354,7 +372,7 @@ def pdf_pagenum(pdf_page,page_number,color=colors.grey):
     c.save()
     
 
-    #Merge the pdf page with watermark
+    #Merge the pdf page with watermarkgt
     watermark = PdfFileReader(tempfile)
     watermark_page = watermark.getPage(0)
     pdf_page.mergePage(watermark_page)
@@ -391,9 +409,9 @@ def IndexPDF(solidbom,outputfolder="",savevisual=False,sort=True,norefpart=False
         data2=data2.sort_values('partnumber', axis=0, ascending=True, inplace=False, kind='quicksort', na_position='last').reset_index()
 
 
-    print('INSIDE INDEX')
-    for i,pepe in data2.iterrows():
-        print (pepe.partnumber)
+    #print('INSIDE INDEX')
+    # for i,pepe in data2.iterrows():
+    #     print (pepe.partnumber)
     
     data2["pdfpages"]=0
     
@@ -467,12 +485,13 @@ def IndexPDF(solidbom,outputfolder="",savevisual=False,sort=True,norefpart=False
                 try:
                     pdfWriter.addBookmark(bookmark,pageref-1)
                 except:
-                    print("couldnt add bookmark for ",data2.at[i,'partnumber'])
+                    #print("couldnt add bookmark for ",data2.at[i,'partnumber'])
+                    pass
                 pageref=pageref+data2.at[i,"pdfpages"]
         
         else:
             data2.at[i,"pdfpath"]=""
-            print("No file for ",data2.at[i,"partnumber"])
+            #print("No file for ",data2.at[i,"partnumber"])
     
     #Store back the index ref into the solidbom
     solidbom.flatbom=data2
@@ -574,42 +593,30 @@ def IndexPDF(solidbom,outputfolder="",savevisual=False,sort=True,norefpart=False
 
 
 
-def visual_list(solidbom, outputfolder="",title=""):
+def visual_list(dictlist, outputfolder="",title="",subtitle="",local=False):
     
-
-    #get children data
-    bom_in=solidbom.flatbom
-
-
-
-
+    #Output folder and files
     if outputfolder=="":
-        outputfolder=solidbom.folderout
+        outputfolder=os.getcwd()+"/temp/"
 
 
-    
-    #Remove harddware and sort by process
-    #bom_in=bom_in.loc[bom_in['process']!='hardware'].sort_values(by=['process','partnumber'])
-    
-  
-    if title=="":
-        outputfile=outputfolder + "Visual_list-"+ solidbom.tag+".pdf"
+    if title=="": 
+        title="Visual index"
+        outputfile=outputfolder + secure_filename("Visual_list-"+ datetime.now().strftime('%d_%m_%Y-%H_%M_%S_%f')+".pdf")
     else:
-        outputfile=outputfolder + title + "-"+ solidbom.tag+".pdf"
+        outputfile=outputfolder +secure_filename( title + "-"+ datetime.now().strftime('%d_%m_%Y-%H_%M_%S_%f')+".pdf")
 
     #In case the list is empty
-    if len(bom_in)==0:
-        return
-    
+    if len(dictlist)==0:
+        return "NO LIST TO PROCESS VISUAL SUMMARY"
+
+
+    #Page format and templates and sections  
     doc = SimpleDocTemplate(outputfile,    pagesize=A4,
                             rightMargin=20,      leftMargin=30,
                             topMargin=20,      bottomMargin=20)
     pagebreak = PageBreak()
-    styles = getSampleStyleSheet()
-    
-    #Sections building
-
-    
+    styles = getSampleStyleSheet()   
     #Index page template reference
     index_firsframe = Frame(doc.leftMargin, doc.bottomMargin, doc.width, doc.height, id='normal')
     index_nextframe = Frame(doc.leftMargin, doc.bottomMargin+20, doc.width, doc.height-60, id='normal')
@@ -623,26 +630,23 @@ def visual_list(solidbom, outputfolder="",title=""):
     #Add pdf header
         # headertext=makeParaRight(solidbom.partnumber + " Drawing Pack")
     
-    headertext=makeParaCenter("Visual index" )
-    
 
+    #Header and title
+    
+    headertext=makeParaCenter(title)
     para = Paragraph(headertext, style=styles["Heading1"])
     flowables.append(para)
-    if title=="":
-        headertext=makeParaCenter(solidbom.partnumber+  " REV "+solidbom.revision + ": "+solidbom.description)
-    else:
-        headertext=makeParaCenter(title)
-
+    
+    headertext=makeParaCenter(subtitle )
     para = Paragraph(headertext, style=styles["Heading2"])
     flowables.append(para)
-    
-    
+
+
+    #Spacer and next page template in case of page change
     flowables.append (Spacer(0, 20))
     flowables.append(NextPageTemplate('index_next'))
 
 
-            
-    partlist=Part.partlist(bom_in)
     
     #Split in sections
     boxywidth=60
@@ -653,10 +657,10 @@ def visual_list(solidbom, outputfolder="",title=""):
     boxyrows=int(((297-margin)/ (boxyheight+spacer))-1)
     
 
-    chunks = [partlist[x:x+boxycols] for x in range(0, len(partlist), boxycols)]
+    chunks = [dictlist[x:x+boxycols] for x in range(0, len(dictlist), boxycols)]
     #flash(boxycols)
    
-    #Add all the parts
+    #Add all the parts split in sections
     j=0
     firstrow=False
     flowables.append (Spacer(0, boxyheight/2*mm))
@@ -676,10 +680,15 @@ def visual_list(solidbom, outputfolder="",title=""):
             firstrow=True
         
 
-
+    #Build pdf document
     doc.build(flowables,onFirstPage=index_page, onLaterPages=index_page )
 
-    return outputfile
+    if local:
+        return outputfile
+    else:
+        #Move file to temp folder and erase initial
+        outputfile=tempFile_toWeb(outputfile)
+        return outputfile
 
 
    
@@ -732,19 +741,25 @@ class BoxyGrid(Flowable):
             qrsize=min([yc*0.9,xc*0.9,50])
             
 
-            if child.png:
+            if 'thumbnail' in child.keys():
+                self.canv.drawImage(child['thumbnail'].replace(webfileserver,fileserver_path),xlevel+15, ylevel+yc*0.4/2, height=yc*0.4, preserveAspectRatio=True, mask='auto')
+            else:
+                if child['pngpath']:
                 # BoxyLine(part=child, x=x,y=ylevel)
-                
-                self.canv.drawImage(thumbnail(child.pngpath),xlevel+15, ylevel+yc*0.4/2, height=yc*0.4, preserveAspectRatio=True, mask='auto')
+                    self.canv.drawImage(thumbnail(child['pngpath']),xlevel+15, ylevel+yc*0.4/2, height=yc*0.4, preserveAspectRatio=True, mask='auto')
                 
             if self.width>45 and self.height>25:
                 qrimagepath=qr_code(child)
                 self.canv.drawImage(qrimagepath,xlevel+xc-qrsize, ylevel+yc-qrsize-yc*0.21, width=qrsize,height=qrsize)
-            if child.approved:
+            if child['approved']:
                 # icon=svg2rlg("app/static/images/"+'approved.svg')
                 # icon=renderPM.drawToFile(icon, "app/static/images/"+'approved.png', fmt='PNG')
                 icon="app/static/images/"+'approved.png'
                 self.canv.drawImage(icon,xlevel+xc-qrsize, ylevel+yc-qrsize-yc*0.21-20, width=30,height=20)
+            elif 'hardware' not in child['process'] and 'purchase' not in child['process'] and 'others' not in  child['process'] :
+                icon="app/static/images/"+'notapproved.png'
+                self.canv.drawImage(icon,xlevel+xc-qrsize, ylevel+yc-qrsize-yc*0.21-20, width=30,height=20)
+
             # self.canv.drawImage(qr_code(child),xlevel+20, ylevel+30,width=xc, height=xc)
                 
             self.canv.setFont("Helvetica-Bold", 10)
@@ -753,30 +768,30 @@ class BoxyGrid(Flowable):
             #Draw rectangle
             fill=0
             self.canv.setLineJoin(1)
-            
-            self.canv.setStrokeColor(get_process_color(child.process))
-            self.canv.setLineWidth(3)
-            self.canv.rect(xlevel+xc*0.1, ylevel+0.05*yc, xc*.92, yc*.82,fill=fill)
-            self.canv.setLineWidth(2)
-   
-            if child.process2!="":
-                    indent=0.03
-                    self.canv.setStrokeColor(get_process_color(child.process2,intensity=0.7))
-                    self.canv.rect(xlevel+xc*(0.1+indent), ylevel+(0.05+indent)*yc, xc*(0.92-2*indent), yc*(0.82-2*indent),fill=fill)
-            if child.process3!="":
-                    indent=0.06
-                    self.canv.setStrokeColor(get_process_color(child.process3,intensity=0.7))
-                    self.canv.rect(xlevel+xc*(0.1+indent), ylevel+(0.05+indent)*yc, xc*(0.92-2*indent), yc*(0.82-2*indent),fill=fill)
+
+            indent=0.0
+            intensity=1.0
+            linewidth=3.0
+            for process in child['process']:
+                self.canv.setLineWidth(linewidth)
+                self.canv.setStrokeColor(get_process_color(process,intensity=intensity))
+                self.canv.rect(xlevel+xc*(0.1+indent), ylevel+(0.05+indent)*yc, xc*(0.92-2*indent), yc*(0.82-2*indent),fill=fill)
+                # self.canv.rect(xlevel+xc*0.1, ylevel+0.05*yc, xc*.92, yc*.82,fill=fill)
+                
+                indent=indent+0.03
+                intensity=intensity-0.3
+                linewidth=linewidth*0.7
+    
+          
             self.canv.setLineWidth(1)    
-             
             ytop=ylevel+yc*0.8-1.52*mm     
-            # self.canv.drawCentredString(xlevel+xc/2, ylevel+xc*0.5, child.partnumber)
-            #self.canv.drawString(xlevel+xc*0.1 + 1.5*mm, ytop, child.partnumber)
+            # self.canv.drawCentredString(xlevel+xc/2, ylevel+xc*0.5, child['partnumber'])
+            #self.canv.drawString(xlevel+xc*0.1 + 1.5*mm, ytop, child['partnumber'])
             
 
             #Part number text
-            if len(child.partnumber)>14:
-                chunks=[child.partnumber[x:x+14] for x in range(0, len(child.partnumber.upper()), 14)]
+            if len(child['partnumber'])>14:
+                chunks=[child['partnumber'][x:x+14] for x in range(0, len(child['partnumber'].upper()), 14)]
                 k=0
                 for chunk in chunks:
                 
@@ -784,34 +799,40 @@ class BoxyGrid(Flowable):
                     k=k+10
                 ytopleft=ytop-k
             else:
-                self.canv.drawString(xlevel+xc*0.1 + 1.5*mm, ytop, child.partnumber)
+                self.canv.drawString(xlevel+xc*0.1 + 1.5*mm, ytop, child['partnumber'])
                 ytopleft=ytop-10
 
                            
             
             
-            if child.revision:
+            if child['revision']:
                 self.canv.setFont("Helvetica", 8)
                 self.canv.setFillColor(colors.grey)
-                self.canv.drawString(xlevel+xc*0.1 + 1.5*mm,ytopleft , "REV: " + child.revision)
+                self.canv.drawString(xlevel+xc*0.1 + 1.5*mm,ytopleft , "REV: " + child['revision'])
                 ytopleft=ytopleft-10
             
             #Page index mark
-            if child.pdfindex!="":
-                self.canv.setFont("Helvetica", 8)
-                self.canv.setFillColor(colors.grey)
-                self.canv.drawString(xlevel+xc*0.1 + 1.5*mm, ytopleft, "P: " +child.pdfindex)
+            if 'pdfindex' in child.keys():
+                if child['pdfindex']!="":
+                    self.canv.setFont("Helvetica", 8)
+                    self.canv.setFillColor(colors.grey)
+                    self.canv.drawString(xlevel+xc*0.1 + 1.5*mm, ytopleft, "P: " +str(child['pdfindex']))
             
             #Qty mark
             self.canv.setFont("Helvetica-BoldOblique", 12)
             self.canv.setFillColor(colors.darkred)
-            if child.qty!=0 and child.qty!=child.totalqty:
-                self.canv.drawRightString(xlevel+xc-1*mm,ytop , "x" + child.qty)
+
+            # print("qty", child['qty'], type(child['qty']))
+            # print("totalqty", child['totalqty'], type(child['totalqty']))
+
+
+            if child['qty']!=0 and child['qty']!=child['totalqty'] and type(child['qty'])==int:
+                self.canv.drawRightString(xlevel+xc-10*mm,ytop , "x" +str(child['qty']))
                 self.canv.setFont("Helvetica", 8)
                 self.canv.setFillColor(colors.grey)
-                self.canv.drawRightString(xlevel+xc-1*mm,ytop-10 , "of " + child.totalqty)
+                self.canv.drawRightString(xlevel+xc-1*mm,ytop , "of " + str(child['totalqty']))
             else:
-                self.canv.drawRightString(xlevel+xc-1*mm,ytop , "x" + child.totalqty)
+                self.canv.drawRightString(xlevel+xc-1*mm,ytop , "x" +str(child['totalqty']))
                 
 
             
@@ -819,7 +840,7 @@ class BoxyGrid(Flowable):
             self.canv.setFillColor(colors.black)
             
             textlimit=int(xc*22/(45*mm))
-            chunks=[child.description[x:x+textlimit] for x in range(0, len(child.description.upper()), textlimit)]
+            chunks=[child['description'][x:x+textlimit] for x in range(0, len(child['description'].upper()), textlimit)]
             
             # if len(chunks)==1:
             #     k=-10
@@ -960,7 +981,7 @@ def bom_to_excel(bom_in,outputfolder,title="",qty="qty", firstrow=0):
  
         
         workbook=load_workbook(filename=excel_file)
-        # # print(dir(self.workbook))
+        # # #print(dir(self.workbook))
         
         # Add images
         worksheet=workbook[sheet]
@@ -1052,7 +1073,7 @@ def bom_to_excel(bom_in,outputfolder,title="",qty="qty", firstrow=0):
             #except:
             #    # worksheet.add_image(thumb, cell)
             #    worksheet[cell].fill = redFill
-            #    print("Could not add image to excel ", row['partnumber'])
+            #    #print("Could not add image to excel ", row['partnumber'])
                 
             
         
@@ -1065,7 +1086,7 @@ def bom_to_excel(bom_in,outputfolder,title="",qty="qty", firstrow=0):
         #Border annd Center alignment for all cells    
         for row in worksheet.iter_rows():
             for cell in row:
-                # print(dir(cell.style))
+                # #print(dir(cell.style))
                 # cell.style.alignment.wrap_text=True
                 cell.border = thin_border
                 cell.alignment = Alignment(horizontal='center',wrapText=True)
@@ -1118,16 +1139,17 @@ def get_files(bom_in,extension,partfolder):
             #    bom_in.at[index,'notes'].append("Missing thickness")
         else:
             targetfile=outputfolder+filenamebit+"_"+row["description"]+"."+extension
-            print(targetfile)
+            #print(targetfile)
         
         try:
             if os.path.exists(sourcefile):
                 create_folder_ifnotexists(outputfolder)
             copyfile(sourcefile,targetfile)
         except:
-            print("source - ", sourcefile)
-            print("target file", targetfile)
-            print("coouldnt get file ", extension," for ",row['partnumber'])
+            #print("source - ", sourcefile)
+            #print("target file", targetfile)
+            #print("coouldnt get file ", extension," for ",row['partnumber'])
+            pass
 
 
 def get_all_files(bom_in,partfolder):
@@ -1160,14 +1182,15 @@ def get_all_files(bom_in,partfolder):
                 #    bom_in.at[index,'notes'].append("Missing thickness")
             else:
                 targetfile=outputfolder+filenamebit+"_"+row["description"]+"."+extension
-                print(targetfile)
+                #print(targetfile)
             
             try:
                 copyfile(sourcefile,targetfile)
             except:
-                print("source - ", sourcefile)
-                print("target file", targetfile)
-                print("coouldnt get file ", extension," for ",row['partnumber'])            
+                #print("source - ", sourcefile)
+                #print("target file", targetfile)
+                #print("coouldnt get file ", extension," for ",row['partnumber'])  
+                pass          
 
 
 
@@ -1297,31 +1320,32 @@ def loadexcelcompilelist(filein,export_objects=False):
     partlist['revision']=partlist['revision'].str.replace(".0","")
     partlist.loc[partlist.revision=="nan",'revision']=''
 
-    # print(partlist)
-    object_list=[]
+    # #print(partlist)
+    object_dict_list=[]
     # db.session.refresh()
     #Loop and find parts
     for item, row in partlist.iterrows():
-        # print(row['partnumber'])
-        # print(row['revision'])
+        # #print(row['partnumber'])
+        # #print(row['revision'])
 
 
         #Find if the part is already in database
-        database_part=db.session.query(Part).filter(and_(Part.partnumber==row['partnumber'] ,
-                                                    Part.revision==row['revision'])
-                                                    ).first()
+        database_part=mongoPart.objects(partnumber=row['partnumber'] , revision=row['revision']).first()
         if database_part!=None:
-            database_part.updatefilespath(webfileserver)
-            object_list.append(database_part)
+            database_part.updateFileset()
+            dicto=database_part.to_dict()
+            dicto['qty']=row['qty']
+            dicto['totalqty']=row['qty']
+            object_dict_list.append(dicto)
         else:
             flash("Couldn't find " + row['partnumber']+" rev " +row['revision'])
-        # print(database_part)
+        # #print(database_part)
     
-    flatbom=pd.DataFrame([x.as_dict(folder=fileserver_path) for x in object_list])
+    flatbom=pd.DataFrame( object_dict_list)
 
     
     if export_objects:
-        return flatbom,object_list
+        return flatbom,object_dict_list
     else:
         return(flatbom)
 
@@ -1375,6 +1399,9 @@ class Label(Flowable):
             # icon=renderPM.drawToFile(icon, "app/static/images/"+'approved.png', fmt='PNG')
             icon="app/static/images/"+'approved.png'
             self.canv.drawImage(icon,xlevel+xc-qrsize, ylevel+yc-qrsize-yc*0.21-20, width=30,height=20)
+        elif 'hardware' not in self['process'] and 'purchase' not in self['process']  and 'others' not in self['process'] :
+                icon="app/static/images/"+'notapproved.png'
+                self.canv.drawImage(icon,xlevel+xc-qrsize, ylevel+yc-qrsize-yc*0.21-20, width=30,height=20)
         # self.canv.drawImage(qr_code(self.part),xlevel+20, ylevel+30,width=xc, height=xc)
             
         self.canv.setFont("Helvetica-Bold", 10)
@@ -1464,3 +1491,380 @@ class Label(Flowable):
                 
 
 
+
+
+def BinderPDF(dictlist,outputfolder="",title="",subtitle="",savevisual=False):
+
+    
+    #Output folder and files
+    if outputfolder=="":
+        outputfolder=os.getcwd()+"/temp/"
+
+
+    if title=="": outputfile=outputfolder + secure_filename("PDFBINDER-"+ datetime.now().strftime('%d_%m_%Y-%H_%M_%S_%f')+".pdf")
+    else:outputfile=outputfolder +secure_filename( title + "-"+ datetime.now().strftime('%d_%m_%Y-%H_%M_%S_%f')+".pdf")
+
+
+    #For merging operation temp file pdf
+    tempPath="temp/temppack_"+ str(int(datetime.now().timestamp()*1e6))+".pdf"
+
+    
+
+
+    #In case the list is empty
+    if len(dictlist)==0:
+        return "NO LIST TO PROCESS BINDER PDF"
+
+    
+    
+    # data2=pd.DataFrame(dictlist).fillna('')
+    # data2.replace(webfileserver,fileserver_path)
+
+
+    #print('INSIDE INDEX')
+    # for i,pepe in data2.iterrows():
+    #     print (pepe.partnumber)
+    
+    # data2["pdfpages"]=0
+    
+    #Pdf pages eference and set files to fileserver
+    for line in dictlist:
+        
+        line['pdfpages']=0
+        if 'pdfpath' in line.keys():
+            line['pdfpath']=line['pdfpath'].replace(webfileserver,fileserver_path)
+        else:
+            line['pdfpath']=""
+    
+    #Set the first page and genertate the wrtier object
+    pageref=1
+    pdfWriter = PyPDF2.PdfFileWriter()
+    
+    
+    #Index page code generation
+    dirtyindexfile="dirtyindex.pdf"
+    doc = SimpleDocTemplate(dirtyindexfile,    pagesize=A4,
+                        rightMargin=40,      leftMargin=50,
+                        topMargin=80,      bottomMargin=20)
+    styles = getSampleStyleSheet()
+    #Modify the normal style to be smaller font
+    styles['Normal'].fontSize = 10
+    styles['Heading1'].textColor = colors.black
+    flowables = []
+     
+    #Index page template reference
+    index_firsframe = Frame(doc.leftMargin, doc.bottomMargin+60, doc.width, doc.height+60, id='normal')
+    index_nextframe = Frame(doc.leftMargin, doc.bottomMargin+60, doc.width, doc.height, id='normal')
+    doc.addPageTemplates([PageTemplate(id='index_next',frames=index_nextframe,pagesize=A4,onPage=index_page),
+                         PageTemplate(id='index_first',frames=index_firsframe,pagesize=A4,onPage=index_page),])
+    
+
+
+    
+    
+    
+    #Compile all the files
+    
+    for i in range(len(dictlist)):
+        # print(dictlist[i]["pdfpath"])
+        if os.path.isfile(dictlist[i]["pdfpath"]):# or file_exists("http://"+dictlist[i]["pdfpath"]):
+                
+                pdfFileObj = open(dictlist[i]["pdfpath"],'rb')
+                pdfReader = PyPDF2.PdfFileReader(pdfFileObj)
+            
+                #Bookmark and index string
+                bookmark=dictlist[i]["partnumber"] + " Rev: " + dictlist[i]["revision"] + " - "+ dictlist[i]["description"]
+                bookmark=bookmark.replace(',',',,')
+            
+                #Add the page index ref and the amount of pages to data2    
+                dictlist[i]["pdfindex"]=pageref
+                dictlist[i]["pdfpages"]=pdfReader.numPages
+            
+                ptext = """ I'm a phantom page<index item=" """
+                ptext=ptext+bookmark.replace(',,',';')
+                ptext=ptext+""" "/>bulletted paragraph"""
+                para = Paragraph(ptext, style=styles["Normal"], bulletText='-')
+                flowables.append(para)
+            
+                #Opening each page of the PDF
+                for pageNum in range(dictlist[i]["pdfpages"]):
+                    pageObj = pdfReader.getPage(pageNum)
+                                    
+                    pageObj=pdf_pagenum(pageObj,pageref+pageNum-1,color=get_process_color(dictlist[i]["process"]))
+                
+                    # pageObj=pdf_pagenum(pageObj,pageref+pageNum-1,color=colors.black)
+                    pdfWriter.addPage(pageObj)
+                
+                    #Add the phantom pages
+                    flowables.append(NextPageTemplate('index_first'))
+                    flowables.append(PageBreak())
+                
+                            
+                #Add bookmark
+                try:
+                    pdfWriter.addBookmark(bookmark,pageref-1)
+                except:
+                    #print("couldnt add bookmark for ",dictlist[i]["partnumber"])
+                    pass
+                pageref=pageref+dictlist[i]["pdfpages"]
+        
+        else:
+            dictlist[i]["pdfpath"]=""
+            #print("No file for ",dictlist[i]["partnumber"])
+    
+
+    
+    with open(tempPath, 'wb') as fh:
+        pdfWriter.write(fh)
+    
+    
+    #Build the index
+    index = SimpleIndex(dot='.', headers=False)
+    
+    
+    # headertext=makeParaRight(solidbom.partnumber + " Drawing Pack")
+    flowables.append (Spacer(0, 60))
+    headertext=makeParaCenter(title)
+    para = Paragraph(headertext, style=styles["Heading1"])
+    flowables.append(para)
+
+
+    headertext=makeParaCenter(subtitle)
+    para = Paragraph(headertext, style=styles["Heading2"])
+    flowables.append(para)
+    
+    
+    flowables.append (Spacer(0, 20))
+    flowables.append(NextPageTemplate('index_next'))
+    flowables.append(index)
+
+
+    
+    
+    doc.build(flowables, onFirstPage=index_page, onLaterPages=index_page,canvasmaker=index.getCanvasMaker())
+    
+    #Create the visual index to add it to the drawing pack
+    visualindexfile=visual_list(dictlist, outputfolder=outputfolder,local=True)
+    # print("visualllll",visualindexfile)
+    
+    visualindex=PdfFileReader(visualindexfile)
+    
+
+
+    
+    splitter=PyPDF2.PdfFileWriter()
+    dirtyindex=PdfFileReader(dirtyindexfile)
+    cleanindexfile="clean_index.pdf"
+    
+    #Extract the index
+    j=0
+    for page in range(pageref-1,dirtyindex.getNumPages()):
+        splitter.addPage(dirtyindex.getPage(page))
+        j=j+1
+        
+     #Add index bookmark
+    splitter.addBookmark("Index",0)   
+        
+    for page in range(0,visualindex.getNumPages()):
+        splitter.addPage(visualindex.getPage(page))
+        
+    #Add vsiual index bookmark
+    splitter.addBookmark("Visual index",j)   
+    
+    with open(cleanindexfile, 'wb') as fh:
+        splitter.write(fh)
+ 
+    
+    
+    # #Merge compiledpdfs and index
+    pdf_merger = PdfFileMerger()
+    pdf_merger.append(cleanindexfile)
+    pdf_merger.append(tempPath)
+
+    
+    
+    with open(outputfile, 'wb') as fileobj:
+        pdf_merger.write(outputfile)
+    pdf_merger.close()
+    
+
+    
+    #Remove temp files
+    os.remove(dirtyindexfile)
+    os.remove(tempPath)
+    os.remove(cleanindexfile)
+    
+    if not savevisual:
+        os.remove(visualindexfile)
+        
+    
+    
+    return outputfile
+
+
+
+
+
+def dictlist_to_excel(treedata,outputfolder,title="",firstrow=1):
+
+
+        sheet_name = 'Flatbom'
+        # sheet="Manufactured components"
+ 
+        if title=="": title="List"
+        
+        excel_file=outputfolder + title +".xlsx"
+        
+        bom_to_sheet=pd.DataFrame(treedata)
+
+
+
+        #Copy of bom for bom generation only (avoid having images path collumns)
+        # and after that empty the pngpath 
+        bom_image=bom_to_sheet[['partnumber']+['revision']+['pngpath']]
+
+
+        #Filter the cols that will stay
+        # property_list=['qty','totalqty','level','pngpath'] +list(config['PROPERTY_CONF'].keys()) 
+        property_list=['partnumber','revision','description','totalqty','material','process',
+                        'finish','thickness','treatment','colour','approved','level','qty',
+                        'spare_part','link','datasheet','oem','supplier',
+                        'supplier_partnumber','mass','total bounding box length',
+                        'total bounding box thickness','total bounding box width']
+        
+        bom_to_sheet=bom_to_sheet[property_list]
+
+        #Add screenshot placeholder
+        bom_to_sheet.insert(0,'Img',"",True,)
+
+        
+        #Replace datasheet location by web link:
+        bom_to_sheet['datasheet']=bom_to_sheet['datasheet'].str.replace("//","/")
+        bom_to_sheet['datasheet']=bom_to_sheet['datasheet'].str.replace(fileserver_path,"http://"+webfileserver)
+        
+
+        
+
+        if firstrow!=0:
+            bom_to_sheet.index = np.arange(firstrow, len(bom_to_sheet) + firstrow)
+        
+        
+
+        #Prepare file and format wrap
+        writer = pd.ExcelWriter(excel_file, engine = 'xlsxwriter')
+        workbook = writer.book
+        wrap_format = workbook.add_format({'text_wrap': True})
+        #wrap_format.set_border(6)
+
+
+
+        #Rename some cols
+        bom_to_sheet.rename(columns = {'total bounding box length':'length',
+                        'total bounding box thickness':'height','total bounding box width':'width'}, inplace = True)
+
+
+        
+        #Dump dataframe to excel      
+        bom_to_sheet.to_excel(writer, sheet_name = sheet_name, engine='xlsxwriter',
+                             header=False, startrow=1)
+
+
+
+        #Write header
+        for colx, value in enumerate(bom_to_sheet.columns.values):
+            writer.sheets[sheet_name].write(0, colx+1, value)
+
+      
+         # Set the worksheet and  autofilter.
+        worksheet = writer.sheets[sheet_name]
+        (max_row, max_col) = bom_to_sheet.shape
+        worksheet.autofilter(0, 0, max_row, max_col)
+        worksheet.set_column(2,max_col,None,wrap_format)
+
+        
+
+        
+        #Width of cols
+        worksheet.set_column(0,0,4,wrap_format)
+        worksheet.set_column(1,1,8,wrap_format)
+        worksheet.set_column(2,2,20,wrap_format)
+        worksheet.set_column(3,3,4,wrap_format)
+        worksheet.set_column(4,4,30,wrap_format)
+        worksheet.set_column(5,5,4,wrap_format)
+        worksheet.set_column(6,max_col,20,wrap_format)
+
+
+
+
+         # Add images section       
+         
+        i=-1           
+        for index, row in bom_image.iterrows():
+            i=i+1
+            thumb=thumbnail(row['pngpath'])
+            #print(thumb) 
+
+            #Adjust row height
+            worksheet.set_row(i+1,30)
+
+            #Add image
+            cell='B'+str(i+2)
+
+            image_url="http://"+webserver+"/part/detail/"
+            image_url+= row['partnumber']+":"
+
+            if row['revision']=="":
+                image_url+= "%25"
+            else:
+                image_url+= row['revision']
+
+            #print(row['png'])
+
+                
+
+            if  thumb!="":
+                worksheet.insert_image(cell, thumb, {'x_offset': 10,
+                                                    'y_offset': 5,
+                                                    'x_scale':0.3,
+                                                    'y_scale': 0.3,
+                                                    'object_position': 4,
+                                                     'url': image_url})
+        
+           
+
+
+
+
+
+        #Adjust header format to warp and center
+        # header_format = workbook.add_format({'bold': True, 'text_wrap': True, 'align': 'center'})
+        header_format = workbook.add_format()
+        header_format.set_text_wrap()
+        header_format.set_shrink()
+        header_format.set_bg_color('black')
+        header_format.set_font_color('white')
+        header_format.set_align('center')
+        header_format.set_align('vcenter')
+        writer.sheets[sheet_name].set_row(0, 30,header_format) 
+
+        #Put rev and total qty in vertical
+        vert_format=workbook.add_format() 
+        vert_format.set_text_wrap()
+        vert_format.set_center_across()
+        vert_format.set_shrink()
+        vert_format.set_align('center')
+        vert_format.set_bg_color('black')
+        vert_format.set_font_color('white')       
+        vert_format.set_rotation(90)
+
+        worksheet.write('D1', "Rev", vert_format)
+        worksheet.write('F1', "Total Qty", vert_format)
+
+       
+
+        #Close workbook with xlsxwriter so openpyxl can open it
+        workbook.close()
+
+
+
+        return excel_file

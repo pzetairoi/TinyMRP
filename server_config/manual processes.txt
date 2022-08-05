@@ -1,3 +1,14 @@
+#Install mongo DEB
+
+#Install the pdfkit and ubuntu packages
+Step1: Download library pdfkit
+ $ pip install pdfkit
+Step2: Download wkhtmltopdf
+For Ubuntu/Debian:
+ sudo apt-get install wkhtmltopdf
+
+
+
 
 #Add crontab scheduled erase temp folders using the default user (tinymrp)
 crontab -e 

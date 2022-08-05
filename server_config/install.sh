@@ -73,11 +73,14 @@ ln -s /etc/nginx/sites-available/tinymrp.conf  /etc/nginx/sites-enabled/tinymrp.
 rm  /etc/nginx/sites-enabled/default
 
 
-cp  $tinyfolder/server_config/tinymrp_server.service  /etc/systemd/system/tinymrp_server.service
+cp  $tinyfolder/server_config/tinymrp_server.service  /etc/systemd/system/newtinymrp_server.service 
 
 systemctl daemon-reload
 systemctl restart nginx.service
 systemctl restart tinymrp_server.service
+
+
+sudo systemctl enable tinymrp_server.service
 
 
 

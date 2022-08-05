@@ -966,6 +966,60 @@ img {
 
 
 
+ <div id="events">
+        Row selected count - new information added at the top
+    </div>
+
+
+
+
+
+ <div class="container-fluid">
+
+<h1>Components table</h1>
+<p>Use the table search tab to filter inside database for partnumber and description. </p>
+<p>Use the bottom table tabs for multifilter </p>
+
+
+    <table id="treetable" class="table table-striped table-bordered" style="width:100%">
+        <thead>
+          <tr>
+            <th>Tree</th>
+            <th>Preview</th>
+            <th>Partnumber</th>
+            <th>Rev</th>
+            <th>Description</th>
+            <th>process</th>
+            <th>Finish</th>
+            <th>Level QTY</th>
+            <th>Total level QTY</th>
+            <th>TotalQTY</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tfoot>
+          <tr>
+            <th>Tree</th>
+            <th>Preview</th>
+            <th>Partnumber</th>
+            <th>Rev</th>
+            <th>Description</th>
+            <th>process</th>
+            <th>Finish</th>
+            <th>Level QTY</th>
+            <th>Total level QTY</th>
+            <th>TotalQTY</th>
+            <th>Action</th>
+        </tr>
+        </tfoot>
+      </table>
+
+   
+</div>
+
+
+
+
 {% endblock %}
 
 
@@ -976,8 +1030,18 @@ img {
 
     
 {% block morescripts %}
+
+
  
- 
+<script type="text/javascript" src="/static/js/tinytreetable.js"></script>  
+    <script type="text/javascript">
+        myVar = tinytreetablefunc('{{part.partnumber}}','{{part.revision}}','')
+     </script>
+    
+
+
+
+
 
  {% endblock %}  
 

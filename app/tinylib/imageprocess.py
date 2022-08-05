@@ -32,24 +32,26 @@ def cropandbackground(filepath):
     new_img = cv2.cvtColor(img, cv2.COLOR_BGR2BGRA)
     new_img[:, :, 3] = mask
 
-    if w*h>200:
+    if w*h>8000:
         # then crop it to bounding rectangle
         crop = new_img[y:y+h, x:x+w]
         #Save image
         cv2.imwrite(filepath, crop)
+    else:
+        cv2.imwrite(filepath, new_img)
 
 
 
 
 
 # path_of_the_directory = '/home/tinymrp/Fileserver/Deliverables/png/'
-# object = os.scandir(path_of_the_directory)
-# print("Files and Directories in '% s':" % path_of_the_directory)
-# for n in object :
+# objecto = os.scandir(path_of_the_directory)
+# #print("Files and Directories in '% s':" % path_of_the_directory)
+# for n in objecto :
 #     if ".png" in n.name and n.is_file() and not "_DWG.png" in n.name and not ".thumbnail.png" in n.name:
-#         # print(n.path)
+#         # #print(n.path)
 #         try:
 #             cropandbackground(n.path)
 #         except:
 #             print("cannot do ", n.name)
-# object.close()
+# objecto.close()

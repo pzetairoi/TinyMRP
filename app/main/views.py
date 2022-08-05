@@ -24,6 +24,20 @@ def after_request(response):
     return response
 
 
+@main.route('/favicon.ico')
+def favicon():
+    print("*********************************************************************")
+    print(url_for('static', filename='misc/favicon.ico'))
+    print("*********************************************************************")
+
+
+    return redirect("http://192.168.1.21:5000/static/misc/favicon.ico")
+    
+    # return "http://192.168.1.21:5000/static/misc/favicon.ico"
+    
+
+
+
 @main.route('/shutdown')
 def server_shutdown():
     if not current_app.testing:

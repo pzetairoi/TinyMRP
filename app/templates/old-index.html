@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
+
+{% block title %}TinyMRP{% endblock %}
+
+{% block page_content %}
+<div class="page-header">
+    <h1>Hello, {% if current_user.is_authenticated %}{{ current_user.username }}! </h1>
+        
+                {% else %}Stranger! </h1>
+
+                {% endif %}
+    
+</div>
+
+
+
+<div class="jumbotron">
+    <h1>TinyMRP</h1>
+    <p class="lead">This is a web access to the engineering models and drawings database. In the future POs and Jobs could be accessed and consulted too.</p>
+
+    
+    <h4>
+        
+    {% if current_user.is_authenticated %}
+    <a href="{{ url_for('tinylib.allparts') }}" class="btn btn-primary btn-large">Inventory &raquo;</a>
+
+    {% else %}
+    <ht>
+        Please <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-large"> LOG IN</a> or 
+        <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-large">REGISTER</a> to access TinyMRP
+    {% endif %}
+
+    </h4> 
+
+    
+</div>
+
+
+
+<div>
+    {% if current_user.can(Permission.WRITE) %}
+    {{ wtf.quick_form(form) }}
+    {% endif %}
+</div>
+<div class="post-tabs">
+    <ul class="nav nav-tabs">
+        <li{% if not show_followed %} class="active"{% endif %}><a href="{{ url_for('.show_all') }}">All</a></li>
+        {% if current_user.is_authenticated %}
+        <li{% if show_followed %} class="active"{% endif %}><a href="{{ url_for('.show_followed') }}">Followed</a></li>
+        {% endif %}
+    </ul>
+    {% include '_posts.html' %}
+</div>
+{% if pagination %}
+<div class="pagination">
+    {{ macros.pagination_widget(pagination, '.index') }}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+{{ pagedown.include_pagedown() }}
+
+
+{% endblock %}

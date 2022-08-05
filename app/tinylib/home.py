@@ -47,7 +47,7 @@ def index(page=1):
 
      if request.method == 'POST':
         search ="%"+ request.form['search']+"%"
-        print(search)
+        #print(search)
         error = None
 
         if not search:

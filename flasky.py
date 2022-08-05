@@ -18,7 +18,8 @@ from app import create_app, db
 from app.models import User, Follow, Role, Permission, Post, Comment
 from app.tinylib.models import Part, solidbom, Bom, Job, Jobbom, deletepart, variables_conf
 
-from app.tinylib.models import mongoPart, mongoJob,client,mongodb,partcol
+from app.tinylib.models import mongoPart, mongoJob \
+,client,mongodb,partcol, mongoOrder, mongoSupplier,mongoBom
 
 
 from config import config as config_set
@@ -38,7 +39,8 @@ def make_shell_context():
                 Part=Part, Bom=Bom, Job=Job, Jobbom=Jobbom, fileserver_path=fileserver_path,
                 deletepart=deletepart,variables_conf=variables_conf,
                 mongoPart=mongoPart,client=client,mongodb=mongodb,partcol=partcol,
-                mongoJob=mongoJob
+                mongoJob=mongoJob, mongoOrder=mongoOrder,mongoBom=mongoBom, 
+                mongoSupplier=mongoSupplier, config=config
                 )
 
 
@@ -62,12 +64,12 @@ def test(coverage, test_names):
     if COV:
         COV.stop()
         COV.save()
-        print('Coverage Summary:')
+        #print('Coverage Summary:')
         COV.report()
         basedir = os.path.abspath(os.path.dirname(__file__))
         covdir = os.path.join(basedir, 'tmp/coverage')
         COV.html_report(directory=covdir)
-        print('HTML version: file://%s/index.html' % covdir)
+        #print('HTML version: file://%s/index.html' % covdir)
         COV.erase()
 
 

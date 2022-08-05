@@ -1,6 +1,7 @@
 #Load app and configuration
 # create config variables (to be cleaned in the future)
 
+
 from flasky import db
 from flask_login import login_required, current_user
 
@@ -25,7 +26,7 @@ lowercase_properties=config['LOWERCASE_PROPERTIES']
 property_conf=config['PROPERTY_CONF']
 hardware_folder=config['HARDWARE_FOLDER']
 
-
+  
 
 from flask import (
     Blueprint, flash, g, redirect, session, render_template, request, url_for
@@ -103,10 +104,41 @@ import json
 from pymongo import MongoClient
 from werkzeug.utils import secure_filename
 
+#to create virtual documents for tree/bom counting
+from copy import deepcopy
+
+
+
 client = pymongo.MongoClient("localhost", 27017)
 mongodb=client.TinyMRP
 partcol=mongodb["part"]
+sandcol=mongodb['sandbox']
+ 
+ 
+import json
+from bson import ObjectId
 
+class JSONEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, ObjectId):
+            return str(o)
+        return json.JSONEncoder.default(self, o)
+
+def mongoToJson(object):
+    return JSONEncoder().encode(object)
+
+
+
+
+class Sandbox(DynamicDocument):
+    meta = {'collection': 'sandbox'}
+    tree=DynamicField()
+
+
+
+class mongoBom(EmbeddedDocument):
+    part = ReferenceField('mongoPart')
+    qty = IntField()
 
 
 
@@ -120,6 +152,7 @@ class mongoPart(DynamicDocument):
     finish=StringField()
     children=ListField(ReferenceField("self"))
     childrenqty=ListField(IntField())
+    bom=ListField(EmbeddedDocumentField(mongoBom))
 
 
     #Uploader
@@ -133,6 +166,7 @@ class mongoPart(DynamicDocument):
     #Related files locations
     modelpath=StringField()
     pngpath=StringField()
+    thumbnail=StringField()
     pdfpath=StringField()
     dxfpath=StringField()
     edrpath=StringField()
@@ -154,6 +188,17 @@ class mongoPart(DynamicDocument):
     process_icons=DynamicField()
 
     tag=StringField()
+
+
+    def CheckNeededFields(self):
+            #Add the missing attributes just in case:
+        persist=False
+        for neededkey in  config['PROPERTY_CONF'].keys():
+            if neededkey not in self.to_dict().keys() or self[neededkey]==None:
+                self[neededkey]=""
+                persist=True
+        if persist: self.save()
+
 
 
 
@@ -191,8 +236,8 @@ class mongoPart(DynamicDocument):
 
     def MainProcess(self):
         processlist=self.process
-        print(self.partnumber)
-        print(processlist)
+        #print(self.partnumber)
+        #print(processlist)
         if len(processlist)>0: processlist=[x for x in processlist if x in process_conf.keys()]
 
         
@@ -210,42 +255,50 @@ class mongoPart(DynamicDocument):
 
     
     #Get tree for tree representation:
-    def treeDict(self, count=0,qty=1):
-         
+    def flatbom(self):
+
+        mongoflatbom=[]
+
+        for bomline in self.bom:
+            if not bomline.part in mongoflatbom:
+                mongoflatbom.append(bomline.part)
+            # if len(bomline.part.bom)>0:
+            #     mongoflatbom=mongoflatbom+bomline.part.flatbom()
         
-        refkids=[]
-        i=0
-        for child in self.children:
-            kid={}
-            count+=1
-            kid=mongoPart.objects(pk=self.children[i]['id']).first().to_dict()
-            kid['qty']=self.childrenqty[i]
-            kid['value']=kid['qty']
-            kid['children']=self.children[i].treeDict(count=count)['children']
-            kid['name']=self.children[i].treeDict(count=count)['partnumber']
-            refkids.append(kid)
-            i+=1
+        return mongoflatbom
+
+
+    def flatbomid(self,toplevelonly=True):
+        flatbomid=[]
+
+        def traverse(item,reflist):
+            for kid in item.flatbom():
+                if kid not in reflist: 
+                    reflist.append(kid.id)
+                traverse(kid,reflist)
+            
+
+
+        for part in self.flatbom():
+            flatbomid.append(part.id)
+            if not toplevelonly:traverse(part,flatbomid)
+
         
+        return flatbomid
+
+
+    def treeDict(self):
+
         refdict=self.to_dict()
-        refdict['children']=refkids
-        refdict['name']=self.partnumber
-        try:
-            refdict['value']=self.qty
-        except:
-            refdict['value']=qty
-        
 
-        #test['children']['0']['part']['children']
-
-        # refkids=[]
-        # for kid in refdict['children']:
-        #     kid['part']['children']=mongoPart.objects(id=kid['part']['id']).first().treeDict()
-        #     print(kid)
-        #     refkids.append(kid)
-        #     # refkids.append({'part': mongoPart.objects(id=t).first().to_dict())  
-        # refdict['children']=refkids
+        # print(refdict)
 
         return refdict
+
+
+
+
+
 
         
 
@@ -270,17 +323,19 @@ class mongoPart(DynamicDocument):
             i+=1
         return outlist
 
-    def children_with_qty (self):
+    def children_with_qty (self,as_dict=False):
         outlist=[]
         i=0
-        for child in self.children:
-            kid=child
-            # kid['part']=partcol.find_one({"_id":child.id})
-            kid['part']=mongoPart.objects(pk=child.id)[0]
-            kid['qty']=self.childrenqty[i]
+        for bom in self.bom:
+            kid=bom.part
+            kid['qty']=bom.qty
+            # if as_dict: outlist.append kid.as
             outlist.append(kid)
-            i+=1
+        
+
+            
         return outlist
+
     
 
     #To get the parents with quantities in those parents
@@ -306,26 +361,50 @@ class mongoPart(DynamicDocument):
     def parents_with_qty(self):
         outlist=[]
       
-        parents=mongoPart.objects(children=self.pk)
+        parents=mongoPart.objects(bom__match={"part":self})
     
         for parent in parents:
-            j=0
-            for kid in parent.children:
-                if kid.pk==self.pk:
-                    parent['qty']=parent.childrenqty[j]
-                j+=1
-            outlist.append(parent)
             
-               
+            for bom in parent.bom:
+                if bom.part==self and not parent in outlist:
+                    parent['qty']=bom.qty
+                    # print(parent)
+                    outlist.append(parent)              
+            
+                
         return outlist
 
         
     def get_process_icons (self,persist=False):
+        if self.process==None or self.process=="":
+            self.process='others'
+        
+        if type(self.process)==str:
+            self.process=[self.process]
+
+        if self['finish'] :
+            #To add the coating process if specified
+            if "zinc" in self.finish.lower():
+                self.process.append("zinc")
+                
+            
+            if "gal" in self.finish.lower():
+                self.process.append("galvanize")
+                
+            
+            if "nickel" in self.finish.lower():
+                self.process.append("nickel")           
+
+
+
         self['process_icons']=[]
         self['process_colors']=[]
+        # print("yeyeyeyeyeyeyey")
 
         if not "process2" in self.to_dict().keys(): self['process2']=""
         if not "process3" in self.to_dict().keys(): self['process3']=""
+
+        # print("*****",type(self['process']))
 
         if type(self['process'])==str:
             self['process']=[self['process']]
@@ -335,7 +414,7 @@ class mongoPart(DynamicDocument):
                  self['process'].append(self['process3'])
             persist=True 
 
-        if type(self['process'])==list:
+        elif len(self['process'])>0:
             
             self['process']=[x for x in self['process'] if x and x!="" and x!=" "]
             
@@ -344,6 +423,7 @@ class mongoPart(DynamicDocument):
 
             #Remove duplicates
             self['process']=list(dict.fromkeys(self['process']))
+            # print("yeyeyeyeyeyeyey")
 
             for process in self['process']:
                 if process in process_conf.keys() :
@@ -352,37 +432,24 @@ class mongoPart(DynamicDocument):
                 else:
                     self['process_icons'].append('images/'+process_conf['others']['icon'])
                     self['process_colors'].append(process_conf['others']['color'])
+        # print(self['process_icons'])
         
         if persist: self.save() 
 
        
     #To return a dictinary with the parts attributes
     def to_dict(self):
-        print(self.partnumber)
-        
-        # dirtydict=self.to_mongo()#.to_dict()
-        #
-
-        dirtydict={}
-        dirtydict['partnumber']=self.partnumber
-        dirtydict['revision']=self.revision
-        dirtydict['description']=self.description
-        dirtydict['process']=self.process
-        dirtydict['finish']=self.finish
-        dirtydict['children']=self.children
-        dirtydict['pngpath']=self.pngpath
-
         
         dirtydict=self.to_mongo().to_dict()
         dirtydict['_id']=str(dirtydict['_id'])
         
-        print(dirtydict)
+        # #print(dirtydict)
         
-        cleanchildren=[]
-        for child in dirtydict['children']:
-            cleanchildren.append(str(child))
+        # cleanchildren=[]
+        # for child in dirtydict['children']:
+        #     cleanchildren.append(str(child))
         
-        dirtydict['children']=cleanchildren
+        # dirtydict['children']=cleanchildren
 
         
 
@@ -436,52 +503,72 @@ class mongoPart(DynamicDocument):
     #Check for all available files in the Fileserver folders for a part
     def updateFileset(self,web=False,persist=False):
         self.get_tag()
-        parttag=self.partnumber+"_REV_"+self.revision
+        parttag=(self.partnumber+"_REV_"+self.revision).upper()
         save=False
         for filetype in config['DELIVERABLES']:
+            field=config['DELIVERABLES'][filetype]['field']
             filelist=[]
             for extension in config['DELIVERABLES'][filetype]['extension']:
-                
                 filetag=config['DELIVERABLES'][filetype]['path']+parttag+str(config['DELIVERABLES'][filetype]['filemod'])+"."+extension
                 
+                
                 if file_exists(filetag):
-                    if config['DELIVERABLES'][filetype]['list']!="yes":
-                        try:
-                            if self[filetype+'path']!=filetag:
-                                self[filetype+'path']=filetag
-                                # print(filetype,extension)
-                                # print("string- " ,filetag)
-                                save=True
-                        except:
-                            print("couldnt save - ", "string- " ,filetag)
-                    else:
-                        if self[filetype+'path']==[] or self[filetype+'path']==None:
-                            self[filetype+'path']=[]
 
-                        if not ( filetag in self[filetype+'path'] ):
-                            self[filetype+'path'].append(filetag)
-                            # print(filetype,extension)
-                            # print("list- ", filetag)
-                            save=True
+                    if filetype=='png' and extension=='png':
+                        print(filetag)
+                        print("FOUND",filetag)
+                    # print("FOUND",filetag)
+
+                    if self[field]!=filetag:
+                        self[field]=filetag
+                        save=True
+
                 else:
-                    pass
-                    # if filetype+'path'=='pngpath':
-                    #     self[filetype+'path']=url_for('static', filename='images/logo.png')
-                    #     save=True
+                    if filetype=='png' and extension=='png':print("NOT FOUND",filetag)
+                    if filetype=='datasheet' and 'datasheet'in self.to_dict().keys():
+                        filename=config['DELIVERABLES'][filetype]['path']+os.path.basename(self.datasheet)
+                        if file_exists(filename):
+                            self[field]=filename
+                            save=True
 
-
-                if web:
+                    if filetype=='qr':
+                         qrcode=qr_code(self,filename=filetag)
+                         self[field]=qrcode
+                         save=True
+ 
+ 
+                if web :
                     try:
-                        self[filetype+'path']=self[filetype+'path'].replace(fileserver_path,webfileserver)
+                        self[field]=self[field].replace(fileserver_path,webfileserver)
 
-                        
-                        
-                        print( (self[filetype+'path']))
-                        print( secure_filename(self[filetype+'path']))
                     except:
                         pass
+
+                
+
+        
+
+
+        if self['pngpath']=="" or self['pngpath']==None or self['pngpath']=="/static/images/logo.svg":
+            self['pngpath']=webfileserver+'/logo.png'
+            
+        
+        # if 'thumbnail' not in self.to_dict().keys():
+        #     self['thumbnail']=thumbnail(self['pngpath'],size=(100,100))
+        # elif not file_exists( self['thumbnail']):
+        #     self['thumbnail']=thumbnail(self['pngpath'],size=(100,100))
+
+        # if web: self['thumbnail']=self['thumbnail'].replace(fileserver_path,webfileserver)
+
+
+
         if persist:
-            if save: self.save()
+            if save: 
+                self.get_process_icons(persist=True)
+                self.save()
+            
+            
+            # print(self['pngpath'])
 
 
     def getweblinks(self,checkfiles=False):
@@ -498,60 +585,93 @@ class mongoPart(DynamicDocument):
                     for extension in config['DELIVERABLES'][filetype]['extension']:
                         filetag=config['DELIVERABLES'][filetype]['path']+parttag+str(config['DELIVERABLES'][filetype]['filemod'])+"."+extension
                         try:
-                                self[filetype+'path']=self[filetype+'path'].replace(fileserver_path,webfileserver)
-                                # print(self[filetype+'path'])
+                                if filetype=='thumbnail':
+                                    self[filetype]=self[filetype].replace(fileserver_path,webfileserver)
+                                else:
+                                    self[filetype+'path']=self[filetype+'path'].replace(fileserver_path,webfileserver)
+                                # #print(self[filetype+'path'])
                         except:
                                 pass
 
 
     
-    def get_components(self, components_only=True,qty=1):
+    def get_components(self, consume=False,qty=1,bomdictlist=False,level="+1",structure="flat",fulltree=True):
 
         reflist=[]
         flatbom=[]
 
-        def loopchildren(partnumber,revision,qty,reflist):
-            part=mongoPart.objects(partnumber=partnumber,revision=revision)[0]
-            children=part.getchildren()
-            for child in children:
-                refqty=child['qty']*qty
-                if  len(child['part']['children'])>0:
-                    if child['part'].hasConsumingProcess() and components_only:
-                        reflist.append((child['part'],refqty))
-                    else:
-                        reflist.append((child['part'],refqty))
-                        loopchildren(child['part']['partnumber'],child['part']['revision'],refqty,reflist)
-                else:
-                    reflist.append((child['part'],refqty))
+        def loopchildren(part,qty,reflist,level=""):
+
                     
-        loopchildren(self.partnumber,self.revision,qty,reflist)
-        
+            i=0
+            for line in part.bom:
+                i+=1
+                # print(line.part)
+
+                branchqty=line['qty']*qty
+                bomqty=line['qty']
+                if i<10:
+                    reflevel=level+".0"+str(i)
+                else:
+                    reflevel=level+"."+str(i)
+                
+                reflist.append([line['part'],branchqty,bomqty,reflevel])
+                if  len(line['part']['bom'])>0:
+                    # reflist.append((child['part'],branchqty))                    
+
+                    if not (line['part'].hasConsumingProcess() and not consume):
+                        if fulltree:loopchildren(line['part'],branchqty,reflist,level=reflevel)
+                # else:
+                #     reflist.append((child['part'],branchqty))
+                    
+        loopchildren(self,qty,reflist,level=level)
+
         #Sum up all quantities and compile flatbom
-        resdict={}
-        for item,q in reflist:
-            total=resdict.get(item,0)+q
-            resdict[item]=total
+        totalsdict={}
+        bomlist=[]
+
+        for part,branchqty,bomqty,level in reflist:
+            total=totalsdict.get(part,0)+branchqty
+            totalsdict[part]=total
+            #part.getweblinks()
+            if bomdictlist:
+                partdict=part.to_dict()
+                partdict['qty']=bomqty
+                partdict['branchqty']=branchqty
+                partdict['level']=level
+                bomlist.append(partdict)
+            # print(part,totalsdict.get(item,0),level,totalsdict[part])
+
         
-        for part in resdict.keys():
-            part.qty=resdict[part]
+        
+            
+        #Store the total quantities for the flatbom
+        for part in totalsdict.keys():
+            part['totalqty']=totalsdict[part]
+            part['level']=[]
+            part['qty']=[]
+            part['branchqty']=[]
+            # print(part,part['totalqty'])
+            
+            for partdict in bomlist:
+                if partdict['partnumber']==part.partnumber and partdict['revision']==part.revision:
+                    partdict['totalqty']=part['totalqty']
+                    part['level'].append(partdict['level'])
+                    part['qty'].append(partdict['qty'])
+                    part['branchqty'].append(partdict['branchqty'])
             flatbom.append(part)
-        
-        #Range flatbom by partnumber
-        #flatbom.sort(key=lambda x: x.partnumber)
-        print(flatbom)
-        #input("stop")
 
-
-
-        # flatbom.sort(key=lambda x: (x.category,x.supplier,x.approved,x.partnumber))
+        if bomdictlist:
+            flatdictlist=[]
+            for part in flatbom:
+                flatdictlist.append(part.to_dict())
+            flatbom=flatdictlist
         
-        totalqty=0
-        for item in flatbom:
-            totalqty=totalqty + item.qty
-        
-        print("Total components ", totalqty)        
-        print("Unique components", len(flatbom))        
-        return flatbom
+
+        if structure=="tree":
+            return bomlist
+        else:        
+            return flatbom
 
 
     
@@ -561,6 +681,9 @@ class mongoPart(DynamicDocument):
 
 
 def file_exists(location):
+    # print(location)
+
+    
 
     if "http" in location:
         request = urllib.request.Request(location)
@@ -578,7 +701,7 @@ def file_exists(location):
 
 
 def web_to_pdf(url,fileout):
-    config= pdfkit.configuration(wkhtmltopdf=path_wkhtmltopdf)
+    
     options = {
                 'quiet': '' 
                 }
@@ -586,6 +709,7 @@ def web_to_pdf(url,fileout):
         pdfkit.from_url(url, fileout, options=options)
     except:
         print("Couldn't export to pdf ",url)
+        pass
 
 
 #To find the encoding of a particular file
@@ -600,14 +724,15 @@ def create_folder_ifnotexists(path):
         foldercheck=os.path.isdir(path)
         if not foldercheck:
             os.makedirs(path)
+            # print("this is the folder??",path)
 
 
 
 #To create thumbnails of images
-def thumbnail(infile, size=(100, 100)):
-
+def thumbnail(filein, size=(100, 100)):
+    infile=filein.replace(webfileserver,fileserver_path)
     outfile = os.path.splitext(infile)[0] + ".thumbnail.png"
-    if file_exists(outfile):
+    if file_exists(outfile) :
         if os.path.getatime(infile)>os.path.getatime(outfile):
             try:
                 os.remove(outfile)
@@ -632,15 +757,18 @@ def thumbnail(infile, size=(100, 100)):
             return outfile
         except IOError:
             print ("cannot create thumbnail for '%s'" % infile)
-            return ""
+            return infile
 
 
 
 #To create a QR code to point to part link in tiny:
-def qr_code(part,persist=True):
-    # flash(part.partnumber)
+def qr_code(part,filename="",persist=True):
+    # flash(part['partnumber'])
 
-    qrfile=fileserver_path+"/Deliverables/png/"+part.partnumber+"_REV_"+part.revision+".qr.jpg"
+    if filename=="":
+        qrfile=fileserver_path+"/Deliverables/png/"+part['partnumber']+"_REV_"+part['revision']+".qr.jpg"
+    else:
+        qrfile=filename
 
 
     if file_exists(qrfile):
@@ -653,13 +781,13 @@ def qr_code(part,persist=True):
             pass
 
 
-    image_url="http://"+webserver+"/part/"
-    image_url+= part.partnumber+"_rev_"
+    image_url="http://"+webserver+"/part/detail/"
+    image_url+= part['partnumber']+":"
 
-    if part.revision=="":
+    if part['revision']=="":
                 image_url+= "%25"
     else:
-                image_url+=part.revision
+                image_url+=part['revision']
 
     image_url=image_url.replace(" ","%20")
 
@@ -677,9 +805,9 @@ def qr_code(part,persist=True):
     tempfile=img.save(qrfile)
     img.close()
 
-    if persist:
-        part['qrpath']=qrfile
-        part.save()
+    # if persist:
+    #     part['qrpath']=qrfile
+    #     part.save()
 
     return qrfile
 
@@ -785,7 +913,7 @@ class mongoJob(DynamicDocument):
     date_due=StringField( )
     date_modify=StringField( )
     date_finish=StringField( )
-    bom=ListField(DynamicField())
+    bom=ListField(EmbeddedDocumentField(mongoBom))
 
 
 
@@ -802,6 +930,13 @@ class mongoJob(DynamicDocument):
         except:
             pass     
         return dirtydict
+    def flatbomid(self):
+        flatbomid=[]
+
+        for line in self.bom:
+            flatbomid.append(line.part.id)
+        
+        return flatbomid
 
 
 
@@ -838,8 +973,9 @@ class mongoOrder (DynamicDocument):
     ordernumber=StringField(unique=True )
     description=StringField( )
     job=StringField()
-    supplier=ReferenceField(mongoSupplier)
-    parts=ListField(ReferenceField(mongoPart))
+    bom=ListField(EmbeddedDocumentField(mongoBom))
+    # supplier=ReferenceField(mongoSupplier)
+    supplier=StringField( )
     user_id=StringField( )
     date_create=StringField( )
     date_due=StringField( )
@@ -859,6 +995,13 @@ class mongoOrder (DynamicDocument):
         except:
             pass     
         return dirtydict
+    def flatbomid(self):
+        flatbomid=[]
+
+        for line in self.bom:
+            flatbomid.append(line.part.id)
+        
+        return flatbomid
 
 
 
@@ -918,19 +1061,61 @@ class solidbom():
             
             ##### Load the input file and create the dataframe
             if bomfile!="" and flatfile!="":
-               
-                print(flatfile)
 
+                
+                with open(flatfile, 'rb') as f:
+                    content_bytes = f.read()
+                detected = chardet.detect(content_bytes)
+                encoding = detected['encoding']
+                print(f"{flatfile}: detected as {encoding}.")
+                content_text = content_bytes.decode(encoding)
+                with open(flatfile, 'w') as f:
+                    f.write(content_text)
+               
+                #Find enconding of file to avoid read errors
+                file_enc=find_encoding(flatfile)
+                # print(file_enc)
                 #Insert all the individual part files, it will override the properties of the previous ones
-                with open(flatfile) as f:
+                with open(flatfile, encoding=file_enc) as f:
+                    
                     lines=f.readlines()
-                    print(lines)
+                    #print(lines)
                 
 
                 for line  in lines:  
-                    print(line)
-                    partdict=json.loads(line)
-                    print(partdict)
+                    #print(line)
+                    partdict={}
+                    partdict=json.loads(line.replace("'",'"'))
+                    #print(partdict)
+                    
+
+                    #Rename the properties from the conifguration file mapping
+                    for prop_key in config['PROPERTY_CONF']:
+                        # print(prop_key)
+                        # print(config['PROPERTY_CONF'][prop_key]['custom_property'], "- toooo - " ,config['PROPERTY_CONF'][prop_key]['tinymrp_property'])
+                        if config['PROPERTY_CONF'][prop_key]['custom_property'].lower() in map(str.lower,partdict.keys()):
+                            try:
+                                partdict[config['PROPERTY_CONF'][prop_key]['tinymrp_property'].lower()] = partdict.pop(config['PROPERTY_CONF'][prop_key]['custom_property'].lower())
+                            except:
+                                partdict[config['PROPERTY_CONF'][prop_key]['tinymrp_property'].lower()] = partdict.pop(config['PROPERTY_CONF'][prop_key]['custom_property'])
+                            # print(config['PROPERTY_CONF'][prop_key]['custom_property'], "- toooo - " ,config['PROPERTY_CONF'][prop_key]['tinymrp_property'])
+                    
+                    
+                    cleandict=deepcopy(partdict)
+                    for key in partdict.keys():
+                        if '.' in key:
+                            cleandict[key.replace('.',"_")] = cleandict.pop(key)
+                        if key=='id' or key=='_id':
+                            cleandict['id_extra'] = cleandict.pop(key)
+                    partdict=cleandict
+
+
+                    #Add the min needed attriburtes attributes just in case:
+                    for neededkey in  config['PROPERTY_CONF'].keys():
+                        if neededkey not in partdict.keys() or partdict[neededkey]==None:
+                            partdict[neededkey]=""
+                            
+
 
 
                     #Add uploader user
@@ -940,22 +1125,22 @@ class solidbom():
                     partnumber=partdict["partnumber"]
                     revision=partdict["revision"]
 
-                    print("IMPORTED DICT - ",partnumber,revision)
+                    #print("IMPORTED DICT - ",partnumber,revision)
                     existing=partcol.find_one({"partnumber":partnumber,"revision":revision})
 
-                    print(existing)
+                    #print(existing)
                     # flash(existing)
 
                     if existing==None:
                         partcol.insert_one(partdict)
-                        # print(input("test"))
+                        # #print(input("test"))
 
                     else:
                         
                         fieldsdrop={}
 
                         for field in existing.keys():
-                            if field != '_id' and field!='partnumber' and field!='revision':
+                            if field != '_id' and field!='id.'  and field!='partnumber' and field!='revision':
                                 fieldsdrop[field]=""
                             
                         # partcol.update ( { "_id": mongoid },{ "$unset":fieldsdrop})
@@ -963,32 +1148,56 @@ class solidbom():
 
                         partcol.update_one({"partnumber":partnumber, "revision":revision},{ "$unset":fieldsdrop})
                         partcol.update_one({"partnumber":partnumber, "revision":revision},{ "$set":partdict})
-                        print("-----------------------------------------------------")
-                        print("-----------------------------------------------------")
-                        print(partdict)
-                        print("-----------------------------------------------------")
-                        print("-----------------------------------------------------")
+                        #print("-----------------------------------------------------")
+                        #print("-----------------------------------------------------")
+                        #print(partdict)
+                        #print("-----------------------------------------------------")
+                        #print("-----------------------------------------------------")
+                    
+                    #Update fileset and check that the min fields exists
                     
                     part=mongoPart.objects(partnumber=partnumber,revision=revision)[0]
+                    part.CheckNeededFields()
                     part.updateFileset(persist=True)
-                    if part.pngpath:
-                        cropandbackground(part.pngpath)
-                    
-                    part.get_process_icons(persist=True)
 
+                    #Crop image and remove backtround
+                    if part['pngpath']!="":
+                        try:
+                            cropandbackground(part['pngpath'])
+                        except:
+                            print('PROBLEM CROP BACKGROUND WITH', part)
+                    
+                    
+
+
+
+                    #Add extra processes to parts
+                    
+                    if 'process2' in part.to_dict().keys():
+                        part.process.append(part.to_dict()['process2'])
+                    
+                    if 'process3' in part.to_dict().keys():
+                        part.process.append(part.to_dict()['process3'])
+                    
 
                     #To add the coating process if specified
-                    if "zinc" in part.finish.lower():
-                        part.process.append("zinc")
-                        part.get_process_icons(persist=True)
+                    if 'finish' in part.to_dict().keys():
+                        if "zinc" in part.finish.lower():
+                            part.process.append("zinc")
                     
-                    if "gal" in part.finish.lower():
-                        part.process.append("galvanize")
-                        part.get_process_icons(persist=True)
+                        
+                        if "gal" in part.finish.lower():
+                            part.process.append("galvanize")
                     
-                    if "nickel" in part.finish.lower():
-                        part.process.append("nickel")
-                        part.get_process_icons(persist=True)
+                        
+                        if "nickel" in part.finish.lower():
+                            part.process.append("nickel")
+                    
+
+
+
+                    #Get process icons
+                    part.get_process_icons(persist=True)
 
                     
 
@@ -1008,8 +1217,8 @@ class solidbom():
                 
                 #Copy data to maniulate
                 self.data=self.filedata.fillna("").copy()
-                print("************** Afterimport filling nan with "" ")
-                print(self.data)
+                #print("************** Afterimport filling nan with "" ")
+                #print(self.data)
                 
                 #Rename cols, not dependent on excel config file, check for future
                 self.data=self.data.rename(columns={"ITEM NO.":"item_no","PART NUMBER":"partnumber","Approved":"approved","QTY.":"qty"}) 
@@ -1017,29 +1226,29 @@ class solidbom():
                 #Remove leading spaces from all cols
                 for col in self.data:                    
                     if col!='qty': self.data[col]=self.data[col].str.lstrip()
-                print("************** After removing spacess")
-                print(self.data)
+                #print("************** After removing spacess")
+                #print(self.data)
                                 
                 #Drop rows with no quantity and transform the col to int
                 self.data.dropna(subset = ["qty"], inplace=True)
                 self.data["qty"]=pd.to_numeric(self.data["qty"], errors='coerce').fillna(0).astype(int)
     
-                print("************** after as rename, drop no quantities, and to int")
-                print(self.data)
+                #print("************** after as rename, drop no quantities, and to int")
+                #print(self.data)
 
                 #Drop empty partnumbers rows
                 self.data=self.data[self.data.partnumber!=""]
-                print("************** after dropping no partnumber rows ")
-                print(self.data)
+                #print("************** after dropping no partnumber rows ")
+                #print(self.data)
 
 
                 #Modify the revision entry to account for the approved status
                 #self.data.loc[self.data['event'].eq('add_rd') & self.data['environment']=="", 'environment'] = 'RD'
 
-                self.data['revision']=np.where(self.data['approved']=="",self.data['revision']+"MOD",self.data['revision'])
+                # self.data['revision']=np.where(self.data['approved']=="",self.data['revision']+"MOD",self.data['revision'])
                 self.data.reset_index(drop=True)
-                print("************** modifiyng revision based on approved ")
-                print(self.data)
+                #print("************** modifiyng revision based on approved ")
+                #print(self.data)
 
 
                 
@@ -1053,7 +1262,7 @@ class solidbom():
                 # self.clean_data()
                 
                 #Get the root component definition
-                print(self.data)
+                #print(self.data)
                 self.root_definition()
                 
                 
@@ -1064,8 +1273,8 @@ class solidbom():
                 #Create bom objects
                 self.uploadbom()
 
-                print("**********************************")
-                print("**********************************")
+                #print("**********************************")
+                #print("**********************************")
                 
                 #Screening based on custom properties
                 # self.property_screening()
@@ -1091,19 +1300,19 @@ class solidbom():
             folderout="temp"
         else:
             folderout="outputfolder"
-        print("---obj in--- for " , part.partnumber)
-        for pepe in object_list:
-            print(pepe.partnumber)
+        #print("---obj in--- for " , part.partnumber)
+        # for pepe in object_list:
+            #print(pepe.partnumber)
         bomout=solidbom ( "","",deliverables_folder,folderout+"/" , toppart=part)
 
-        bomout.flatbom=pd.DataFrame([x.to_dict() for x in object_list])
+        bomout.flatbom=pd.DataFrame([x.to_dict() for x in object_list]).fillna('')
 
-        print("---bom out --")
-        for i,row in bomout.flatbom.iterrows():
-            print(row.partnumber)
+        #print("---bom out --")
+        # for i,row in bomout.flatbom.iterrows():
+            #print(row.partnumber)
         return bomout
-        print("---end --")                
-        print(" ")                
+        #print("---end --")                
+        #print(" ")                
             
     # def find_deliverables(self):
 
@@ -1181,16 +1390,16 @@ class solidbom():
                 try:
                     self.data[col]=pd.to_numeric(self.data[col].fillna(0).astype(int))
                 except:
-                    print("Problems tranforming to int " , col)
-                    print("forcing and replacing non valid with 0.0, check impact on output files")
+                    #print("Problems tranforming to int " , col)
+                    #print("forcing and replacing non valid with 0.0, check impact on output files")
                     self.data[col]=pd.to_numeric(self.data[col], errors='coerce').fillna(0).astype(int)
                 
         #     elif col in self.float_cols:
         #         try:
         #             self.data[col]=pd.to_numeric(self.data[col].fillna(0.0).astype(float))
         #         except:
-        #             print("Problems tranforming to float " , col)
-        #             print("forcing and replacing non valid with 0.0, check impact on output files")
+        #             #print("Problems tranforming to float " , col)
+        #             #print("forcing and replacing non valid with 0.0, check impact on output files")
         #             self.data[col]=pd.to_numeric(self.data[col], errors='coerce').fillna(0.0).astype(float)
         #     elif col in self.bool_cols:
         #         self.data[col]=self.data[col].fillna(False).astype(bool)
@@ -1209,13 +1418,13 @@ class solidbom():
         
         
         #Remove leading spaces in part number
-        print(self.data)
+        #print(self.data)
         self.data['partnumber']=self.data['partnumber'].str.lstrip()
 
         #Remove all the empty partnumber lines (to include in the future )
         self.data.dropna(subset = ["partnumber"], inplace=True)
 
-        print(self.data)
+        #print(self.data)
         
         
         #no need with mongodb
@@ -1389,6 +1598,7 @@ class solidbom():
 
 
     def uploadbom(self):
+        print("*************************")
 
         for index, row in self.bom.iterrows():
 
@@ -1398,25 +1608,27 @@ class solidbom():
             childREV=row['child_revision']
             qty=row['qty']
 
-            father=partcol.find_one({"partnumber":fatherPN,"revision":fatherREV})   
-            child=partcol.find_one({"partnumber":childPN,"revision":childREV})
+            # father=partcol.find_one({"partnumber":fatherPN,"revision":fatherREV})   
+            # child=partcol.find_one({"partnumber":childPN,"revision":childREV})
+            father=mongoPart.objects(partnumber=fatherPN,revision=fatherREV).first()
+            child=mongoPart.objects(partnumber=childPN,revision=childREV).first()
+            if child==None:
+                child=mongoPart.objects(partnumber=childPN.upper(),revision=childREV).first()
+                if child==None:
+                    child=mongoPart.objects(partnumber=childPN.lower(),revision=childREV).first()
 
-            # father=partcol.find_one({"partnumber":fatherPN})   
-            # child=partcol.find_one({"partnumber":childPN})
 
-            # print("*"+fatherPN+"*","*"+ fatherREV+"*")
-            # print("*"+childPN+"*","*"+ childREV+"*")
 
-            # print(father['partnumber'], child['partnumber'])
-            # print(father['partnumber'], child['partnumber'])
-            
+            bomin=mongoBom(part=child,qty=qty)
+
+            print(child)
+            print(mongoPart.objects(partnumber=childPN).first())
+            print("**"+childPN+"**","**"+childREV+"**")
+
             if father!=None and child!=None:
-                if "children" in father.keys():
-                    partcol.update_one({"partnumber":fatherPN, "revision":fatherREV},{ "$push":{'children': child['_id'],'childrenqty': qty}})
-                else:
-                    partcol.update_one({"partnumber":fatherPN, "revision":fatherREV},{ "$set":{'children':[ child['_id']],'childrenqty':[qty]}})
-            
-        
+                father.bom.append(bomin)
+                father.save()
+
 
         
     def solidbom_to_excel(self,process=""):
@@ -1508,7 +1720,7 @@ class solidbom():
         for index, row in bom_image.iterrows():
             i=i+1
             thumb=thumbnail(row['pngpath'])
-            print(thumb) 
+            #print(thumb) 
 
             #Adjust row height
             worksheet.set_row(i+1,30)
@@ -1524,7 +1736,7 @@ class solidbom():
             else:
                 image_url+= row['revision']
 
-            print(row['png'])
+            #print(row['png'])
 
                 
 
@@ -1621,6 +1833,7 @@ class solidbom():
                         self.flatbom.at[i,'datasheet']=targetfile
                     except:
                         print (self.flatbom['partnumber'][i] + " PROBLEMS COMPILING DATASHEET ", sourcefile)
+                        pass
                 elif "pdf" in fileExtension.lower():    
                     targetfile=targetfile + fileExtension
                     sourcefile=PureWindowsPath(sourcefile)
@@ -1632,24 +1845,28 @@ class solidbom():
                         self.flatbom.at[i,'datasheet']=targetfile
                     except:
                         print (self.flatbom['partnumber'][i] + " PROBLEMS COMPILING DATASHEET ", sourcefile, targetfile)
+                        pass
                         
                 if self.flatbom['process'][i]=='purchase' or self.flatbom['process2'][i]=='purchase' or self.flatbom['process3'][i]=='purchase' :
                         purchasefile=purchasefolder + self.flatbom['partnumber'][i]+".pdf"
                         try:
                             copyfile(targetfile,purchasefile)
                         except:
-                            print("Couldn't copy ", purchasefile  , " to ", targetfile)
+                            #print("Couldn't copy ", purchasefile  , " to ", targetfile)
+                            pass
                     
             elif self.flatbom.at[i,"datasheet"]!="":
                     try:
                         web_to_pdf(self.flatbom['link'][i],targetfile+".pdf")
-                        print(self.flatbom['partnumber'][i] , " DATASHEET FROM WEB")
+                        #print(self.flatbom['partnumber'][i] , " DATASHEET FROM WEB")
                         
                     except:
                         try:
-                            print(self.flatbom['partnumber'][i] , " NO DATASHEET - ", sourcefile)
+                            #print(self.flatbom['partnumber'][i] , " NO DATASHEET - ", sourcefile)
+                            pass
                         except:
-                            print(self.flatbom['partnumber'][i] , " invalid SOURCEFILE !!!!!!!!!!")
+                            #print(self.flatbom['partnumber'][i] , " invalid SOURCEFILE !!!!!!!!!!")
+                            pass
                         # self.flatbom.at[i,'notes'].append("Invalid datasheet source")
     
     def gather_deliverables(self):
@@ -1672,7 +1889,7 @@ class solidbom():
             #Check if outputfolder exists otherwise create it
             outputfolder=self.folderout+process+"/"
             
-            print(outputfolder)
+            #print(outputfolder)
             if len(musthave)>0:create_folder_ifnotexists(outputfolder)
     
             
@@ -1695,7 +1912,7 @@ class solidbom():
                                         
                     if os.path.isfile(sourcefile):
                         copyfile(sourcefile,targetfile)
-                print(sourcefile,targetfile)
+                #print(sourcefile,targetfile)
 
   
 class Bom(db.Model):
@@ -1735,21 +1952,27 @@ def deletepart(database_part,echo=False):
     for bomline in bomentries:
         this=bomline.id
         db.session.delete(bomline)
-        if echo: print("deleted-",this)
+        if echo: 
+            #print("deleted-",this)
+            pass
     db.session.commit()
     # bomentries=db.session.query(Bom).filter(Bom.child_id==database_part.id)
     # for bomline in bomentries:
     #     this=bomline.id
     #     db.session.delete(bomline)
-    #     if echo: print("deleted-",this)
+    #     if echo: #print("deleted-",this)
     # db.session.commit()
     this=database_part.id
     
     db.session.delete(database_part)
-    if echo: print("part deleted-",this)
+    if echo: 
+        #print("part deleted-",this)
+        pass
 
     db.session.commit()
-    if echo: print("all deleted from ",this)
+    if echo:
+        #print("all deleted from ",this) 
+        pass
     #db.session.close()
  
 
@@ -1843,7 +2066,7 @@ class Part(db.Model):
 
         weblink= '<a href="'+ urllink +  '">' + """<img src="http://""" + self.pngpath + """" width=auto height=30rm></a>"""
         
-     
+        
 
 
         return {
@@ -2022,7 +2245,7 @@ class Part(db.Model):
             # path, filename = os.path.split(self.datasheet)
             # flash(PureWindowsPath(self.datasheet).name)
             # flash(filename)
-            filename=PureWindowsPath(self.datasheet).name
+            filename=os.path.basename(self.datasheet)
             self.datasheet=datasheetfolder+filename
             
             if file_exists(self.datasheet):
@@ -2035,7 +2258,7 @@ class Part(db.Model):
                      self.datasheet_link=self.datasheet_link.replace(' ','%20')
                      self.datasheet_available=True
             #if hasattr(self,"datasheet_link"): 
-            #    print(self.datasheet_link)
+            #    #print(self.datasheet_link)
       
            
 
@@ -2065,7 +2288,7 @@ class Part(db.Model):
 
         #print(self.pngpath)
         if file_exists(self.pngpath):
-            # print("exist")
+            # #print("exist")
             if png_thumbnail:
                 pngfolder=fileserver_path+variables_conf['deliverables_folder']['value']+"png/"
                 self.pngpath=pngfolder+self.file+"_REV_"+self.revision+".png"
@@ -2079,10 +2302,10 @@ class Part(db.Model):
                     self.png=True 
                     
                 except:
-                    print("Problems with ", self.partnumber)
-                    print("pngfolder  ", fileserver_path)
-                    print("folder  ", folder)
-                    print("fileserver_path  ", fileserver_path)
+                    #print("Problems with ", self.partnumber)
+                    #print("pngfolder  ", fileserver_path)
+                    #print("folder  ", folder)
+                    #print("fileserver_path  ", fileserver_path)
                     
                     self.png=False 
             else:
@@ -2320,7 +2543,7 @@ class Part(db.Model):
         #flatbom.sort(key=lambda x: x.partnumber)
         flatbom.sort(key=lambda x: (x.category,x.supplier,x.oem,x.approved,x.partnumber))
         
-        print(len(flatbom))        
+        #print(len(flatbom))        
         return flatbom
 
 
@@ -2421,7 +2644,7 @@ class Job(db.Model):
         self.user_id=user_id
         self.user=user
         self.misc="wahtever"
-        print('walksjad;f')
+        #print('walksjad;f')
         # self.date_create=datetime.now()
         # self.date_due=date_due
         # self.date_modify=date_modify

@@ -38,8 +38,8 @@ def bom_to_excel(flatbom,outputfolder,title=""):
         property_list=['partnumber','revision','qty','description','material','thickness','finish']
 
         
-        for pepe in flatbom:
-            print(pepe)
+        # for pepe in flatbom:
+            #print(pepe)
         
         paco=[x.as_dict() for x in flatbom]
         bom_in=pd.DataFrame([x.as_dict() for x in flatbom])
@@ -56,7 +56,7 @@ def bom_to_excel(flatbom,outputfolder,title=""):
  
         
         workbook=openpyxl.load_workbook(filename=excel_file)
-        # # print(dir(self.workbook))
+        # # #print(dir(self.workbook))
         
         # Add images
         worksheet=workbook[sheet]
@@ -75,7 +75,7 @@ def bom_to_excel(flatbom,outputfolder,title=""):
 
         
         
-        print(col_width)
+        #print(col_width)
        
         for i, column_width in enumerate(col_width):
             if column_width>5:
@@ -105,7 +105,8 @@ def bom_to_excel(flatbom,outputfolder,title=""):
                 
             except:
                 # worksheet.add_image(thumb, cell)
-                print("Could not add image to excel ", row['partnumber'])
+                #print("Could not add image to excel ", row['partnumber'])
+                pass
                 
             
         
@@ -118,7 +119,7 @@ def bom_to_excel(flatbom,outputfolder,title=""):
         #Border annd Center alignment for all cells    
         for row in worksheet.iter_rows():
             for cell in row:
-                # print(dir(cell.style))
+                # #print(dir(cell.style))
                 # cell.style.alignment.wrap_text=True
                 cell.border = thin_border
                 cell.alignment = Alignment(horizontal='center')
