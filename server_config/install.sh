@@ -8,7 +8,7 @@ filefolder="/home/tinymrp/Fileserver/Deliverables"
 
 echo $filefolder
 repository="pzetairoi/TinyMRP.git"
-#removed login line for avoiding issues with github
+
 
 
 #apt-get update 
