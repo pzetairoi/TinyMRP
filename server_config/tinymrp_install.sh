@@ -5,7 +5,11 @@ deliverables="3mf,datasheet,dxf,edr,pdf,pic,png,reports,step,temp"
 tinyfolder="/TinyMRP"
 filefolder="/Fileserver"
 repository="pzetairoi/TinyMRP.git"
+<<<<<<< HEAD
 #removed login line for avoiding issues with github
+=======
+#removed gitlogin line for avoiding issues with github
+>>>>>>> 6b18a49... Added initial files from home install at 04-06-2024
 
 
 
