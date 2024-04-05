@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   id="Capa_1"
+   enable-background="new 0 0 512.085 512.085"
+   height="400"
+   viewBox="0 0 512.085 400.06641"
+   width="512"
+   version="1.1"
+   sodipodi:docname="approved.svg"
+   inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
+   inkscape:export-filename="Y:\app\static\images\approved.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <metadata
+     id="metadata43">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs41" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1858"
+     inkscape:window-height="1057"
+     id="namedview39"
+     showgrid="false"
+     inkscape:zoom="0.8691406"
+     inkscape:cx="249.67192"
+     inkscape:cy="178.91236"
+     inkscape:window-x="54"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="Capa_1"
+     inkscape:document-rotation="0"
+     inkscape:pagecheckerboard="0" />
+  <path
+     id="path6087"
+     style="fill:#00ff00;stroke:#000000;stroke-width:11.0018;stroke-miterlimit:4;stroke-dasharray:none"
+     d="m 182.9848,131.20172 c 9.54997,26.36451 22.26594,82.40692 51.38061,79.90731 10.1565,-2.43459 15.64177,-14.58799 20.39682,-23.02288 15.07866,-26.74763 43.42992,-57.7631 68.62488,-82.26549 7.86874,-7.652463 10.21148,-22.124156 1.32882,-29.292485 -7.69291,-7.917554 -15.09218,-5.870094 -27.2563,2.076753 -12.16411,7.946847 -54.79672,84.559302 -64.7483,77.476732 -9.95155,-7.08259 -9.71361,-24.45216 -14.94777,-30.99409 -5.28538,-9.86905 -17.40029,-17.36237 -27.75272,-11.78764 -5.63419,3.52495 -8.28628,11.20914 -7.02604,17.90179 z m 193.77552,8.52601 c 0,66.6706 -54.04724,120.71781 -120.71784,120.71781 -66.6706,0 -120.7178,-54.04721 -120.7178,-120.71781 0,-66.670604 54.0472,-120.717808 120.7178,-120.717808 66.6706,0 120.71784,54.047204 120.71784,120.717808 z"
+     sodipodi:nodetypes="cccccsscccsssss"
+     inkscape:export-filename="Y:\app\static\images\approved.png"
+     inkscape:export-xdpi="96"
+     inkscape:export-ydpi="96" />
+  <rect
+     style="fill:#00ff00;stroke:#000000;stroke-width:11.0018;stroke-miterlimit:4;stroke-dasharray:none"
+     id="rect9928"
+     width="473.57639"
+     height="99.272026"
+     x="19.254309"
+     y="284.00409"
+     ry="34.175617"
+     inkscape:export-filename="Y:\app\static\images\approved.png"
+     inkscape:export-xdpi="96"
+     inkscape:export-ydpi="96" />
+  <text
+     xml:space="preserve"
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:73.7915px;line-height:1.25;font-family:Impact;-inkscape-font-specification:'Impact, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;letter-spacing:8.39991px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.84479"
+     x="50.902618"
+     y="401.20782"
+     id="text8786"
+     transform="scale(1.1150959,0.89678385)"
+     inkscape:export-filename="Y:\app\static\images\approved.png"
+     inkscape:export-xdpi="96"
+     inkscape:export-ydpi="96"><tspan
+       id="tspan8784"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:73.7915px;font-family:Impact;-inkscape-font-specification:'Impact, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:1.84479"
+       x="50.902618"
+       y="401.20782"
+       sodipodi:role="line">APPROVED</tspan></text>
+</svg>

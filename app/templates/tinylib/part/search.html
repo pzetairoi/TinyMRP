@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+
+{% block header %}
+<h1>{% block title %} LIST OF PARTS results for {{ searchstring }} {% endblock %}</h1>
+
+
+
+<a class="action" href="{{ url_for('tinylib.index') }}">See all</a>
+  {% if g.user %}
+<a class="action" href="{{ url_for('tinylib.create') }}">New</a>
+  {% endif %}
+{% endblock %}
+
+
+
+{% block page_content %}
+
+
+
+
+
+
+
+<h1>List of parts results for {{ searchstring }}</h1>
+
+
+
+<div class="table-responsive">
+    <table class="table table-hover table-sm table-borderless mb-0">
+        <thead class="thead-dark">
+            <tr>
+                <th>#</th>
+                <th>Preview</th>
+                <th>Partnumber</th>
+                <th>Revision</th>
+                <th>Description</th>
+                <th>Process</th>
+
+                <th>Finish</th>
+                <th>Treatment</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            {% for part in pagination.items %}
+            <tr>
+                <th scope="row" style="background-color:rgb({{part['process_colors'][0]}});">{{ loop.index }} </th>
+                <td>
+                    <a href="http://{{ part['pngpath'] }}">
+
+                        <img src="http://{{part['pngpath']}}" width="70" height="48">
+
+                    </a>
+                </td>
+                <td>
+                    {% if part['revision']  == "": %}
+                    <a href="{{ url_for('tinylib.details',partnumber=part.partnumber,revision="%") }}">{{ part['partnumber'] }}  </a>
+                    {% else %}
+                    <a href="{{ url_for('tinylib.details',partnumber=part.partnumber,revision=part.revision) }}">{{ part['partnumber'] }}  </a>
+                    {% endif %}
+                </td>
+                <td>{{ part.revision }}</td>
+                <td>{{ part.description }}</td>
+                <td>
+                    <p class="card-text">
+                        {% for iconpath in part.process_icons %}
+                        <img src="{{url_for('static', filename=iconpath)}}" class="card-img-top" alt="..." style="width: 1.5rem; background-color: rgb({{part['process_colors'][loop.index0]}});">
+                        {% endfor %}
+                    </p>
+
+
+
+                </td>
+                <td>{{ part.finish }}</td>
+                <td>{{ part.treatment }}</td>
+
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+
+<!-- Pagination Links-->
+<div class="text-right">
+    <a href="{{ url_for('tinylib.search', searchstring=searchstring, page=pagination.prev_num) }}"
+       class="btn btn-outline-dark
+   {% if pagination.page == 1 %}disabled{% endif %}">
+        &laquo;
+    </a><!-- Loop through the number of pages to display a link for each-->
+    {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}{% if page_num %}
+    <!-- Check for the active page and set the link to "Active"-->
+    {% if pagination.page == page_num %}
+    <a href="{{ url_for('tinylib.search',searchstring=searchstring, page=page_num) }}"
+       class="btn btn-dark">
+        {{ page_num }}
+    </a>
+    {% else %}
+    <a href="{{ url_for('tinylib.search', searchstring=searchstring,page=page_num) }}"
+       class="btn btn-outline-dark">
+        {{ page_num }}
+    </a>
+    {% endif %}
+    {% else %}
+    ...
+    {% endif %}
+    {% endfor %}    <a href="{{ url_for('tinylib.search', searchstring=searchstring,page=pagination.next_num) }}"
+                       class="btn btn-outline-dark
+   {% if pagination.page == pagination.pages %}disabled{% endif %}">
+        &raquo;
+    </a>
+</div>
+<p class="text-right mt-3">
+    Showing page {{ pagination.page }} of {{ pagination.pages }}
+</p>
+
+<div class="container-fluid">
+
+    <div class="row row-cols-auto">
+        {% for part in parts %}
+
+
+        <div class="card text-center" style="width: 12rem;">
+            <a href="http://{{part['edrpath']}}">
+
+                <img src="http://{{part['pngpath']}}" href="http://{{part['edrpath']}}" style="background-color: transparent;" class="card-img-top" alt="...">
+            </a>
+
+
+            <div class="card-body">
+
+                {% if part['revision']  == "": %}
+                <a class="btn btn-primary" href="{{ url_for('tinylib.details',partnumber=part.partnumber,revision="%") }}" style="background-color:rgb({{part['process_colors'][0]}});"> {{ part['partnumber'] }} </a>
+                {% else %}
+                <a class="btn btn-primary" href="{{ url_for('tinylib.details',partnumber=part.partnumber,revision=part.revision) }}" style="background-color:rgb({{part['process_colors'][0]}});">{{ part['partnumber'] }}  </a>
+                {% endif %}
+
+
+
+                <p class="card-text">{{ part['description'] }}</p>
+                <p class="card-text">
+                    {% for iconpath in part.process_icons %}
+                    <img src="{{url_for('static', filename=iconpath)}}" class="card-img-top" alt="..." style="width: 2rem;">
+                    {% endfor %}
+                </p>
+
+                {% if part['pdf']  %}
+                <a href="http://{{ part['pdfpath'] }}" class="btn btn-primary">DRAWING PDF</a>
+                {% endif %}
+
+                {% if part['eprt']  %}
+                <a href="http://{{ part['eprtpath'] }}" class="btn btn-primary">3D</a>
+                {% endif %}
+
+                {% if part['easm']  %}
+                <a href="http://{{ part['easmpath'] }}" class="btn btn-primary">3D</a>
+                {% endif %}
+
+                {% if part['datasheet_available']  %}
+                <a href="http://{{ part['datasheet_link'] }}" class="btn btn-primary">Datasheet</a>
+                {% endif %}
+
+            </div>
+
+        </div>
+        {% endfor %}
+
+    </div>
+</div>
+
+    
+    {% endblock %}               
+    
+    

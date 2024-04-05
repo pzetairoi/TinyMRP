@@ -1,0 +1,362 @@
+{% extends "base.html" %}
+
+
+{% block header %}
+<h1>{% block title %} LIST OF PARTS {% endblock %}</h1>
+
+
+
+<a class="action" href="{{ url_for('tinylib.index') }}">See all</a>
+  {% if g.user %}
+<a class="action" href="{{ url_for('tinylib.create') }}">New</a>
+  {% endif %}
+{% endblock %}
+
+
+
+{% block page_content %}
+
+
+
+
+<div class="container-fluid">
+
+    <h1>Inventory</h1>
+    <p>Use the table search tab to filter inside database for partnumber and description. </p>
+    <p>Use the bottom table tabs for multifilter </p>
+    
+
+    
+        <table id="datatable" class="table table-striped table-bordered" style="width:100%">
+            <thead>
+              <tr>
+                
+                <th>Preview</th>
+                <th>Partnumber</th>
+                <th>Rev</th>
+                <th>Description</th>
+                <th>process</th>
+                <th>process2</th>
+                <th>process3</th>
+                <th>Finish</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- {% for part in parts %}
+                <tr>
+                  <td>{{ part.partnumber }}</td>
+                  <td>{{ part.revision }}</td>
+                  <td>{{ part.description }}</td>
+                  <td>{{ part.process }}</td>
+                  <td>{{ part.finish }}</td>
+                </tr>
+              {% endfor %} -->
+            </tbody>
+            <tfoot>
+              <tr>
+                
+                <th>Preview</th>
+                <th>partnumber</th>
+                <th>revision</th>
+                <th>description</th>
+                <th>process</th>
+                <th>process2</th>
+                <th>process3</th>
+                <th>finish</th>
+                <th>Action</th>
+            </tr>
+            </tfoot>
+          </table>
+    
+       
+    </div>
+
+
+    {% endblock %}
+
+
+    
+    {% block morescripts %}
+ 
+
+      <script type = "text/javascript">
+
+
+
+
+        $(document).ready(function () {
+
+            // Setup - add a text input to each footer cell
+    $('#datatable tfoot th').each( function () {
+        var title = $(this).text();
+        if ( title !== 'Preview' && title !== 'Action' ) {
+          $(this).html( '<input type="text" placeholder="Search '+title+'" style="width:100px"/>' );
+                    } 
+        
+    } );
+    
+    
+
+    // DataTable
+    var tablet = $(document).ready( function () {
+        $('#datatable').DataTable({
+
+        ajax: '/vault/api/part',
+        dom: 'Bfrtip',
+            deferRender: true,
+
+        columns: [
+                
+                {data: 'pngpath', orderable: false},
+                {data: 'partnumber'},
+                {data: 'revision'},
+                {data: 'description', class: 'editable text'},
+                {data: 'process', class: 'editable text'},
+                {data: 'process2', class: 'editable text'},
+                {data: 'process3', class: 'editable text'},
+                {data: 'finish', class: 'editable text'},
+                {render: function (data, type, row) {    
+                      return [createButton('edit', row.id),createButton('delete', row.id)];    
+                  }},
+              ],
+
+
+
+          initComplete: function () {
+              // Apply the search
+              this.api().columns().every( function () {
+                  var that = this;
+  
+                  $( 'input', this.footer() ).on( 'keyup change clear', function () {
+                      if ( that.search() !== this.value ) {
+                          that
+                              .search( this.value )
+                              .draw();
+                      }
+                  } );
+              } );
+          }
+      });
+    });
+
+
+
+
+function createButton(buttonType, rowID) {    
+    var buttonText = buttonType == "edit" ? "Edit" : "Delete";  
+    //var onclickAction==  
+    return '<button class="' + buttonType + '" type="button" >' + buttonText+'</button>';    
+} 
+
+      
+function fnCreateTextBox(value, fieldprop) {    
+    return '<input data-field="' + fieldprop + '" type="text" value="' + value + '" ></input>';    
+} 
+
+  
+ 
+function fnUpdateDataTableValue($inputCell, value) {    
+    var dataTable = $('#datatable').DataTable();    
+    var rowIndex = dataTable.row($($inputCell).closest('tr')).index();    
+    
+    var fieldName = $($inputCell).attr('data-field');
+
+    alert(fieldName,value)
+    
+    dataTable.rows().data()[rowIndex][fieldName] = value; 
+}    
+
+function fnCreateTextBox(value, fieldprop) {    
+        return '<input data-field="' + fieldprop + '" type="text" value="' + value + '" ></input>';    
+    } 
+   
+    
+function fnResetControls() {    
+        var openedTextBox = $('#datatable').find('input');    
+        $.each(openedTextBox, function (k, $cell) {    
+            $(openedTextBox[k]).closest('td').html($cell.value);    
+        })    
+    } 
+
+
+$('#datatable').on('click', 'tbody td .cancel', function (e) {    
+        fnResetControls();    
+        $('#datatable tbody tr td .update').removeClass('update').addClass('edit').html('Edit');    
+        $('#datatable tbody tr td .cancel').removeClass('cancel').addClass('delete').html('Delete');    
+    });    
+
+$('#datatable').on('click', 'tbody td .update', function (e) {    
+
+    var openedTextBox = $('#datatable').find('input');
+    var dataTable = $('#datatable').DataTable(); 
+
+    var partid;
+    var partnumber;
+    var description ;
+    var revision;
+    var process;
+    var process2;
+    var process3;
+    var finish
+    
+    var rowref;
+    var colref;
+
+    $.each(openedTextBox, function (k, $cell) {    
+        fnUpdateDataTableValue($cell, $cell.value);
+        rowref = dataTable.row($($cell).closest('tr')).index();  
+        colref= dataTable.column($($cell).closest('td')).index();  
+        console.log("rowindex ",rowref,"colindex ",colref) 
+        
+
+        $(openedTextBox[k]).closest('td').html($cell.value);  
+       
+        
+        if (colref == 1) {
+            partnumber = $cell.value;}
+         else if (colref == 2) {
+            revision = $cell.value;}   
+           else if (colref == 3) {
+            description = $cell.value;}
+            else if (colref == 4) {
+            process = $cell.value;} 
+            else if (colref == 5) {
+            process2 = $cell.value;}
+            else if (colref == 6) {
+            process3 = $cell.value;}
+            else if (colref == 7) {
+            finish = $cell.value;}
+                    
+        //console.log(jobid,jobnumber,description,customer)            
+
+    })  
+    
+    partid = dataTable.rows(rowref).data()[0]['id'];
+
+    var data_tosend={id:partid,partnumber:partnumber,description:description,
+                      revision:revision, process:process, process2:process2,
+                      process3:process3, finish:finish}
+    console.log(partid,partnumber,revision,description,revision,process,process2,process3,finish);   
+    console.log(data_tosend);         
+
+    
+    var sel_row = dataTable.row( $(this).parents('tr') );
+
+
+    $('#datatable tbody tr td .update').removeClass('update').addClass('edit').html('Edit');    
+    $('#datatable tbody tr td .cancel').removeClass('cancel').addClass('delete').html('Delete');  
+    
+        //send the data back to database
+
+    //var sel_row = $cell;
+    // var data_tosend=sel_row.data();
+
+    $.ajax({
+        type: "POST",
+        url: 'partapi/delete',
+        dataType: "json",
+        data: data_tosend,
+        //data: $(clickedRow),
+
+        success: function(response) {
+            console.log(response);
+        },
+        error: function(error) {
+             console.log(error);
+        }
+    });
+    
+
+    dataTable.draw();
+
+
+
+
+    });  
+
+
+$('#datatable').on('click', 'tbody td .delete', function (e) {    
+        fnResetControls();    
+
+
+        var tablon = $('#datatable').DataTable();    
+        var clickedRow = $($(this).closest('td')).closest('tr');  
+        var sel_row = tablon.row( $(this).parents('tr') );
+        var data_tosend=sel_row.data();
+
+        var test="dklfsdlkfs";
+       
+
+        // var retVal = confirm($(data_tosend['partnumber']));
+        // if( retVal == true ){
+        var retVal = confirm($(test.value));
+               if( retVal == true ){
+
+               
+
+
+        $.ajax({
+            type: "POST",
+            url: 'partapi/delete',
+            dataType: "json",
+            data: data_tosend,
+            //data: $(clickedRow),
+
+            success: function(response) {
+                // console.log($(clickedRow));
+                //console.log( $(test));
+                console.log(response);
+            },
+            error: function(error) {
+                //console.log( $(test));
+                console.log(error);
+            }
+        });
+
+
+        //Erase the row
+        tablon.row($(clickedRow)).remove().draw();
+        
+        }
+    });  
+
+
+
+$('#datatable').on('click', 'tbody td .edit', function (e) {    
+    fnResetControls();    
+    var dataTable = $('#datatable').DataTable();    
+    var clickedRow = $($(this).closest('td')).closest('tr');    
+    
+
+    $(clickedRow).find('td').each(function () {    
+        // do your cool stuff    
+        if ($(this).hasClass('editable')) {    
+            if ($(this).hasClass('text')) {    
+                var html = fnCreateTextBox($(this).html(), 'name');    
+                $(this).html($(html))    
+            }    
+        }    
+    });     
+    
+    
+    $('#datatable tbody tr td .update').removeClass('update').addClass('edit').html('Edit');    
+    $('#datatable tbody tr td .cancel').removeClass('cancel').addClass('delete').html('Delete');    
+    $(clickedRow).find('td .edit').removeClass('edit').addClass('update').html('Update');    
+    $(clickedRow).find('td .delete').removeClass('delete').addClass('cancel').html('Cancel');    
+   
+});        
+
+
+
+
+        });
+      </script>
+
+
+
+
+    
+    {% endblock %}  
+
+

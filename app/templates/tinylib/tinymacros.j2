@@ -1,0 +1,225 @@
+{% macro compile_form(compileform,partnumber,revision,allfiles,allprocesses) -%}
+
+
+<form method="POST" action="{{ url_for('tinylib.compile_pack') }}">
+{{ compileform.partnumber(value=partnumber) }}
+{{ compileform.revision(value=revision) }}
+
+
+<br>
+ <div class="panel-group" id="accordion" style="width:98%; margin: 0px auto;">
+  <div class="panel panel-default" style="margin: 0px auto;">
+    <div class="panel-heading">
+      <h5 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion" href="#collapse1">
+        BOM and ouput options</a>
+      </h5>
+    </div>
+    <div id="collapse1" class="panel-collapse collapse in">
+      <div class="panel-body">
+
+      <div class="col-sm-6">
+                            <fieldset class="group">
+                                <ul class="checkbox"> 
+                                {{ compileform.bom_opt.label }}
+                                {{ compileform.bom_opt }}
+                                </ul> 
+                            </fieldset>
+                            <br>      
+
+                           <fieldset class="group">
+                                <ul class="checkbox"> 
+                                {{ compileform.consumed_opt.label }}
+                                {{ compileform.consumed_opt }}
+                                </ul> 
+                            </fieldset>
+                            <br>                  
+
+                           <fieldset class="group">
+                                <ul class="checkbox"> 
+                                {{ compileform.classified_opt.label }}
+                                {{ compileform.classified_opt }}
+                                </ul> 
+                            </fieldset>
+                            <br>      
+
+                 
+
+            </div>  
+        <div class="col-sm-6">                   
+
+                           <fieldset class="group">
+                                <ul class="checkbox"> 
+                                {{ compileform.filterprocess_opt.label }}
+                                {{ compileform.filterprocess_opt }}
+                                </ul> 
+                            </fieldset>
+                            <br>  
+
+                            <fieldset class="group">
+                                <ul class="checkbox"> 
+                                {{ compileform.export_opt.label }}
+                                {{ compileform.export_opt }}
+                                </ul> 
+                            </fieldset>
+                            <br>  
+
+                            <fieldset class="group">
+                                <ul class="checkbox"> 
+                                {{ compileform.watermark_opt.label }}
+                                {{ compileform.watermark_opt }}
+                                </ul> 
+                            </fieldset>
+                            <br>   
+                            
+
+
+                            {{ compileform.csrf_token }}  
+                            {{ compileform.submit }}
+          </div>   
+      
+      </div>
+    </div>
+  </div>
+  </hr>
+
+
+  <div class="panel panel-default" >
+    <div class="panel-heading">
+      <h5 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion" href="#collapse3">
+        File filter</a>
+      </h5>
+    </div>
+    <div id="collapse3" class="panel-collapse collapse">
+      <div class="panel-body">
+
+                                  <fieldset class="group">
+                                <ul class="checkbox"> 
+                                {{ compileform.files }}
+                                </ul> 
+                            </fieldset>
+
+                            <br>
+                <button type="button" class="btn btn-xs"  onclick="all_files()">Select all</button>
+                <button type="button" class="btn btn-xs"  onclick="no_files()">Select none</button>
+      </div>
+    </div>
+  </div>
+  <br>
+     
+  <div class="panel panel-default" >
+    <div class="panel-heading">
+      <h5 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion" href="#collapse2">
+        Process filter (only selected will be output)</a>
+      </h5>
+    </div>
+ 
+    <div id="collapse2" class="panel-collapse collapse">
+      <div class="panel-body">
+   
+                            <fieldset class="group">
+                                <ul class="checkbox"> 
+                                {{ compileform.processes }}
+                                </ul> 
+                            </fieldset>
+                            <br>
+
+                <button type="button" class="btn btn-xs"  onclick="all_processes()">Select all</button>
+          <button type="button" class="btn btn-xs"  onclick="no_processes()">Select none</button>
+   
+      </div>
+
+    </div>
+   
+  </div>
+ 
+  
+<div>
+                            
+                   {#     {{ compileform.standard_sets.label }} #}
+                     {#  {{ compileform.standard_sets }} #}
+
+
+
+
+</div> 
+
+
+</div> 
+
+
+                         
+                        </form>
+
+
+
+
+<script type="text/javascript">
+
+
+let allprocesses = {{allprocesses}};
+let boxref ="";
+for (let i = 0; i < allprocesses.length; i++) {
+        boxref = "#processes-" +i;
+        var checkcheckbox = document.querySelector(boxref).checked;        
+        document.querySelector(boxref).checked=true;
+        }
+
+
+
+function all_files() {
+    let allfiles = {{allfiles}}
+    let boxref =""
+    for (let i = 0; i < allfiles.length; i++) {
+            boxref = "#files-" +i;
+            var checkcheckbox = document.querySelector(boxref).checked;        
+            document.querySelector(boxref).checked=true;
+    }
+}
+
+
+function no_files() {
+    let allfiles = {{allfiles}}
+    let boxref =""
+    for (let i = 0; i < allfiles.length; i++) {
+            boxref = "#files-" +i;
+            var checkcheckbox = document.querySelector(boxref).checked;        
+            document.querySelector(boxref).checked=false;
+    }
+}
+
+
+
+function all_processes() {
+    let allprocesses = {{allprocesses}}
+    let boxref =""
+    for (let i = 0; i < allprocesses.length; i++) {
+            boxref = "#processes-" +i;
+            var checkcheckbox = document.querySelector(boxref).checked;        
+            document.querySelector(boxref).checked=true;
+    }
+}
+
+
+function no_processes() {
+    let allprocesses = {{allprocesses}}
+    let boxref =""
+    for (let i = 0; i < allprocesses.length; i++) {
+            boxref = "#processes-" +i;
+            var checkcheckbox = document.querySelector(boxref).checked;        
+            document.querySelector(boxref).checked=false;
+    }
+}
+
+</script>
+
+
+
+
+
+{% endmacro -%}
+
+
+

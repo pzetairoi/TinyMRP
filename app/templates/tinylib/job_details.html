@@ -1,0 +1,423 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
+
+{% block title %}TinyMRP JOB{% endblock %}
+
+
+{% block page_content %}
+<!-- <a href="javascript:spin_jsf('test');"></a> -->
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script type = "text/javascript"> 
+    function spinjs(destElem) {
+        $(destElem).html('<img src="{{ url_for('static', filename='images/loading.gif') }}">');
+        alert($(destElem).val());        
+        document.getElementById("jobnumber").style.color='green';  
+        };
+
+
+
+    $(document).ready(function(){
+        $("#jobnumber").on("input", function(){
+            //document.getElementById("customer").value=$("#jobnumber").val();            
+            $.post('/vault/checkjobnumber', {
+                    jobnumber: $("#jobnumber").val(),
+                    }).done(function(response) {
+                        //$("#description").text(response['resp']);
+                        
+                        var check=response['text'];                        
+                        if (check>0) {
+                            document.getElementById("jobnumber").style.color='red';
+                            
+                        } else {
+                            document.getElementById("jobnumber").style.color='green';
+                        }
+                    })
+            });
+    });
+
+    
+    // $('#jobnumber').on('submit', function(e) {
+    //         var chkJobnumber=0;
+    //         let jobnumber = document.querySelector("#jobnumber").value;
+    //         alert(jobnumber);
+    //         // alert(document.querySelector("#jobnumber").value+"5555555555555");
+    //         // $.get('/vault/checkjobnumber',function(resp) {
+    //         //     let text = '';
+    //         //     if (users.length != 0) {
+    //         //         document.querySelector("#error").innerHTML = "Username already exists";
+    //         //         return false;
+    //         //     }
+    //         // });
+    //     });
+    
+</script>
+
+<!-- <input type = "button" onclick = "spinjs('#jobnumber')" value = "Display">   -->
+<div class="container-fluid">
+<div class="col-md-4"> 
+    <h1>Manage Job</h1>
+
+   <form action="" method="post">
+    {{ form.hidden_tag() }}
+    <!-- <div id="msg"><img src="{{ url_for('static', filename='images/loading.gif') }}"></div> -->
+    <p>
+    {{ form.jobnumber.label }}<br>
+    {{ form.jobnumber.data }}<br>
+    {% for error in form.jobnumber.errors %}
+    <span style="color: red;">[{{ error }}]</span>
+    {% endfor %}
+    </p>
+    <p>
+    {{ form.description.label }}<br>
+    {{ form.description(size=64) }}<br>
+    {% for error in form.description.errors %}
+    <span style="color: red;">[{{ error }}]</span>
+    {% endfor %}
+    </p>
+    <p>
+    {{ form.customer.label }}<br>
+    {{ form.customer(size=32) }}<br>
+    {% for error in form.customer.errors %}
+    <span style="color: red;">[{{ error }}]</span>
+    {% endfor %}
+    </p>
+
+    <p>
+      {{ form.users.label }}<br>
+      {{ form.users }}<br>
+      {% for error in form.users.errors %}
+      <span style="color: red;">[{{ error }}]</span>
+      {% endfor %}
+      </p>
+
+    <p>{{ form.submit() }}</p>
+    </form>
+
+</div>
+</div>
+
+
+<div class="container-fluid">
+
+  <h1>Job Scope</h1>
+  <p>Use the table search tab to filter inside database for partnumber and description. </p>
+  <p>Use the bottom table tabs for multifilter </p>
+  
+
+  
+      <table id="jobbomtable" class="table table-striped table-bordered" style="width:100%">
+          <thead>
+            <tr>
+              
+              <th>Preview</th>
+              <th>Partnumber</th>
+              <th>Rev</th>
+              <th>Description</th>
+              <th>process</th>
+              <th>Finish</th>
+              <th>qty</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- {% for part in parts %}
+              <tr>
+                <td>{{ part.partnumber }}</td>
+                <td>{{ part.revision }}</td>
+                <td>{{ part.description }}</td>
+                <td>{{ part.process }}</td>
+                <td>{{ part.finish }}</td>
+              </tr>
+            {% endfor %} -->
+          </tbody>
+          <tfoot>
+            <tr>
+              
+              <th>Preview</th>
+              <th>partnumber</th>
+              <th>revision</th>
+              <th>description</th>
+              <th>process</th>
+              <th>finish</th>
+              <th>qty</th>
+              <th>Action</th>
+          </tr>
+          </tfoot>
+        </table>
+  
+     
+  </div>
+
+
+    <div class="container-fluid">
+
+    <h1>Part selection</h1>
+    <p>Use the table search tab to filter inside database for partnumber and description. </p>
+    <p>Use the bottom table tabs for multifilter </p>
+    
+
+    
+        <table id="datatable" class="table table-striped table-bordered" style="width:100%">
+            <thead>
+              <tr>
+                
+                <th>Preview</th>
+                <th>Partnumber</th>
+                <th>Rev</th>
+                <th>Description</th>
+                <th>process</th>
+                <th>Finish</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- {% for part in parts %}
+                <tr>
+                  <td>{{ part.partnumber }}</td>
+                  <td>{{ part.revision }}</td>
+                  <td>{{ part.description }}</td>
+                  <td>{{ part.process }}</td>
+                  <td>{{ part.finish }}</td>
+                </tr>
+              {% endfor %} -->
+            </tbody>
+            <tfoot>
+              <tr>
+                
+                <th>Preview</th>
+                <th>partnumber</th>
+                <th>revision</th>
+                <th>description</th>
+                <th>process</th>
+                <th>finish</th>
+                <th>Action</th>
+            </tr>
+            </tfoot>
+          </table>
+    
+       
+    </div>
+
+
+
+
+    <div class="container-fluid">
+
+      <h1>Job {{job['jobnumber']}} Detailed BOM</h1>
+
+ <button style="color:black" type="button" class="btn btn-xs" href="#" id="level" data-toggle="tooltip" 
+            data-placement="bottom" title="Use table button to show top level only or all the tree levels"> 
+        </button>   
+<button style="color:black" type="button" 
+            class="btn btn-xs" href="#" id="structure" 
+            data-toggle="tooltip" data-placement="bottom" 
+            title="Use table button to toggle between FLAT bom or tree bom">
+        </button> 
+        
+<button type="button"  style="color:black" class="btn btn-xs" href="#" id="consume"
+            data-toggle="tooltip" data-placement="bottom" 
+            title="Use table button to show/hide the consumed components (like a lasercut plate in welded assembly)">
+        </button>
+
+<div class="btn-group  container-fluid" id='agroup'>
+
+    <button type="button" style="color:black" id="process_filter" class="btn  btn-xs dropdown-toggle" data-toggle="dropdown">Process filter
+      <span class="caret"></span>
+    </button>
+
+
+    <ul class="dropdown-menu" role="menu" >
+
+        <button type="button" id="bt_clear_process_bt"  style="color:black;"
+                      name="clear_process_bt" onclick="clearprocess();"> Clear selection</button>
+
+        {% for item in legend %}
+        <li>&nbsp;&nbsp;&nbsp;
+              <input type="checkbox" id="cb_{{item.process|replace(' ', '_')}}_cb" 
+                      name="cb_{{item.process|replace(' ', '_')}}_cb" onclick="filterprocess();">
+              <label for="cb_{{item.process|replace(' ', '_')}}_cb" style="background-color: rgb({{item.color}})">
+                      {{item.process|replace(' ', '_')}}
+              </label> 
+          </li>
+
+         {% endfor %}
+
+      </ul>
+
+  </div>
+
+  <div class="btn-group  container-fluid">
+
+    <button type="button" style="color:black" class="btn  btn-xs dropdown-toggle" data-toggle="dropdown">Filetype selection
+      <span class="caret"></span>
+    </button>
+
+
+    <ul class="dropdown-menu" role="menu" >
+
+
+    {% for filetype in fileset %}
+        <li>&nbsp;&nbsp;&nbsp;
+            
+            <input type="checkbox" id="{{ filetype['filetype'] }}_cb" name="{{ filetype['filetype'] }}_cb">
+            <label for="{{ filetype['filetype'] }}_cb" style="color:black"> 
+            {{ filetype['filetype'] }}
+            </label> 
+            
+          </li>
+
+{% endfor %} 
+      </ul>
+
+  </div>
+
+
+        <table id="treetable" class="table table-striped table-bordered" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Level</th>
+                    <th>Preview</th>
+                    <th>Partnumber</th>
+                    <th>Rev</th>
+                    <th>Description</th>
+                    <th>process</th>
+                    <th>Finish</th>
+                    <th>material</th>
+                    <th>Level QTY</th>
+                    <th>Total level QTY</th>
+                    <th>TotalQTY</th>
+                    <!-- <th>Action</th> -->
+                    <th>oem</th>
+                    <th>oem P/N</th>
+                    <th>classified</th>
+                    <th>Mass</th>
+                    <th>Category</th>
+
+                    <th>Colour</th>
+                    <!-- <th>Treatment</th>
+                    <th>Colour</th> -->
+                    <!-- <th>Approved</th>
+                    <th>Author</th>
+                    <th>Uploader</th>
+                    <th>Spare Part</th>
+                    <th>Drawndate </th> -->
+                </tr>
+
+            </thead>
+            <tfoot>
+
+                <tr>
+                    <th>Level</th>
+                    <th>Preview</th>
+                    <th>Partnumber</th>
+                    <th>Rev</th>
+                    <th>Description</th>
+                    <th>process</th>
+                    <th>Finish</th>
+                    <th>material</th>
+                    <th>Level QTY</th>
+                    <th>Total level QTY</th>
+                    <th>TotalQTY</th>
+                    <!-- <th>Action</th> -->
+                    <th>oem</th>
+                    <th>oem P/N</th>
+                    <th>classified</th>
+                    <th>Mass</th>
+                    <th>Category</th>
+
+                    <th>Colour</th>
+                    <!-- <th>Treatment</th>
+                    <th>Colour</th> -->
+                    <!-- <th>Approved</th>
+                    <th>Author</th>
+                    <th>Uploader</th>
+                    <th>Spare Part</th>
+                    <th>Drawndate </th> -->
+                </tr>
+        
+            </tfoot>
+        </table>
+
+
+            <div >
+            Toggle columns
+                
+               <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="0" id="toggle-col-0" >Level</a>
+               <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="1" id="toggle-col-1" >Img</a>
+               <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="2" id="toggle-col-2" >Partnumber</a>
+               <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="3" id="toggle-col-3" >Rev</a>
+               <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="4" id="toggle-col-4" >Description</a>
+               <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="5" id="toggle-col-5" >Process</a>
+               <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="6" id="toggle-col-6" >Finish</a>
+               <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="7" id="toggle-col-7" >Material</a>
+               <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="8" id="toggle-col-8" >Level QTY</a>
+               <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="9" id="toggle-col-9" >Total level QTY</a>
+               <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="10" id="toggle-col-10" >TotalQTY</a>
+               <!-- <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="11" id="toggle-col-11" >Edit</a> -->
+               <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="11" id="toggle-col-11" >oem</a>
+               <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="12" id="toggle-col-12" >oem P/N</a>
+               <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="13" id="toggle-col-13" >classified</a>
+               <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="14" id="toggle-col-14" >Mass</a>
+                
+               <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="15" id="toggle-col-15" > category </a>
+               <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="16" id="toggle-col-16" > colour </a>
+
+               <!-- <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="17" id="toggle-col-18" > treatment </a>
+               <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="19" id="toggle-col-19" > approved </a>
+               <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="20" id="toggle-col-20" > author </a>
+               <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="21" id="toggle-col-21" > uploader.username </a>
+               <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="22" id="toggle-col-22" > spare_Part </a>
+               <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="23" id="toggle-col-23" > drawndate </a> -->
+                
+            </div>
+
+
+
+
+
+      </div>
+      
+
+
+
+    {% endblock %}
+
+
+    
+    {% block morescripts %}
+ 
+
+
+
+
+<script type="text/javascript" src="/static/js/tinytreetable.js"></script>  
+<script type="text/javascript">
+    myVar = tinytreetablefunc('','','{{job['jobnumber']}}')
+    // console.log(myVar);
+        // console.log("test");
+        console.log('{{job['jobnumber']}}');
+        // console.log("test");
+
+    // $('#treetable').DataTable().ajax.reload()
+ </script>
+
+    <script type="text/javascript" src="/static/js/tinypartselecttable.js"></script>  
+    <script type="text/javascript">
+        myVar = selectpart('{{job['jobnumber']}}')
+                // console.log('{{job['jobnumber']}}');
+        // console.log("test");
+
+     </script>
+    
+<!-- 
+    <script type="text/javascript">
+      $('#treetable').DataTable().ajax.reload()
+   </script> -->
+
+
+
+    {% endblock %}  
+
+

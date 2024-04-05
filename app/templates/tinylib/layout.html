@@ -1,0 +1,140 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+
+<head>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.png') }}">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+
+
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css" />
+
+</head>
+
+
+
+  <body>
+
+
+      <div class="container">
+
+          <nav class="navbar navbar-expand-lg navbar-light bg-light">
+              <a class="navbar-brand" href="/"> <img src="{{url_for('static', filename='images/logo.png')}}" style="width: 8rem;"> </a>
+              <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                  <span class="navbar-toggler-icon"></span>
+              </button>
+
+              <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                  <ul class="navbar-nav mr-auto">
+                      <li class="nav-item active">
+                          <a class="nav-link active" aria-current="page" href="/part">Parts database </a>
+                          <!--<a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>-->
+                      </li>
+                      <li class="nav-item">
+                          <a class="nav-link" href="{{ url_for('tinylib.upload_file') }}">Upload Bom</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('tinylib.excelcompile') }}">Compile XLS</a>
+                    </li>
+                      
+                    
+                      <li class="nav-item" >
+                          <form method="post" id="searchform">
+
+                              <input name="search" id="search"  placeholder="partnumber/description" value="{{ request.form['search'] }}" required>
+                              <button type="submit" form="searchform" value="Search"> Search </button>
+
+                            </form>
+
+                            
+                        </li>
+                              
+
+                  </ul>
+
+              </div>
+          </nav>
+
+      </div>
+
+
+
+
+      <div class="container body-content">
+
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          <ul class=flashes>
+          {% for message in messages %}
+            <li>{{ message }}</li>
+          {% endfor %}
+          </ul>
+        {% endif %}
+      {% endwith %}
+
+
+          {% block content %}{% endblock %}
+
+      </div>
+
+      <hr />
+      <footer>
+
+          {% if legend %}
+
+          <hr />
+          <h5> Process related icons and color code:</h5>
+
+          <h6>
+              {% for item in legend %}
+              <span style="background-color: rgb({{item.color}})">
+
+
+
+
+                  {{item.process}}
+
+              </span>
+              <img src="{{url_for('static', filename=item.icon)}}" class="card-img-top" alt="..." style="width: 2.0rem; ">
+              -
+              {% endfor %}
+          </h6>
+          <hr />
+          {% endif %}
+
+
+          <p>&copy; {{ year }} - TinyMRP</p>
+      </footer>
+
+
+
+      <script src="/static/js/jquery-3.6.0.min.js"</script>
+      <script src="/static/js/popper.min.js"</script>      
+      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+      // <--    // //   treeview script -->
+      <script>
+              var toggler = document.getElementsByClassName("caret");
+              var i;
+
+              for (i = 0; i < toggler.length; i++) {
+                toggler[i].addEventListener("click", function() {
+                  this.parentElement.querySelector(".nested").classList.toggle("active");
+                  this.classList.toggle("caret-down");
+                });
+              } 
+
+
+        </script>
+  </body>
+
+
+
+
+
+
+
+</html>

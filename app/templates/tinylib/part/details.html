@@ -1,0 +1,1047 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+
+
+
+{% block page_content %}
+
+
+<br>
+
+
+    <img class="img-rounded profile-thumbnail" src="{{ part.uploader.gravatar }}">
+<p> {{part['png_dpath']}}{{part['pngpath']}}</p>
+
+<br>
+
+
+<div class="row">
+    <div class="col-sm-4">
+        <h4 class="card-title">{{part['partnumber']}} REV {{part['revision']}}
+        {% if part['approved'] and part['approved']!="" and part['approved']|length > 1  %}
+        <img src="{{url_for('static', filename='images/approved.svg')}}" align="right" hspace="20" style="width: 2.5rem;">
+        {% endif %}
+
+    </h4>
+        <h6 class="card-subtitle">{{part['description']}} </h6>
+
+        {% if part['threemf'] and pepe %}
+        <canvas id="c"></canvas>
+
+
+        <script type="module">
+        import * as loader from '/static/js/loadstl.js';
+            loader.main({{ part['threemfpath'] | tojson}});
+        </script>
+        {%else %}
+        <br>
+
+        <a href="http://{{part['pngpath']}}"> <img src="http://{{part['pngpath']}}" class="img-fluid"  style="height: 200px;"> </a>
+        {% endif %}
+
+
+        <p>
+            <br>
+
+            {% for iconpath in part['process_icons'] %}
+            <img src="{{url_for('static', filename=iconpath)}}" align="left" hspace="20" style="width: 2.5rem;">
+            {% endfor %}
+
+
+            {% if part['pdf']  %}
+            <a href="http://{{ part['pdfpath'] }}" class="btn btn-primary btn-sm">DRAWING PDF</a>
+            {% endif %}
+
+            {% if part['eprt']  %}
+            <a href="http://{{ part['eprtpath'] }}" class="btn btn-primary btn-sm">3D</a>
+            {% endif %}
+
+            {% if part['easm']  %}
+            <a href="http://{{ part['easmpath'] }}" class="btn btn-primary btn-sm">3D</a>
+            {% endif %}
+
+            {% if part['dxf']  %}
+            <a href="http://{{ part['dxfpath'] }}" class="btn btn-primary btn-sm">dxf</a>
+            {% endif %}
+
+            {% if part['step']  %}
+            <a href="http://{{ part['steppath'] }}" class="btn btn-primary btn-sm">step</a>
+            {% endif %}
+
+            {% if part['edrw']  %}
+            <a href="http://{{ part['edrwpath'] }}" class="btn btn-primary btn-sm">Drawing Edrw</a>
+            {% endif %}
+
+
+
+            {% if part['datasheet_available']  %}
+            <a href="http://{{ part['datasheet_link'] }}" class="btn btn-primary btn-sm">Datasheet</a>
+            {% endif %}
+
+        </p>
+
+    </div>
+
+    <div class="col-sm-8">
+        <div class="panel with-nav-tabs panel-default">        
+            
+                <div class="panel-heading">
+                <ul class="nav nav-tabs">
+                    <li class="active"> <a href="#tab1" data-toggle="tab">Properties</a> </li>
+                    <li >               <a href="#tab2" data-toggle="tab">Related files</a> </li>
+
+                    
+                    <li class="nav-item">
+                        <a data-toggle="tab" href="#tab3">
+                            {% if comments|length > 0 %}
+                            <img src="{{url_for('static', filename='images/comment.svg')}}" class="img-fluid" "alt=" ..."
+                                align="left" style="width: 1.5rem;">
+                            {% endif %}
+                            Comments
+                        </a>
+                    </li>
+
+
+                    <li class="nav-item">
+                        <a data-toggle="tab" href="#tab4">Reports</a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="panel-body">
+                <div class="tab-content" id="myTabContent">
+                    <div class="tab-pane fade in active" id="tab1">
+                        <p class="card-text">
+                            Material: {{part['material']}}
+                            <br>Mass: {{ part['mass'] }} Kg
+
+                            <br>Finish: {{part['finish']}}
+
+                            {% if part['colour']  %}
+                            <br><br>Colour:{{part['colour']}}
+                            {% endif %}
+
+                            {% if part['treatment']  %}
+                            <br>Treatment:{{part['treatment']}}
+                            {% endif %}
+
+                        </p>
+
+                        <p class="card-text">
+                            <hr />
+                            Primary process: {{part['process']}}
+                            {% if part['process2']  %}
+                            <br>Secondary process: {{ part['process2'] }}
+                            {% endif  %}
+                            {% if part['process3']  %}
+                            <br>Terciary process: {{ part['process3'] }}
+                            {% endif  %}
+                        </p>
+
+
+                        <p class="card-text">
+                            {% if part['category'] or part['oem'] or  part['oem'] or part['oem_partnumber'] or part['link']   %}
+                            <hr />
+                            {% if part['category']  %}
+                            <plain>Purchasing Category: {{ part['category'] }}</plain>
+                            {% endif  %}
+
+                            {% if part['oem']  %}
+                            <br><plain>Oem: {{ part['oem'] }}</plain>
+                            {% endif  %}
+
+                            {% if part['oem']  %}
+                            <br><plain>oem: {{ part['oem'] }}</plain>
+                            {% endif  %}
+
+                            {% if part['oem_partnumber']  %}
+                            <br><plain>oem P/N: {{ part['oem_partnumber'] }}</plain>
+                            {% endif  %}
+
+                            {% if part['link']  %}
+
+                        <p><a class="btn btn-primary btn-sm" href="{{ part['link'] }}">Website </a></p>
+                        {% endif  %}
+
+                        {% endif  %}
+                        </p>
+
+                        <p class="card-text">
+                            <hr />
+                            Author: {{part['author']}}
+                            {% if part['approved']  %}
+                            <br>Approved: {{ part['approved'] }}
+                            {% endif  %}
+                            {% if part['drawndate']  %}
+                            <br>Drawndate: {{ part['drawndate'] }}
+                            {% endif  %}
+                        </p>
+
+                        <hr />
+                        <p class="card-text">
+                            {% if part['spare_part']==1  %}
+
+
+                            Spare part: YES
+
+                            {% else %}
+                            Spare part: NO
+                            {% endif  %}
+
+                            <a href="http://{{part['qrpath']}}"> <img src="http://{{part['qrpath']}}" class="img-fluid" "alt=" ..." style="float: right;width:25%"> </a>
+                        </p>
+
+                        
+                        
+
+                    </div>
+                    <div class="tab-pane fade" id="tab2" >
+
+
+                        Model file: {{part['file']}}<br>
+                        Model configuration:  {{part['configuration']}}<br>
+                        Model revision:  {{part['revision']}}<br>
+                        Model folder: {{part['folder']}}
+
+                        {% if part['link']  %}
+                        <hr /><br>
+                        <a class="btn btn-primary btn-sm" href="{{ part['link'] }}">Website </a>
+                        {% endif  %}
+
+
+                        <hr />
+                        {% if part['pdf']  %}<br>
+                        <a href="http://{{ part['pdfpath'] }}" class="btn btn-primary btn-sm">DRAWING PDF</a>
+                        {% endif %}
+
+                        {% if part['eprt']  %}<br>
+                        <a href="http://{{ part['eprtpath'] }}" class="btn btn-primary btn-sm">3D</a>
+                        {% endif %}
+
+                        {% if part['easm']  %}<br>
+                        <a href="http://{{ part['easmpath'] }}" class="btn btn-primary btn-sm">3D</a>
+                        {% endif %}
+
+                        {% if part['dxf']  %}<br>
+                        <a href="http://{{ part['dxfpath'] }}" class="btn btn-primary btn-sm">dxf</a>
+                        {% endif %}
+
+                        {% if part['step']  %}<br>
+                        <a href="http://{{ part['steppath'] }}" class="btn btn-primary btn-sm">step</a>
+                        {% endif %}
+
+                        {% if part['edrw']  %}<br>
+                        <a href="http://{{ part['edrwpath'] }}" class="btn btn-primary btn-sm">Drawing Edrw</a>
+                        {% endif %}
+
+                        {% if part['datasheet_available']  %}<br>
+                        <a href="http://{{ part['datasheet_link'] }}" class="btn btn-primary btn-sm">Datasheet</a>
+                        {% endif %}
+
+
+                        {% if part['datasheet']  %}<br>
+                        Original datasheet location: {{ part['datasheet'] }}
+                        <br>
+                        Web datasheet location: {{ part['datasheet_link'] }}
+                        {% endif %}
+
+
+                        <hr />
+                        Database ID: {{part['id']}}
+
+                        <hr />
+                        Raw files location (with no link check):<br>
+                        Datasheet: {{ part['datasheet_link'] }}<br>
+                        PNG:{{ part['pngpath'] }}<br>
+                        DXF:{{ part['dxfpath'] }}<br>
+                        PDF:{{ part['pdfpath'] }}<br>
+                        eprtpath
+                        EDR(drawing):{{ part['edrwpath'] }}<br>
+
+
+
+
+                    </div>
+
+                    <div class="tab-pane fade" id="tab3" >
+
+
+
+                        {% for comment in comments %}
+                        <div class="card ">
+                            {{comment['category']}}  - {{comment['username']}} on {{comment['created']}}<br>
+                            {% if '.jpg' in comment['pic_path']  or '.png' in comment['pic_path']%}
+
+                            {{comment['body']}}<br>
+                            <img src="http://{{comment['pic_path']}}" class="img-fluid" "alt=" ...">
+                            {% else %}
+                            {{comment['body']}}
+                            {% if comment['pic_path'] %}
+
+                            <a href="http://{{comment['pic_path']}}">
+                                <img src="{{url_for('static', filename='images/file.svg')}}" class="img-fluid" "alt=" ..."
+                                    align="right" hspace="20" style="width: 3rem;">
+                            </a>
+                            <br>
+                            {% endif %}
+                            {% endif %}
+
+                        </div>
+                        <br>
+                        <hr />
+                        {% endfor %}
+
+                        {% if current_user %} 
+                        {{ wtf.quick_form(commentform) }} 
+                        {% else %} 
+                        Log-in for adding comments: Log In 
+                        {% endif %} 
+
+
+
+                    </div>
+
+                    <div class="tab-pane fade" id="tab4" >
+
+
+
+
+
+                        {% if flatbom %}
+
+                        {% if part['revision']!=''%}
+                        <a href="{{ url_for('tinylib.flatbom',partnumber=part['partnumber'],revision=part['revision'], components_only="YES") }}" class="btn btn-primary btn-sm">
+                            EXCEL LIST - FULL BOM - COMPONENTS ONLY
+                        </a>
+                        
+                        <hr />
+                        <a href="{{ url_for('tinylib.flatbom',partnumber=part['partnumber'],revision=part['revision'],components_only="NO") }}" class="btn btn-primary btn-sm">
+                            EXCEL LIST - FULL BOM
+                        </a>
+                        <hr />
+                        <a href="{{ url_for('tinylib.drawingpack',partnumber=part['partnumber'],revision=part['revision'], components_only="NO") }}" class="btn btn-primary btn-sm">
+                            FULL DRAWING PACK 
+                        </a>
+
+
+                        {% else %}
+
+                        <a href="{{ url_for('tinylib.flatbom',partnumber=part['partnumber'],revision="%25", components_only="YES") }}" class="btn btn-primary btn-sm">
+                            EXCEL LIST - FULL BOM - COMPONENTS ONLY
+                        </a>
+                        <hr />
+
+                        <a href="{{ url_for('tinylib.flatbom',partnumber=part['partnumber'],revision="%25", components_only="NO") }}" class="btn btn-primary btn-sm">
+                            EXCEL LIST - FULL BOM
+                        </a>
+                        <hr />
+                        <a href="{{ url_for('tinylib.drawingpack',partnumber=part['partnumber'],revision="%25", components_only="NO") }}" class="btn btn-primary btn-sm">
+                            FULL DRAWING PACK 
+                        </a>
+                        {% endif %}
+
+                        <hr />
+
+                        Quantity of unique components (including hardware)
+                        {{ flatbom|length }}
+                        <br />
+                        Total components (including hardware)
+                        {{ flatbom| sum(attribute='qty')  }}
+
+                        {% else %}
+
+                        {% if part['revision']%}
+                        <a href="{{ url_for('tinylib.partnumber',partnumber=part['partnumber'],revision=part['revision'],detail="full") }}" class="btn btn-primary btn-sm">
+                            LOAD FULL TREE - LONG ASSEMBLIES MIGHT TAKE A WHILE TO LOAD
+                        </a>
+                        {% else %}
+                        <a href="{{ url_for('tinylib.partnumber',partnumber=part['partnumber'],revision="%25",detail="full") }}" class="btn btn-primary btn-sm">
+                            LOAD FULL TREE - LONG ASSEMBLIES MIGHT TAKE A WHILE TO LOAD
+                        </a>
+
+                        {% endif %}
+
+
+
+
+
+
+
+                        
+
+                        {% endif %}
+
+                        {% if part['revision']%}
+        <a href="{{ url_for('tinylib.process_label_list',partnumber=part['partnumber'],revision=part['revision'],processin="toplevel",components_only="YES") }}" class="btn btn-primary btn-sm" style="float: right;">
+            Print top level labels
+        </a>
+        {% else %}
+        <a href="{{ url_for('tinylib.process_label_list',partnumber=part['partnumber'],revision="%25",processin="toplevel",components_only="YES") }}" class="btn btn-primary btn-sm" style="float: right;">
+            Print top level labels
+        </a>
+
+
+        {% endif %}
+
+        {% if flatbom %}
+        
+        {% if part['revision']%}
+        <a href="{{ url_for('tinylib.process_label_list',partnumber=part['partnumber'],revision=part['revision'],processin="all",components_only="YES") }}" class="btn btn-primary btn-sm" style="float: right;">
+            Print FULL BOM labels
+        </a>
+        {% else %}
+        <a href="{{ url_for('tinylib.process_label_list',partnumber=part['partnumber'],revision="%25",processin="all",components_only="YES") }}" class="btn btn-primary btn-sm" style="float: right;">
+            Print FULL BOM labels
+        </a>
+
+        {% endif %}
+        {% endif %}
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+ {% if part['png_dpath'] %}
+    <div class="row">
+        <div class="col-sm-12">
+
+
+            {% if part['revision']%}
+            <a href="{{ url_for('tinylib.pdfwithdescription',partnumber=part['partnumber'],revision=part['revision']) }}" > <img src="http://{{part['png_dpath']}}" style="width: 100%;"> </a>
+            {% else %}
+            <a href="{{ url_for('tinylib.pdfwithdescription',partnumber=part['partnumber'],revision="%25") }}" > <img src="http://{{part['png_dpath']}}" style="width: 100%;"> </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+
+    
+
+
+
+
+
+    {% if parts %}
+<br>
+
+<h3>
+    Top level components
+
+
+
+    {% if part['revision']%}
+    <a href="{{ url_for('tinylib.process_visuallist',partnumber=part['partnumber'],revision=part['revision'],processin="toplevel",components_only="YES") }}" class="btn btn-primary btn-sm" style="float: right;">
+        PDF Visual summary
+    </a>
+    {% else %}
+    <a href="{{ url_for('tinylib.process_visuallist',partnumber=part['partnumber'],revision="%25",processin="toplevel",components_only="YES") }}" class="btn btn-primary btn-sm" style="float: right;">
+        PDF Visual summary
+    </a>
+
+
+    {% endif %}
+
+    {% if flatbom %}
+    
+    {% if part['revision']%}
+    <a href="{{ url_for('tinylib.process_visuallist',partnumber=part['partnumber'],revision=part['revision'],processin="all",components_only="YES") }}" class="btn btn-primary btn-sm" style="float: right;">
+        FULL FLATBOM PDF Visual summary
+    </a>
+    {% else %}
+    <a href="{{ url_for('tinylib.process_visuallist',partnumber=part['partnumber'],revision="%25",processin="all",components_only="YES") }}" class="btn btn-primary btn-sm" style="float: right;">
+        FULL FLATBOM PDF Visual summary
+    </a>
+
+    {% endif %}
+    {% endif %}
+
+</h3>
+   
+
+    <div class="container-fluid">
+        <style>
+img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+</style>
+        <div class="row" >
+
+
+            {% for item in parts %}
+
+                <div class="col-sm-2 col-lg-2"  >
+                    <img src="http://{{item['pngpath']}}" style="height: 60px;"> 
+                    <div >
+                        <p style="color: red;">X {{ item['qty'] }} 
+                        {% if item['revision']  == "": %}
+                        <a class="btn btn-primary" href="{{ url_for('tinylib.details',partnumber=item['partnumber'],revision="%") }}" style="background-color:rgb({{item['process_colors'][0]}});"> {{ item['partnumber'] }} </a>
+                        {% else %}
+                        <a class="btn btn-primary" href="{{ url_for('tinylib.details',partnumber=item['partnumber'],revision=item['revision']) }}" style="background-color:rgb({{item['process_colors'][0]}});">{{ item['partnumber'] }}  </a>
+                        {% endif %}
+                        <!-- <p  style="color: rgb(0, 0, 0); font-size:11px; width: 60%;"> {{ item['description'] }}  </p> -->
+                        
+                    </div>   
+                    
+               
+                </div>
+
+            {% endfor %}
+        </div>
+    </div>
+{% endif %}
+
+
+
+
+
+
+
+
+     {% if hardware %}
+<hr />
+<br>
+<div class="container-fluid">
+    <h2> Hardware </h2>
+    <div class="table-responsive">
+        <table class="table table-hover table-sm table-borderless mb-0">
+            <thead class="thead-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Partnumber</th>
+                    <th>Description</th>
+                    <th>Qty</th>
+                    <th>Material</th>
+                    <th>Finish</th>
+                    <th>Treatment</th>
+
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in hardware %}
+                <tr>
+                    <th scope="row">{{ loop.index }} </th>
+
+                    <td>
+                        {% if item['revision']  == "": %}
+                        <a href="{{ url_for('tinylib.details',partnumber=item['partnumber'],revision="%") }}">{{ item['partnumber'] }}  </a>
+                        {% else %}
+                        <a href="{{ url_for('tinylib.details',partnumber=item['partnumber'],revision=item['revision']) }}">{{ item['partnumber'] }}  </a>
+                        {% endif %}
+                    </td>
+
+                    <td>{{ item['description'] }}</td>
+                    <td>{{ item['qty'] }}</td>
+                    <td>{{ item['material'] }}</td>
+                    <td>{{ item['finish'] }}</td>
+                    <td>{{ item['treatment'] }}</td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+    {% endif %}
+
+
+
+
+      {% if parents %}
+<hr />
+<br>
+<div class="container-fluid">
+    <h2> Used in  </h2>
+    <div class="table-responsive">
+        <table class="table table-hover table-sm table-borderless mb-0">
+            <thead class="thead-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Preview</th>
+                    <th>Partnumber</th>
+                    <th>Description</th>
+                    <th>Revision</th>
+                    <th>Quantity</th>
+
+
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in parents %}
+                <tr>
+                    <th scope="row">{{ loop.index }} </th>
+
+                    <td>
+                        <a href="http://{{ item['pngpath'] }}">
+
+                            <img src="http://{{item['pngpath']}}" height="100px" >
+
+                        </a>
+                    </td>
+
+                    <td>
+                        {% if item['revision']  == "": %}
+                        <a href="{{ url_for('tinylib.details',partnumber=item['partnumber'],revision="%") }}">{{ item['partnumber'] }}  </a>
+                        {% else %}
+                        <a href="{{ url_for('tinylib.details',partnumber=item['partnumber'],revision=item['revision']) }}">{{ item['partnumber'] }}  </a>
+                        {% endif %}
+                    </td>
+
+                    <td>{{ item['description'] }}</td>
+                    <td>{{ item['revision'] }}</td>
+
+                    <td>{{ item['qty'] }}</td>
+
+                    {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+    {% endif %}
+
+
+
+
+
+
+{% if flatbom %}
+
+<hr />
+    <div class="row">
+        <h3> Process summary</h3>
+        <p> Components that are part of purchased,welded or machined assemblies will not appear in the tables below, however they will be picked on the "any part" drawing pack or visual summaries.<p>
+
+
+        <div class="panel with-nav-tabs panel-default">        
+                
+                <div class="panel-heading">
+                
+
+        
+
+
+                    <ul class="nav nav-tabs">
+
+                {% for pro in legend  if not pro.process=="others"%}
+
+                
+                    {% if loop.index == 1 %}
+                    
+    
+                        <li class="active">
+                        <a data-toggle="tab" href={{"#"+"a"+pro.process| replace(' ', '')}} id={{"a"+pro.process| replace(' ', '')+"-tab"}}>
+                        {% else %}
+                        <li class="nav-item">
+                        <a data-toggle="tab" href={{"#"+"a"+pro.process| replace(' ', '')}} id={{"a"+pro.process| replace(' ', '')+"-tab"}}>
+    
+                        {% endif %}
+
+
+                            <img src="{{url_for('static', filename=pro.icon)}}" class="card-img-top" alt="..." style="width: 2.0rem; "> {{pro.process}}
+
+                        </a>
+
+                </li>
+
+
+                {% endfor %}
+
+
+                <li class="nav-item">
+
+                    <a class="nav-link" id={{"notapproved"+"-tab"}} data-toggle="tab" href={{"#"+"notapproved"}} role="tab" aria-controls={{"notapproved"}} aria-selected="false">
+
+
+                        <img src="{{url_for('static', filename="images/unknown.svg")}}" class="card-img-top" alt="..." style="width: 2.0rem; "> {{"Not approved"}}
+
+                    </a>
+
+                </li>
+
+
+                {% if "others" in processes %}
+                <li class="nav-item">
+
+                    <a class="nav-link" id={{"others"+"-tab"}} data-toggle="tab" href={{"#"+"others"}} role="tab" aria-controls={{"others"}} aria-selected="false">
+
+
+                        <img src="{{url_for('static', filename="images/unknown.svg")}}" class="card-img-top" alt="..." style="width: 2.0rem; "> {{"Missing or unknown processes"}}
+
+                    </a>
+
+                </li>
+                {% endif %}
+
+
+
+            </ul>
+        </div>
+
+        
+            <div class="tab-content" id="myTabContent">
+                {% for pro in legend  if not pro.process=="others" %}
+
+                    {% if loop.index == 1 %}
+                        <div class="tab-pane fade in active" id={{"a"+pro.process| replace(' ', '')}} role="tabpanel" aria-labelledby={{"a"+pro.process| replace(' ', '')+"-tab"}}>
+                    {% else %}
+                            
+                        <div class="tab-pane fade" id={{"a"+pro.process| replace(' ', '')}} role="tabpanel" aria-labelledby={{"a"+pro.process| replace(' ', '')+"-tab"}}>
+                    {% endif %}
+                    
+                    
+                            {% if part['revision']!=''%}       
+                                    <a href="{{ url_for('tinylib.process_docpack',partnumber=part['partnumber'],revision=part['revision'],processin=pro.process,components_only="YES") }}" class="btn btn-primary btn-sm">
+                                        {{pro.process}} drawing pack as main process  </a>                    
+                                    <a href="{{ url_for('tinylib.process_visuallist',partnumber=part['partnumber'],revision=part['revision'],processin=pro.process,components_only="YES") }}" class="btn btn-primary btn-sm" style="float: right;">
+                                        {{pro.process}} as main process visual summary</a>        <br /> <br />
+                                    <a href="{{ url_for('tinylib.process_docpack',partnumber=part['partnumber'],revision=part['revision'],processin=pro.process,components_only="NO") }}" class="btn btn-primary btn-sm">
+                                        Drawing pack including any part that has {{pro.process}} </a>
+                                    <a href="{{ url_for('tinylib.process_visuallist',partnumber=part['partnumber'],revision=part['revision'],processin=pro.process,components_only="NO") }}" class="btn btn-primary btn-sm" style="float: right;">
+                                        Visual summary including any part that has {{pro.process}}  </a>          <br />
+
+                                {% else %}
+                                    <a href="{{ url_for('tinylib.process_docpack',partnumber=part['partnumber'],revision="%25",processin=pro.process,components_only="YES") }}" class="btn btn-primary btn-sm">
+                                        {{pro.process}} drawing pack as main process        </a>
+                                    <a href="{{ url_for('tinylib.process_visuallist',partnumber=part['partnumber'],revision="%25",processin=pro.process,components_only="YES") }}" class="btn btn-primary btn-sm" style="float: right;">
+                                        {{pro.process}} as main process visual summary        </a>                    <br />                    <br />
+                                    <a href="{{ url_for('tinylib.process_docpack',partnumber=part['partnumber'],revision="%25",processin=pro.process,components_only="NO") }}" class="btn btn-primary btn-sm">
+                                        Drawing pack including any part that has {{pro.process}}                   </a>
+                                    <a href="{{ url_for('tinylib.process_visuallist',partnumber=part['partnumber'],revision="%25",processin=pro.process,components_only="NO") }}" class="btn btn-primary btn-sm" style="float: right;">
+                                        Visual summary including any part that has {{pro.process}}       </a>        <br />
+
+                                {% endif %}
+
+
+
+
+                            {%if pro.process=="welding"%}
+                                <br />
+                                {% if part['revision']!=''%}
+                                    <a href="{{ url_for('tinylib.fabrication',partnumber=part['partnumber'],revision=part['revision']) }}" class="btn btn-primary btn-sm" style="float: right;">
+                                        Full fabrication pack (includes lasercut, folding and intermediate fabrication)  </a>
+                                {% else %}
+                                    <a href="{{ url_for('tinylib.fabrication',partnumber=part['partnumber'],revision="%25") }}" class="btn btn-primary btn-sm" style="float: right;">Full fabrication pack (includes lasercut, folding and intermediate fabrication)</a>
+                                {% endif %}
+                            {% endif %}
+
+
+                            <h6> THINK TWICE BEFORE HITTING THE BUTTON, IT MIGHT OVERLOAD THE SERVER IF TOO MANY COMPONENTS</h6>
+                            <div class="table-responsive">
+                                <table class="table table-hover table-sm table-borderless mb-0">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Preview</th>
+                                            <th>Partnumber</th>
+                                            <th>Description</th>
+                                            <th>Revision</th>
+                                            <th>Quantity</th>
+
+                                            {% if pro.process != "purchase" %}
+                                            <th>Approved</th>
+                                            <th>Finish</th>
+                                            {% endif %}
+                                            {% if pro.process == "paint" %}
+                                            <th>Colour</th>
+                                            {% endif %}
+                                            {% if pro.process == "purchase" %}
+                                            <th>OEM</th>
+                                            <th>Supplier</th>
+                                            <th>Datasheet</th>
+                                            <th>Website</th>
+                                            <th>Category</th>
+                                            {% endif %}
+
+                                        </tr>
+                                    </thead>
+
+
+                                    <tbody>
+                                        {% for item in flatbom  if  item['mainprocess']==pro.process %}
+                                        <!--and not (pro.process=="lasercut" and (item['process']=="folding" or item['process2']=="folding" or item['process3']=="folding")) %}-->
+                                        <tr>
+                                            <th scope="row">{{ loop.index }} </th>
+
+                                            <td>
+                                                <a href="http://{{ item['pngpath'] }}">
+
+                                                    <img src="http://{{item['pngpath']}}" width="70" height="48">
+
+                                                </a>
+                                            </td>
+
+                                            <td>
+                                                {% if item['revision']  == "": %}
+                                                <a href="{{ url_for('tinylib.details',partnumber=item['partnumber'],revision="%") }}">{{ item['partnumber'] }}  </a>
+                                                {% else %}
+                                                <a href="{{ url_for('tinylib.details',partnumber=item['partnumber'],revision=item['revision']) }}">{{ item['partnumber'] }}  </a>
+                                                {% endif %}
+                                            </td>
+
+                                            <td>{{ item['description'] }}</td>
+                                            <td> <center> {{ item['revision'] }} </center> </td>
+
+
+
+                                            <td> <center> {{ item['qty'] }} </center> </td>
+                                            {% if pro.process != "purchase" %}
+                                            <td> <center> {{ item['approved'] }} </center> </td>
+                                            <td>{{ item['finish'] }}</td>
+                                            {% if pro.process == "paint" %}
+                                            <td>{{ item['colour'] }}</td>
+                                            {% endif %}
+
+                                            {% endif %}
+                                            {% if pro.process == "purchase" %}
+                                            <td>{{ item['oem'] }}</td>
+                                            <td>{{ item['supplier'] }}</td>
+
+                                            <td>
+                                                {% if item['datasheet_available'] %}
+                                                <a href="http://{{ item['datasheet_link'] }}" class="btn btn-primary btn-sm">Datasheet</a>
+                                                {% else %}
+                                                <center> - </center>
+                                                {% endif %}
+                                            </td>
+
+                                            <td>
+                                                {% if item['link'] %}
+                                                <a href="http://{{ item['link'] }}" class="btn btn-primary btn-sm">Website</a>
+                                                {% else %}
+                                                <center> - </center>
+                                                {% endif %}
+                                            </td>
+
+                                            <td>{{ item['category'] }}</td>
+                                            {% endif %}
+                                            {% endfor %}
+                                    </tbody>
+                                </table>
+                        </div>
+
+
+
+                    </div> 
+
+                    
+                {% endfor %}
+
+                        <div class="tab-pane fade" id={{"notapproved"}} role="tabpanel" aria-labelledby={{"notapproved"+"-tab"}}>
+
+                            <div class="table-responsive">
+                                <table class="table table-hover table-sm table-borderless mb-0">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Preview</th>
+                                            <th>Partnumber</th>
+                                            <th>Description</th>
+                                            <th>Approved</th>
+                                            <th>Process</th>
+                                            <th>Process 2</th>
+                                            <th>Process 3</th>
+                                            <th>Revision</th>
+                                            <th>Quantity</th>
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in flatbom if ( (not  "purchase" in  item['process']) and (not  "hardware" in  item['process']) )%}
+
+                                        <tr>
+                                            <th scope="row">{{ loop.index }} </th>
+
+                                            <td>
+                                                <a href="http://{{ item['pngpath'] }}">
+
+                                                    <img src="http://{{item['pngpath']}}" width="70" height="48">
+
+                                                </a>
+                                            </td>
+
+                                            <td>
+                                                {% if item['revision']  == "": %}
+                                                <a href="{{ url_for('tinylib.details',partnumber=item['partnumber'],revision="%") }}">{{ item['partnumber'] }}  </a>
+                                                {% else %}
+                                                <a href="{{ url_for('tinylib.details',partnumber=item['partnumber'],revision=item['revision']) }}">{{ item['partnumber'] }}  </a>
+                                                {% endif %}
+                                            </td>
+
+                                            <td>{{ item['description'] }}</td>
+                                            <td>{{ item['approved'] }}</td>
+                                            <td>{{ item['process'] }}</td>
+                                            <td>{{ item['process2'] }}</td>
+                                            <td>{{ item['process3'] }}</td>
+                                            <td> <center> {{ item['revision'] }} </center> </td>
+
+
+
+                                            <td> <center> {{ item['qty'] }} </center> </td>
+
+                                            {% endfor %}
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            </div>
+
+
+
+                            {% if "others" in processes %}
+                            <div class="tab-pane fade" id={{"others"}} role="tabpanel" aria-labelledby={{"others"+"-tab"}}>
+
+                            <div class="table-responsive">
+                                <table class="table table-hover table-sm table-borderless mb-0">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Preview</th>
+                                            <th>Partnumber</th>
+                                            <th>Description</th>
+                                            <th>Process</th>
+                                            <th>Process 2</th>
+                                            <th>Process 3</th>
+                                            <th>Revision</th>
+                                            <th>Quantity</th>
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in flatbom if (not item['process'] in processes) or (item['process2'] and not item['process2'] in processes) or (item['process3'] and not item['process3'] in processes) %}
+                                        <!--{% if  not item['process2'] in processes %}-->
+                                        <tr>
+                                            <th scope="row">{{ loop.index }} </th>
+
+                                            <td>
+                                                <a href="http://{{ item['pngpath'] }}">
+
+                                                    <img src="http://{{item['pngpath']}}" width="70" height="48">
+
+                                                </a>
+                                            </td>
+
+                                            <td>
+                                                {% if item['revision']  == "": %}
+                                                <a href="{{ url_for('tinylib.details',partnumber=item['partnumber'],revision="%") }}">{{ item['partnumber'] }}  </a>
+                                                {% else %}
+                                                <a href="{{ url_for('tinylib.details',partnumber=item['partnumber'],revision=item['revision']) }}">{{ item['partnumber'] }}  </a>
+                                                {% endif %}
+                                            </td>
+
+                                            <td>{{ item['description'] }}</td>
+                                            <td>{{ item['process'] }}</td>
+                                            <td>{{ item['process2'] }}</td>
+                                            <td>{{ item['process3'] }}</td>
+                                            <td> <center> {{ item['revision'] }} </center> </td>
+
+
+
+                                            <td> <center> {{ item['qty'] }} </center> </td>
+                                            <!--{% endif %}-->
+                                            {% endfor %}
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            </div>
+                            {% endif %}
+
+                
+
+
+
+
+            </div>
+        </div>
+    </div>
+ {% endif %}
+
+
+
+ <div id="events">
+        Row selected count - new information added at the top
+    </div>
+
+
+
+
+
+ <div class="container-fluid">
+
+<h1>Components table</h1>
+<p>Use the table search tab to filter inside database for partnumber and description. </p>
+<p>Use the bottom table tabs for multifilter </p>
+
+
+    <table id="treetable" class="table table-striped table-bordered" style="width:100%">
+        <thead>
+          <tr>
+            <th>Tree</th>
+            <th>Preview</th>
+            <th>Partnumber</th>
+            <th>Rev</th>
+            <th>Description</th>
+            <th>process</th>
+            <th>Finish</th>
+            <th>Level QTY</th>
+            <th>Total level QTY</th>
+            <th>TotalQTY</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tfoot>
+          <tr>
+            <th>Tree</th>
+            <th>Preview</th>
+            <th>Partnumber</th>
+            <th>Rev</th>
+            <th>Description</th>
+            <th>process</th>
+            <th>Finish</th>
+            <th>Level QTY</th>
+            <th>Total level QTY</th>
+            <th>TotalQTY</th>
+            <th>Action</th>
+        </tr>
+        </tfoot>
+      </table>
+
+   
+</div>
+
+
+
+
+{% endblock %}
+
+
+
+
+
+
+
+    
+{% block morescripts %}
+
+
+ 
+<script type="text/javascript" src="/static/js/tinytreetable.js"></script>  
+    <script type="text/javascript">
+        myVar = tinytreetablefunc('{{part.partnumber}}','{{part.revision}}','')
+     </script>
+    
+
+
+
+
+
+ {% endblock %}  
+

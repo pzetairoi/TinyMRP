@@ -1,0 +1,444 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
+
+{% block title %}TinyMRP JOB{% endblock %}
+
+
+{% block page_content %}
+<!-- <a href="javascript:spin_jsf('test');"></a> -->
+
+<!-- <input type = "button" onclick = "spinjs('#jobnumber')" value = "Display">   -->
+
+
+{% if ordernumber=='all'  %}
+
+<div class="container-fluid">
+  <div class="col-md-4"> 
+      <h1>Manage Job Orders for  {{job['jobnumber']}}</h1>
+  
+  </div>
+  </div>
+
+
+<div class="container-fluid">
+  <h3>Latest orders</h3>
+  <div class="table-responsive" >
+      
+      <table class="table table-hover table-sm table-borderless mb-0">
+          <thead class="thead-dark">
+              <tr>
+                  
+                  <th>ordernumber</th>
+                  <th>job</th>
+                  
+                  <th>description</th>
+                  <th>supplier</th>
+                  <th>User</th>
+                  <th>Action</th>
+              </tr>
+          </thead>
+          <tbody>
+              {% for order in orders %}
+              <tr>
+                  <!-- <th >{{ loop.index }} </th> -->
+                  
+                  <td>{{ order.ordernumber }}</td>
+                  <td>{{ order.job }}</td>
+                  
+                  <td>{{ order.description }}</td>
+                  <td>{{ order.supplier }}</td>
+                  <td>{{ order.user_id }}</td>
+                  <td><a href="{{ url_for('tinylib.job_orders',jobnumber=order.job,ordernumber=order.ordernumber)}}" class="btn btn-primary btn-sm" style="float: right;">
+                    Edit Order  </a></td>
+  
+              </tr>
+              {% endfor %}
+          </tbody>
+      </table>
+  </div>
+  </div>
+
+  {% else  %}
+ 
+    <div class="container-fluid"> 
+        <h1>Manage Order:  {{ordernumber}}</h1>
+    
+    </div>
+ <div class="container-fluid">
+    <div class="table-responsive" >
+      
+      <table id="tinytable" class="table table-striped table-bordered" style="width:100%">
+        <thead>
+          <tr>
+            
+            <th>Preview</th>
+            <th>partnumber</th>
+            <th>revision</th>
+            <th>description</th>
+            <th>process</th>
+            <th>finish</th>
+            <th>material</th>
+            <th>Action</th>
+            <th>Oem</th>
+            <th>Oem P/N</th>
+            <th>Classified</th>
+            <th>QTY</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+        <tfoot>
+          <tr>
+            
+            <th>Preview</th>
+            <th>partnumber</th>
+            <th>revision</th>
+            <th>description</th>
+            <th>process</th>
+            <th>finish</th>
+            <th>material</th>
+            <th>Action</th>
+            <th>Oem</th>
+            <th>Oem P/N</th>
+            <th>Classified</th>
+            <th>QTY</th>
+
+        </tr>
+        </tfoot>
+      </table>
+  </div>
+
+
+
+<!--   
+  <div class="container-fluid">
+    <div class="table-responsive" >
+      
+      <table class="table table-hover table-sm table-borderless mb-0">
+          <thead class="thead-dark">
+              <tr>
+                  <th>Screenshot</th>
+                  <th>partnumber</th>
+                  <th>revision</th>
+                  
+                  <th>description</th>
+                  <th>material</th>
+                  <th>process</th>
+                  <th>qty</th>
+              </tr>
+          </thead>
+          <tbody>
+              {% for part in orderbom %}
+              <tr>
+                                    
+                  <td><a href="{{ url_for('tinylib.partnumber',partnumber=part['partnumber'],revision=part['revision']) }}">
+                      <img src="http://{{part['pngpath']}}" width=auto height=30rm>  
+                      </a></td>
+                  <td>{{ part.partnumber }}</td>
+                  <td>{{ part.revision }}</td>
+                  <td>{{ part.description }}</td>
+                  <td>{{ part.material }}</td>
+                  <td>{{ part.process }}</td>
+                  <td>{{ part.qty }}</td>
+                  
+  
+              </tr>
+              {% endfor %}
+          </tbody>
+      </table>
+  </div>
+
+    </div> -->
+
+
+
+  <div class="text-center">
+    <button type="button" class="btn mb-1 btn-primary" id="bt-add_to_order">Add selected to order</button>
+</div>
+
+{% endif %}
+
+<div class="container-fluid">
+
+  <h1>Job {{job['jobnumber']}} Detailed BOM</h1>
+
+<button style="color:black" type="button" class="btn btn-xs" href="#" id="level" data-toggle="tooltip" 
+        data-placement="bottom" title="Use table button to show top level only or all the tree levels"> 
+    </button>   
+<button style="color:black" type="button" 
+        class="btn btn-xs" href="#" id="structure" 
+        data-toggle="tooltip" data-placement="bottom" 
+        title="Use table button to toggle between FLAT bom or tree bom">
+    </button> 
+    
+<button type="button"  style="color:black" class="btn btn-xs" href="#" id="consume"
+        data-toggle="tooltip" data-placement="bottom" 
+        title="Use table button to show/hide the consumed components (like a lasercut plate in welded assembly)">
+    </button>
+
+<div class="btn-group  container-fluid" id='agroup'>
+
+<button type="button" style="color:black" id="process_filter" class="btn  btn-xs dropdown-toggle" data-toggle="dropdown">Process filter
+  <span class="caret"></span>
+</button>
+
+
+<ul class="dropdown-menu" role="menu" >
+
+    <button type="button" id="bt_clear_process_bt"  style="color:black;"
+                  name="clear_process_bt" onclick="clearprocess();"> Clear selection</button>
+
+    {% for item in legend %}
+    <li>&nbsp;&nbsp;&nbsp;
+          <input type="checkbox" id="cb_{{item.process|replace(' ', '_')}}_cb" 
+                  name="cb_{{item.process|replace(' ', '_')}}_cb" onclick="filterprocess();">
+          <label for="cb_{{item.process|replace(' ', '_')}}_cb" style="background-color: rgb({{item.color}})">
+                  {{item.process|replace(' ', '_')}}
+          </label> 
+      </li>
+
+     {% endfor %}
+
+  </ul>
+
+</div>
+
+<div class="btn-group  container-fluid">
+
+<button type="button" style="color:black" class="btn  btn-xs dropdown-toggle" data-toggle="dropdown">Filetype selection
+  <span class="caret"></span>
+</button>
+
+
+<ul class="dropdown-menu" role="menu" >
+
+
+{% for filetype in fileset %}
+    <li>&nbsp;&nbsp;&nbsp;
+        
+        <input type="checkbox" id="{{ filetype['filetype'] }}_cb" name="{{ filetype['filetype'] }}_cb">
+        <label for="{{ filetype['filetype'] }}_cb" style="color:black"> 
+        {{ filetype['filetype'] }}
+        </label> 
+        
+      </li>
+
+{% endfor %} 
+  </ul>
+
+</div>
+
+
+
+  
+  <table id="treetable" class="table table-striped table-bordered" style="width:100%">
+    <thead>
+        <tr>
+            <th>Level</th>
+            <th>Preview</th>
+            <th>Partnumber</th>
+            <th>Rev</th>
+            <th>Description</th>
+            <th>process</th>
+            <th>Finish</th>
+            <th>material</th>
+            <th>Level QTY</th>
+            <th>Total level QTY</th>
+            <th>TotalQTY</th>
+            <!-- <th>Action</th> -->
+            <th>oem</th>
+            <th>oem P/N</th>
+            <th>classified</th>
+            <th>Mass</th>
+            <th>Category</th>
+
+            <th>Colour</th>
+            <!-- <th>Treatment</th>
+            <th>Colour</th> -->
+            <!-- <th>Approved</th>
+            <th>Author</th>
+            <th>Uploader</th>
+            <th>Spare Part</th>
+            <th>Drawndate </th> -->
+        </tr>
+
+    </thead>
+    <tfoot>
+
+        <tr>
+            <th>Level</th>
+            <th>Preview</th>
+            <th>Partnumber</th>
+            <th>Rev</th>
+            <th>Description</th>
+            <th>process</th>
+            <th>Finish</th>
+            <th>material</th>
+            <th>Level QTY</th>
+            <th>Total level QTY</th>
+            <th>TotalQTY</th>
+            <!-- <th>Action</th> -->
+            <th>oem</th>
+            <th>oem P/N</th>
+            <th>classified</th>
+            <th>Mass</th>
+            <th>Category</th>
+
+            <th>Colour</th>
+            <!-- <th>Treatment</th>
+            <th>Colour</th> -->
+            <!-- <th>Approved</th>
+            <th>Author</th>
+            <th>Uploader</th>
+            <th>Spare Part</th>
+            <th>Drawndate </th> -->
+        </tr>
+
+    </tfoot>
+</table>
+
+
+    <div >
+    Toggle columns
+        
+       <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="0" id="toggle-col-0" >Level</a>
+       <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="1" id="toggle-col-1" >Img</a>
+       <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="2" id="toggle-col-2" >Partnumber</a>
+       <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="3" id="toggle-col-3" >Rev</a>
+       <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="4" id="toggle-col-4" >Description</a>
+       <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="5" id="toggle-col-5" >Process</a>
+       <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="6" id="toggle-col-6" >Finish</a>
+       <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="7" id="toggle-col-7" >Material</a>
+       <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="8" id="toggle-col-8" >Level QTY</a>
+       <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="9" id="toggle-col-9" >Total level QTY</a>
+       <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="10" id="toggle-col-10" >TotalQTY</a>
+       <!-- <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="11" id="toggle-col-11" >Edit</a> -->
+       <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="11" id="toggle-col-11" >oem</a>
+       <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="12" id="toggle-col-12" >oem P/N</a>
+       <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="13" id="toggle-col-13" >classified</a>
+       <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="14" id="toggle-col-14" >Mass</a>
+        
+       <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="15" id="toggle-col-15" > category </a>
+       <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="16" id="toggle-col-16" > colour </a>
+
+       <!-- <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="17" id="toggle-col-18" > treatment </a>
+       <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="19" id="toggle-col-19" > approved </a>
+       <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="20" id="toggle-col-20" > author </a>
+       <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="21" id="toggle-col-21" > uploader.username </a>
+       <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="22" id="toggle-col-22" > spare_Part </a>
+       <a style="color:black"class="btn btn-xs toggle-vis" onclick="reColCols()" data-column="23" id="toggle-col-23" > drawndate </a> -->
+        
+    </div>
+  </div>
+  
+
+
+
+
+    {% endblock %}
+
+
+    
+    {% block morescripts %}
+
+    <script type="text/javascript" src="/static/js/tinytable.js"></script>  
+    <script type="text/javascript">
+        ordertable = tinytablefunc('{{searchstring}}','{{jobnumber}}','{{ordernumber}}')
+     </script>
+
+
+ 
+    <script type="text/javascript" src="/static/js/tinypartselecttable.js"></script>  
+    <script type="text/javascript">
+        myVar = selectpart('{{job['jobnumber']}}')
+     </script>
+
+<script type="text/javascript" src="/static/js/tinytreetable.js"></script>  
+
+{% if ordernumber=='all'  %}
+<script type="text/javascript">
+    myVar = tinytreetablefunc('','','{{job['jobnumber']}}')
+ </script>
+{% else  %}
+<script type="text/javascript">
+  myVar = tinytreetablefunc('','','{{job['jobnumber']}}','{{ordernumber}}')
+</script>
+{% endif %}
+
+
+<script type="text/javascript">
+
+$(document).ready(function () {
+  $("#bt-add_to_order").click(function () {
+    var dataTable = $('#treetable').DataTable()
+    var count =  dataTable.rows( { selected: true } )[0].data;
+    var count =  dataTable.rows( { selected: true } ).count();
+
+    var rowsel=dataTable.rows( { selected: true } );
+    var counter=0   
+    var alldata=[]
+
+    var jobnumber="{{job['jobnumber']}}";
+    var ordernumber="{{ordernumber}}";
+    // console.log(jobnumber);
+
+
+    rowsel.data(1).each( function () {
+        
+        // console.log($(this)[0])
+        // console.log($(this)[0].partnumber);
+        // console.log($(this)[1]);
+        // console.log($(this)[2].partnumber);
+        // console.log(rowsel.data());
+        alldata=[]
+        $(this).each( function () {
+            // console.log($(this)[0])
+            alldata.push($(this)[0])
+
+            
+        
+        } );
+
+                    } );
+
+                    
+
+        console.log($(alldata));
+        var testdata=JSON.stringify(alldata);
+        // "jobbb";
+        // var ordernumber="orderrrr";
+        // console.log(jobnumber);
+
+        $.ajax({
+            type: "POST",
+            url: '/vault/jobapi/addtoorder',
+            dataType: "json",
+            // data:{"test":"test"},
+            data: {'alldata':testdata,
+                    'jobnumber':'{{job['jobnumber']}}',
+                    'ordernumber':'{{ordernumber}}',          
+          },
+            
+            
+      
+            success: function(response) {
+
+                console.log(response);
+                $('#treetable').DataTable().ajax.reload();
+                $('#tinytable').DataTable().ajax.reload();
+            },
+            error: function(error) {
+
+                  console.log(error);
+            }
+        });
+
+
+  });
+});
+</script>    
+   
+    {% endblock %}  
+
+

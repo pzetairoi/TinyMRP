@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+
+{% block header %}
+<h1>{% block title %} LIST OF PARTS {% endblock %}</h1>
+
+
+
+<a class="action" href="{{ url_for('tinylib.index') }}">See all</a>
+  {% if g.user %}
+<a class="action" href="{{ url_for('tinylib.create') }}">New</a>
+  {% endif %}
+{% endblock %}
+
+
+
+{% block page_content %}
+
+<!--<select name="sauce">
+    {% for part in pagination.items %}
+    <option value={{ part.description }}>{{ part.description }}</option>
+    {% endfor %}
+</select>-->
+
+
+
+
+    <h1>List of Assets</h1>
+    <div class="table-responsive">
+        <table class="table table-hover table-sm table-borderless mb-0">
+            <thead class="thead-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Preview</th>
+                    <th>Partnumber</th>
+                    <th>Revision</th>
+                    <th>Description</th>
+                    <th>Process</th>
+
+                    <th>Finish</th>
+                    <th>Treatment</th>
+
+                </tr>
+            </thead>
+            <tbody>
+                {% for part in pagination.items %}
+                <tr>
+                    <th scope="row" style="background-color:rgb({{part['process_colors'][0]}});">{{ loop.index }} </th>
+                    <td>
+                        <a href="http://{{ part['pngpath'] }}">
+
+                            <img src="http://{{part['pngpath']}}" width="70" height="48">
+
+                        </a>
+                    </td>
+                    <td>
+                        {% if part['revision']  == "": %}
+                        <a href="{{ url_for('tinylib.details',partnumber=part.partnumber,revision="%") }}">{{ part['partnumber'] }}  </a>
+                        {% else %}
+                        <a href="{{ url_for('tinylib.details',partnumber=part.partnumber,revision=part.revision) }}">{{ part['partnumber'] }}  </a>
+                        {% endif %}
+                    </td>
+                    <td>{{ part.revision }}</td>
+                    <td>{{ part.description }}</td>
+                    <td>
+                        <p class="card-text">
+                            {% for iconpath in part.process_icons %}
+                            <img src="{{url_for('static', filename=iconpath)}}" class="card-img-top" alt="..." style="width: 1.5rem; background-color: rgb({{part['process_colors'][loop.index0]}});">
+                            {% endfor %}
+                        </p>
+
+
+
+                    </td>
+                    <td>{{ part.finish }}</td>
+                    <td>{{ part.treatment }}</td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+
+    <!-- Pagination Links-->
+    <div class="text-right">
+        <a href="{{ url_for('tinylib.allparts', page=pagination.prev_num) }}"
+           class="btn btn-outline-dark
+       {% if pagination.page == 1 %}disabled{% endif %}">
+            &laquo;
+        </a><!-- Loop through the number of pages to display a link for each-->
+        {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}{% if page_num %}
+        <!-- Check for the active page and set the link to "Active"-->
+        {% if pagination.page == page_num %}
+        <a href="{{ url_for('tinylib.allparts', page=page_num) }}"
+           class="btn btn-dark">
+            {{ page_num }}
+        </a>
+        {% else %}
+        <a href="{{ url_for('tinylib.allparts', page=page_num) }}"
+           class="btn btn-outline-dark">
+            {{ page_num }}
+        </a>
+        {% endif %}
+        {% else %}
+        ...
+        {% endif %}
+        {% endfor %}    <a href="{{ url_for('tinylib.allparts', page=pagination.next_num) }}"
+                           class="btn btn-outline-dark
+       {% if pagination.page == pagination.pages %}disabled{% endif %}">
+            &raquo;
+        </a>
+    </div>
+    <p class="text-right mt-3">
+        Showing page {{ pagination.page }} of {{ pagination.pages }}
+    </p>
+
+    <div class="container-fluid">
+        <table id="dati" class="table table-striped">
+            <thead>
+              <tr>
+                <th>partnumber</th>
+                <th>revision</th>
+                <th>description</th>
+                <th>process</th>
+                <th>finish</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- {% for part in parts %}
+                <tr>
+                  <td>{{ part.partnumber }}</td>
+                  <td>{{ part.revision }}</td>
+                  <td>{{ part.description }}</td>
+                  <td>{{ part.process }}</td>
+                  <td>{{ part.finish }}</td>
+                </tr>
+              {% endfor %} -->
+            </tbody>
+          </table>
+    
+       
+    </div>
+
+
+
+
+
+    {% endblock %}
+
+
+    
+    {% block morescripts %}
+ 
+
+    <!--Datatables script -->
+    <script>
+        $(document).ready(function () {
+          $('#dati').DataTable({
+            ajax: '/vault/api/part',
+            serverSide: true,
+            columns: [
+              {data: 'partnumber'},
+              {data: 'revision'},
+              {data: 'description', orderable: false},
+              {data: 'process', orderable: false},
+              {data: 'finish'}
+            ],
+          });
+        });
+      </script>
+    
+    {% endblock %}  
+
+

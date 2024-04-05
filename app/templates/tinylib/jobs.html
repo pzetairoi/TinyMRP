@@ -1,0 +1,340 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
+
+{% block title %}TinyMRP Jobs{% endblock %}
+
+
+{% block page_content %}
+
+
+<div class="table-responsive" >
+        <table id="datatable" class="display">
+        <thead>
+            <tr>
+                <th >Id</th>
+                <th>Jobnumber</th>
+                <th>Description</th>
+                <th>Customer</th>
+                <th>a number</th>
+                <!-- <th >Somedate </th>
+                <th>Anotherdate</th>
+                <th>Actions</th>
+                <th>Moreactions</th> -->
+                
+            </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+    </table>
+</div>
+
+
+
+{% endblock %}
+
+{% block morescripts %}
+<!--Datatables script -->
+<script type = "text/javascript"> 
+
+
+
+   var tablet= $(document).ready( function () {
+        $('#datatable').DataTable({
+            ajax: 'jobdata',
+            dom: 'Bfrtip',
+            deferRender: true,
+            columns: [               
+                        { data:'_id'},
+                        //{ render: function (data, type, row, meta) { return meta.row + meta.settings._iDisplayStart + 1; }},
+                        { data: 'jobnumber' , class: 'editable text' },
+                        { data: 'description', class: 'editable text' },
+                        { data: 'customer', class: 'editable text'  },
+                        {//edit button creation    
+                render: function (data, type, row) {    
+                    return [createButton('manage', row.id),createButton('orders', row.id),createButton('edit', row.id),createButton('delete', row.id)];    
+                }},
+                        // {},{},{},{},{},
+                        ],
+            
+            // columnDefs: [ 
+            //     {targets: -5, defaultContent:1},    
+            //     {targets: -4, render: function(data1){ return moment(data1).format('dddd')},},
+            //     { targets: -3, defaultContent: '<button class="btn-view" type="button">Edit</button>'
+            //         + '<button class="btn-delete" type="button">Delete</button>'},
+            //     { targets: -2, render: function(data2){ return moment(data2).format('YYYY-MM-DD')}},
+                // {targets: -1, render: function(data, type, row, meta){ 
+                //     return '<input type="button" class="name" id=n-"' + meta.row + '" value="Name"/>'}}
+                // ],
+
+            // "fnRowCallback": function (nRow, aData, iDisplayIndex) {    
+            //     $("td:first", nRow).html(iDisplayIndex + 0);    
+            //     return nRow;    
+            //     },
+        });
+    });
+
+
+
+function createButton(buttonType, rowID) {    
+    var buttonText = "test";
+
+    switch (buttonType){
+        case "edit":
+            buttonText="Edit";
+            break;
+        case "delete":
+            buttonText="Delete";
+            break;
+        case "manage":
+            buttonText="Manage";
+            break;
+        case "orders":
+            buttonText="orders";
+            break;
+
+    }
+    
+    return '<button class="' + buttonType + '" type="button">' + buttonText+'</button>';    
+} 
+
+
+      
+function fnCreateTextBox(value, fieldprop) {    
+    return '<input data-field="' + fieldprop + '" type="text" value="' + value + '" ></input>';    
+} 
+
+  
+ 
+function fnUpdateDataTableValue($inputCell, value) {    
+    var dataTable = $('#datatable').DataTable();    
+    var rowIndex = dataTable.row($($inputCell).closest('tr')).index();    
+    var fieldName = $($inputCell).attr('data-field');
+    
+    dataTable.rows().data()[rowIndex][fieldName] = value; 
+}    
+
+    
+function fnResetControls() {    
+        var openedTextBox = $('#datatable').find('input');    
+        $.each(openedTextBox, function (k, $cell) {    
+            $(openedTextBox[k]).closest('td').html($cell.value);    
+        })    
+    } 
+
+
+$('#datatable').on('click', 'tbody td .cancel', function (e) {    
+        fnResetControls();    
+        $('#datatable tbody tr td .update').removeClass('update').addClass('edit').html('Edit');    
+        $('#datatable tbody tr td .cancel').removeClass('cancel').addClass('delete').html('Delete');    
+    });    
+
+$('#datatable').on('click', 'tbody td .update', function (e) {    
+
+    var openedTextBox = $('#datatable').find('input');
+    var dataTable = $('#datatable').DataTable(); 
+
+    var jobid;
+    var jobnumber;
+    var description ;
+    var customer;
+    
+    var rowref;
+    var colref;
+
+    $.each(openedTextBox, function (k, $cell) {    
+        fnUpdateDataTableValue($cell, $cell.value);
+        rowref = dataTable.row($($cell).closest('tr')).index();  
+        colref= dataTable.column($($cell).closest('td')).index();  
+        console.log("rowindex ",rowref,"colindex ",colref) 
+        
+
+        $(openedTextBox[k]).closest('td').html($cell.value);  
+       
+        
+        if (colref == 1) {
+            jobnumber = $cell.value;
+        } else if (colref == 2) {
+            description = $cell.value;   
+        } else if (colref == 3) {
+            customer = $cell.value;
+            } 
+                    
+        //console.log(jobid,jobnumber,description,customer)            
+
+    })  
+    
+    jobid = dataTable.rows(rowref).data()[0]['id'];
+
+    var data_tosend={id:jobid,jobnumber:jobnumber,description:description,customer:customer}
+    console.log(jobid,jobnumber,description,customer);   
+    console.log(data_tosend);         
+
+    
+    var sel_row = dataTable.row( $(this).parents('tr') );
+
+
+    $('#datatable tbody tr td .update').removeClass('update').addClass('edit').html('Edit');    
+    $('#datatable tbody tr td .cancel').removeClass('cancel').addClass('delete').html('Delete');  
+    
+        //send the data back to database
+
+    //var sel_row = $cell;
+    // var data_tosend=sel_row.data();
+
+    $.ajax({
+        type: "POST",
+        url: 'jobapi/update',
+        dataType: "json",
+        data: data_tosend,
+        //data: $(clickedRow),
+
+        success: function(response) {
+            console.log(response);
+        },
+        error: function(error) {
+             console.log(error);
+        }
+    });
+
+
+    dataTable.draw();
+
+
+
+
+    });  
+
+
+$('#datatable').on('click', 'tbody td .delete', function (e) {    
+        fnResetControls();    
+        var tablon = $('#datatable').DataTable();    
+        var clickedRow = $($(this).closest('td')).closest('tr');  
+        var sel_row = tablon.row( $(this).parents('tr') );
+        var data_tosend=sel_row.data();
+
+        $.ajax({
+            type: "POST",
+            url: 'jobapi/delete',
+            dataType: "json",
+            data: data_tosend,
+            //data: $(clickedRow),
+
+            success: function(response) {
+                // console.log($(clickedRow));
+                console.log( $(test));
+                console.log(response);
+            },
+            error: function(error) {
+                console.log( $(test));
+                console.log(error);
+            }
+        });
+
+        // $.ajax({
+
+        //     type: "GET",
+        //     url: 'answerback',
+        //     dataType: "json",
+        //     success: function(response) {
+        //         console.log(response);
+        //     },
+        //     error: function(error) {
+        //         console.log(error);
+        //     }
+            
+
+        // });
+
+
+
+        //Erase the row
+        tablon.row($(clickedRow)).remove().draw();
+        
+        
+    });  
+
+
+
+$('#datatable').on('click', 'tbody td .edit', function (e) {    
+    fnResetControls();    
+    var dataTable = $('#datatable').DataTable();    
+    var clickedRow = $($(this).closest('td')).closest('tr');    
+    
+
+    $(clickedRow).find('td').each(function () {    
+        // do your cool stuff    
+        if ($(this).hasClass('editable')) {    
+            if ($(this).hasClass('text')) {    
+                var html = fnCreateTextBox($(this).html(), 'name');    
+                $(this).html($(html))    
+            }    
+        }    
+    });     
+    
+    
+    $('#datatable tbody tr td .update').removeClass('update').addClass('edit').html('Edit');    
+    $('#datatable tbody tr td .cancel').removeClass('cancel').addClass('delete').html('Delete');    
+    $(clickedRow).find('td .edit').removeClass('edit').addClass('update').html('Update');    
+    $(clickedRow).find('td .delete').removeClass('delete').addClass('cancel').html('Cancel');    
+   
+});        
+
+
+
+$('#datatable').on('click', 'tbody td .manage', function (e) {    
+    fnResetControls();    
+    var dataTable = $('#datatable').DataTable();    
+    var clickedRow = $($(this).closest('td')).closest('tr');    
+    
+    // console.log(clickedRow)
+    console.log(clickedRow[0].cells[1].innerText);
+    var jobnumberc=clickedRow[0].cells[1].innerText;
+    console.log(jobnumberc)
+
+
+    $.post(    '{{ url_for('tinylib.job_link')}}',
+    {jobnumber: jobnumberc},
+    function (data) {
+        console.log(data)
+        window.open(data)
+
+    }
+);
+    //window.open(linkstring)
+    
+   
+});   
+
+
+$('#datatable').on('click', 'tbody td .orders', function (e) {    
+    fnResetControls();    
+    var dataTable = $('#datatable').DataTable();    
+    var clickedRow = $($(this).closest('td')).closest('tr');    
+    
+    // console.log(clickedRow)
+    console.log(clickedRow[0].cells[1].innerText);
+    var jobnumberc=clickedRow[0].cells[1].innerText;
+    console.log(jobnumberc)
+
+
+    $.post(    '{{ url_for('tinylib.job_orders_link')}}',
+    {jobnumber: jobnumberc,ordernumber:'all'},
+    function (data) {
+        console.log(data)
+        window.open(data)
+
+    }
+);
+    //window.open(linkstring)
+    
+   
+});   
+    </script> 
+
+{% endblock %}
+
+
+
+    

@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
+
+{% block title %}TinyMRP supplier{% endblock %}
+
+
+{% block page_content %}
+<!-- <a href="javascript:spin_jsf('test');"></a> -->
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script type = "text/javascript"> 
+    function spinjs(destElem) {
+        $(destElem).html('<img src="{{ url_for('static', filename='images/loading.gif') }}">');
+        alert($(destElem).val());        
+        document.getElementById("suppliername").style.color='green';  
+        };
+
+
+
+    $(document).ready(function(){
+        $("#suppliername").on("input", function(){
+            //document.getElementById("customer").value=$("#suppliername").val();            
+            $.post('/vault/checksuppliername', {
+                    suppliername: $("#suppliername").val(),
+                    }).done(function(response) {
+                        //$("#description").text(response['resp']);
+                        
+                        var check=response['text'];                        
+                        if (check>0) {
+                            document.getElementById("suppliername").style.color='red';
+                            
+                        } else {
+                            document.getElementById("suppliername").style.color='green';
+                        }
+                    })
+            });
+    });
+
+    
+    // $('#suppliername').on('submit', function(e) {
+    //         var chksuppliername=0;
+    //         let suppliername = document.querySelector("#suppliername").value;
+    //         alert(suppliername);
+    //         // alert(document.querySelector("#suppliername").value+"5555555555555");
+    //         // $.get('/vault/checksuppliername',function(resp) {
+    //         //     let text = '';
+    //         //     if (users.length != 0) {
+    //         //         document.querySelector("#error").innerHTML = "Username already exists";
+    //         //         return false;
+    //         //     }
+    //         // });
+    //     });
+    
+</script>
+
+<!-- <input type = "button" onclick = "spinjs('#suppliername')" value = "Display">   -->
+<div class="container-fluid">
+<div class="col-md-4"> 
+    <h1>Create supplier</h1>
+
+   <form action="" method="post">
+    {{ form.hidden_tag() }}
+    <!-- <div id="msg"><img src="{{ url_for('static', filename='images/loading.gif') }}"></div> -->
+    <p>
+    {{ form.suppliername.label }}<br>
+    {{ form.suppliername(size=32) }}<br>
+    {% for error in form.suppliername.errors %}
+    <span style="color: red;">[{{ error }}]</span>
+    {% endfor %}
+    </p>
+    <p>
+    {{ form.description.label }}<br>
+    {{ form.description(size=64) }}<br>
+    {% for error in form.description.errors %}
+    <span style="color: red;">[{{ error }}]</span>
+    {% endfor %}
+    </p>
+    <p>
+    {{ form.address.label }}<br>
+    {{ form.address(size=32) }}<br>
+    {% for error in form.address.errors %}
+    <span style="color: red;">[{{ error }}]</span>
+    {% endfor %}
+    </p>
+
+    <p>
+        <!-- {{ form.processes.label }}<br>
+        {{ form.processes(size=32) }}<br> -->
+        {% for nested in form.processes %}
+            {{ nested.label }}{{ nested }}<br>
+        {% endfor %}
+
+        {% for error in form.processes.errors %}
+        <span style="color: red;">[{{ error }}]</span>
+        {% endfor %}
+    </p>
+
+    <p>
+        {{ form.contact.label }}<br>
+        {{ form.contact(size=32) }}<br>
+        {% for error in form.contact.errors %}
+        <span style="color: red;">[{{ error }}]</span>
+        {% endfor %}
+    </p>
+
+    <p>{{ form.submit() }}</p>
+    </form>
+
+</div>
+</div>
+
+<div class="container-fluid">
+<h3>Latest suppliers</h3>
+<div class="table-responsive" >
+    
+    <table class="table table-hover table-sm table-borderless mb-0">
+        <thead class="thead-dark">
+            <tr>
+                <th >name</th>
+                <th>description</th>
+                <th>process</th>
+                <th>address</th>
+                <th>location</th>
+                <th>contact</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for supplier in suppliers %}
+            <tr>
+                <!-- <th >{{ loop.index }} </th> -->
+                
+                <td>{{ supplier.suppliername }}</td>
+                <td>{{ supplier.description }}</td>
+                <td>{{ supplier.processes }}</td>
+                <td>{{ supplier.address }}</td>
+                <td>{{ supplier.location }}</td>
+                <td>{{ supplier.contact }}</td>
+                
+
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+</div>
+
+
+{% endblock %}
+

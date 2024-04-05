@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<CPTemplate>
+  <AppVersion>30</AppVersion>
+  <CPSheet>
+    <GroupBox Label="TinyMRP properties" PropName="Groupbox2" DefaultState="Expanded">
+      <Control Label="Partnumber" PropName="reference part number" ApplyTo="Config" Type="TextBox" ReadOnly="True" DefaultValue="[SW-Partnumber]" Mode="Text" />
+      <Control Label="Description" PropName="Description" ApplyTo="Global" Type="TextBox" ReadOnly="False" DefaultValue="" Mode="Text" />
+      <Control Label="Drawn by" PropName="Author" ApplyTo="Global" Type="ComboBox" ReadOnly="False" UserDefineable="False">
+        <Data Range="a1:a30" SheetIndex="1" Path="C:\TinyMRP\SOLIDFILES\tinymrp_customtab_excel_reference.xlsx" SourceType="Excel" />
+      </Control>
+      <Control Label="Date" PropName="DrawnDate" ApplyTo="Global" Type="TextBox" ReadOnly="False" DefaultValue="" Mode="Date" />
+      <Control Label="Revision" PropName="Revision" ApplyTo="Config" Type="TextBox" ReadOnly="False" DefaultValue="" Mode="Text" />
+      <Control Label="Revision Date" PropName="Revision Date" ApplyTo="Config" Type="TextBox" ReadOnly="False" DefaultValue="" Mode="Date" />
+      <Control Label="Material" PropName="Material" ApplyTo="Global" Type="TextBox" ReadOnly="False" DefaultValue="SW-Material" Mode="SWProperty" />
+      <Control Label="Process" PropName="process" ApplyTo="Global" Type="ComboBox" ReadOnly="False" UserDefineable="False">
+        <Data Range="A1:A50" SheetIndex="3" Path="C:\TinyMRP\SOLIDFILES\tinymrp_customtab_excel_reference.xlsx" SourceType="Excel" />
+      </Control>
+      <Control Label="Second Process" PropName="SecondProcess" ApplyTo="Global" Type="ComboBox" ReadOnly="False" UserDefineable="False">
+        <Data Range="" SheetIndex="1" Path="" SourceType="Excel" />
+      </Control>
+      <Control Label="Third Process" PropName="ThirdProcess" ApplyTo="Global" Type="ComboBox" ReadOnly="False" UserDefineable="False">
+        <Data Range="" SheetIndex="1" Path="" SourceType="Excel" />
+      </Control>
+      <Control Label="Material Size" PropName="StockSize" ApplyTo="Global" Type="ComboBox" ReadOnly="False" UserDefineable="True">
+        <Data Range="" SheetIndex="1" Path="" SourceType="Excel" />
+      </Control>
+      <Control Label="Sheet Metal Thickness" PropName="SheetMetalThickness" ApplyTo="Global" Type="ComboBox" ReadOnly="False" UserDefineable="True">
+        <Data Range="" SheetIndex="1" Path="" SourceType="Excel" />
+      </Control>
+      <Control Label="Finish" PropName="Finish" ApplyTo="Global" Type="ComboBox" ReadOnly="False" UserDefineable="False">
+        <Data Range="" SheetIndex="1" Path="" SourceType="Excel" />
+      </Control>
+      <Control Label="Weight" PropName="Weight" ApplyTo="Global" Type="TextBox" ReadOnly="False" DefaultValue="SW-Mass" Mode="SWProperty" />
+      <Control Label="Notes" PropName="Notes" ApplyTo="Config" Type="TextBox" ReadOnly="False" DefaultValue="" Mode="Text" />
+      <Control Label="Supplier" PropName="supplier" ApplyTo="Config" Type="ComboBox" ReadOnly="False" UserDefineable="True">
+        <Data Range="" SheetIndex="1" Path="" SourceType="Excel" />
+      </Control>
+      <Control Label="Part No" PropName="supplier_partnumber" ApplyTo="Global" Type="TextBox" ReadOnly="False" DefaultValue="" Mode="Text" />
+      <Control Label="Cost" PropName="Cost - Total Cost" ApplyTo="Config" Type="TextBox" ReadOnly="False" DefaultValue="" Mode="Text" />
+    </GroupBox>
+  </CPSheet>
+</CPTemplate>
