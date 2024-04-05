@@ -1,5 +1,6 @@
 TinyMRP_conf.xlsm
 data-dev.sqlite
+tinyserver.sock
 
 
 ##### STANDARD PYTHON IGNORES #######################################
