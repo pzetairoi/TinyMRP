@@ -5,7 +5,7 @@ deliverables="3mf,datasheet,dxf,edr,pdf,pic,png,reports,step,temp"
 tinyfolder="/TinyMRP"
 filefolder="/Fileserver"
 repository="pzetairoi/TinyMRP.git"
-#removed gitlogin line for avoiding issues with github
+#removed login line for avoiding issues with github
 
 chmod -R 777 /TinyMRP/
 chmod -R +x /TinyMRP/server_config/*
