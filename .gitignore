@@ -1,3 +1,8 @@
+TinyMRP_conf.xlsm
+data-dev.sqlite
+
+
+##### STANDARD PYTHON IGNORES #######################################
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
