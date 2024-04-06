@@ -2,6 +2,7 @@ TinyMRP_conf.xlsm
 data-dev.sqlite
 tinyserver.sock
 git-pull.sh
+temp/
 
 
 ##### STANDARD PYTHON IGNORES #######################################

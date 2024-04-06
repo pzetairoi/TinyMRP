@@ -1,0 +1,9 @@
+#mongorestore --db TinyMRP TinyMRP_mongodb_template/TinyMRP
+version: '3.8'
+services:
+  mongodb:
+    image: mongo:latest
+    volumes:
+      - C:\TinyMRP\Server\DatabaseVolumes:/data/db
+    ports:
+      - 27017:27017
