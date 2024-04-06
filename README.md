@@ -1,7 +1,7 @@
 # Initial Setup
 
 ## Check for Existing Files
-
+ 
 Before making any changes, ensure you do not already have a TinyMRP_conf.xlsm file or a data-dev.sqlite database file that you wish to keep. If you do, make sure they are backed up or stored safely outside the repository folder.
 Copy the Configuration and Database Templates
 
