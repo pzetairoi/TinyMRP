@@ -27,3 +27,7 @@ admin@tinymrp.com pass:admin
 test@test.com pass:test
 
 To avoid accidentally tracking or pushing changes to TinyMRP_conf.xlsm and data-dev.sqlite, we've added them to the .gitignore file. This means Git will ignore changes to these files, keeping your local configurations safe from being overwritten by updates or affecting other users.
+
+## Add the automatic update for the repository
+Copy the file git-pull_template.sh and into git-pull.sh and edit it to put the actual folder of the installation
+
