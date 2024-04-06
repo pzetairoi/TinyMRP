@@ -31,3 +31,10 @@ To avoid accidentally tracking or pushing changes to TinyMRP_conf.xlsm and data-
 ## Add the automatic update for the repository
 Copy the file git-pull_template.sh and into git-pull.sh and edit it to put the actual folder of the installation
 
+## Add the scrip to the cron tab
+
+>crontab -e
+> * * * * *   ~/TinyMRP/git-pull.sh
+
+
+
