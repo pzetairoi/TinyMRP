@@ -21,6 +21,12 @@ Open TinyMRP_conf.xlsm in your preferred spreadsheet editor and adjust the setti
 Database File:
 The data-dev.sqlite file is a SQLite database that includes the generic starting logins:
 
+## Windows dev version
+You can run the debug version of tiny using win_requirements.txt and/or anaconda and the # conda_win_environment.yml file
+
+
+
+
 ### Admin login
 admin@tinymrp.com pass:admin
 ### Project based login
