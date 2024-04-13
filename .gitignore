@@ -4,6 +4,7 @@ data-dev.sqlite
 tinyserver.sock
 git-pull.sh
 temp/
+venv/
 
 # Temporary pdf file during the generation of the binders and visual list of the files
 dirtyindex.pdf
