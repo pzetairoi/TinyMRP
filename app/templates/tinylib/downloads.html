@@ -1,45 +1,38 @@
 {% extends "base.html" %}
 
 {% block page_content %}
-
 <body>
-
-
-      <h3>Resources Download </h3>
-      <br>
-      <div class="container-fluid">
-      <h4>Solidworks Files</h4>
-      <a href="{{ url_for('static', filename='misc/TinyMRP.swp') }}" >Solidworks macro </a> and its <a href="{{ url_for('static', filename='misc/TinyMRP.bmp') }}" >icon</a>
-      <p>For generating the deliverables files and bom 
-        </p>
-    
-      <br>
-      <a href="{{ url_for('static', filename='misc/TinyMRP_BOM_TEMPLATE.sldbomtbt') }}" >BOM template for solidworks</a>
-      <p>Needed for creating the BOM files to upload</p>
-      <br>
-      <a href="{{ url_for('static', filename='misc/tinymrp_assy_customtab.asmprp') }}" >Custom tab property for SolidWorks (Parts)</a>
-      
-      <br>
-      <a href="{{ url_for('static', filename='misc/tinymrp_part_customtab.prtprp') }}" >Custom tab property for SolidWorks (Assemblies)</a>
-      <p>For setting the properties inside solidworks</p>
-
-  
-      
-      </div>
-      <br>
-      <br>
-      <div class="container-fluid">
-            <h4>Other Downloads</h4>
-            <a href="{{ url_for('static', filename='misc/excelcompile.xlsx') }}" >Excel compile -template download</a>
-            <p>For generating the deliverables files and bom</p>
-            <br>
-            <a href="{{ url_for('static', filename='misc/TinyMRP_conf.xlsm') }}" >TinyMRP sample system configuration file</a>
-            <p>Needed for creating the BOM files to upload</p>
-            <a href="{{ url_for('static', filename='misc/favicon.ico') }}" >Favicon for web</a>
-            <p>Needed for creating the BOM files to upload</p>
-
-            </div>
-
+  <h3>Resources Download</h3>
+  <br>
+  <div class="container-fluid">
+    <h4>Solidworks Files</h4>
+    <a href="{{ url_for('static', filename='misc/SOLIDSETUP/TinyMRP.swp') }}">Solidworks macro</a> and its
+    <a href="{{ url_for('static', filename='misc/SOLIDSETUP/TinyMRP.bmp') }}">icon</a>
+    <p>For generating the deliverables files and bom</p>
+    <br>
+    <a href="{{ url_for('static', filename='misc/SOLIDSETUP/TinyMRP_BOM_TEMPLATE.sldbomtbt') }}">BOM template for solidworks</a>
+    <p>Needed for creating the BOM files to upload</p>
+    <br>
+    <a href="{{ url_for('static', filename='misc/SOLIDSETUP/TinyMRP_BLANKSHEET_TEMPLATE.slddrt') }}">Blank FlattPattern Shee Format for solidworks</a>
+    <p>Blank Sheet format for flatpattern pages export</p>
+    <br>
+    <a href="{{ url_for('static', filename='misc/tinymrp_assy_customtab.asmprp') }}">Custom tab property for SolidWorks (Parts)</a>
+    <br>
+    <a href="{{ url_for('static', filename='misc/tinymrp_part_customtab.prtprp') }}">Custom tab property for SolidWorks (Assemblies)</a>
+    <p>For setting the properties inside solidworks</p>
+  </div>
+  <br>
+  <br>
+  <div class="container-fluid">
+    <h4>Other Downloads</h4>
+    <a href="{{ url_for('static', filename='misc/excelcompile.xlsx') }}">Excel compile -template download</a>
+    <p>For generating the deliverables files and bom</p>
+    <br>
+    <a href="{{ url_for('static', filename='misc/TinyMRP_conf.xlsm') }}">TinyMRP sample system configuration file</a>
+    <p>Needed for creating the BOM files to upload</p>
+    <a href="{{ url_for('static', filename='misc/favicon.ico') }}">Favicon for web</a>
+    <p>Needed for creating the BOM files to upload</p>
+  </div>
 </body>
 
 {% endblock %}

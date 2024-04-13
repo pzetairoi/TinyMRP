@@ -1,8 +1,12 @@
 TinyMRP_conf.xlsm
+~$TinyMRP_conf.xlsm
 data-dev.sqlite
 tinyserver.sock
 git-pull.sh
 temp/
+
+# Temporary pdf file during the generation of the binders and visual list of the files
+dirtyindex.pdf
 
 
 ##### STANDARD PYTHON IGNORES #######################################

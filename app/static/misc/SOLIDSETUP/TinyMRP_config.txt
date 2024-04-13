@@ -1,0 +1,7 @@
+BlankTemplatePath=C:\TinyMRP\SolidWorks\SolidSetUp\Macros\TinyMRP_BLANKSHEET_TEMPLATE.slddrt
+REMOVE_MODIFIED_NOTES=True
+FILTER_ANY=*
+BOMtemplate=C:\TinyMRP\SolidWorks\SolidSetUp\Macros\TinyMRP_BOM_TEMPLATE.sldbomtbt
+weblink=192.168.0.161
+BOM_Folder=Z:\Deliverables
+deliverables_folder=Z:\Deliverables

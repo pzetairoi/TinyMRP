@@ -1154,8 +1154,17 @@ class solidbom():
                         #print("********",line)
                         # pepe="""{"material":"GR350 PLATE AS3678","revision":"1","partnumber":"CM1-FRA-044","description":"TOP OUTER SKIN"}"""
                         # print(json.loads(pepe))
-                        partdict=json.loads(line)
+                        #partdict=json.loads(line)
                         # print(partdict)
+
+
+                        try:
+                            partdict = json.loads(line)
+                        except json.JSONDecodeError:
+                            print(f"Failed to decode JSON from line: {line}")
+                            continue
+                            partdict = json.loads(line)
+
                         
 
                         #Rename the properties from the conifguration file mapping
@@ -1192,6 +1201,7 @@ class solidbom():
                         
 
                         #Enforcing all the partnumbers to be capitalized
+                        print(partdict)
                         partdict["partnumber"]=partdict["partnumber"].upper()
                         partnumber=partdict["partnumber"]
                         print(partnumber)
