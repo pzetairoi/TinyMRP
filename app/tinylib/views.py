@@ -3327,7 +3327,7 @@ def downloadfile(filename):
     @after_this_request
     def remove_file(response):
         try:
-            delay = 1  # seconds
+            delay = 30 # seconds
             threading.Thread(target=delayed_remove, args=(file_path, delay)).start()
             # os.remove(file_path)
             # flash(f"Succe+ssfully removed {file_path}")
