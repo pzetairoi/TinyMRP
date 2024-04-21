@@ -4,5 +4,5 @@ sudo apt-get update
 sudo apt-get install -y mongodb-org
 sudo systemctl daemon-reload
 sudo systemctl start mongod
- sudo nano /etc/mongod.conf
+sudo nano /etc/mongod.conf
 (change the ip to 0.0.0.0 so is visible in the network)
