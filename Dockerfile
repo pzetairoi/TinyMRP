@@ -55,12 +55,24 @@ COPY data-dev.sqlite data.sqlite
 
 RUN apt-get install -y nginx git samba
 
+# Import the collection template into the mongodb,
+# the template is located on the project folder and it is in
+# app\static\misc\TinyMRP_mongodb_template.zip . The database
+# is called TinyMRP, import everything into the database
+COPY app/static/misc/TinyMRP_mongodb_template.zip .
+RUN apt-get install -y unzip
+#RUN unzip TinyMRP_mongodb_template.zip -d /data/db
+#RUN mongorestore --db TinyMRP /data/db/TinyMRP
+
+
 
 #Run flask dev by now
 #CMD [ "python3", "-m" , "flasky", "run", "--host=0.0.0.0"]
 CMD [ "flask", "run", "--host=0.0.0.0","--debugger"]
 
 
+
+
 # run-time configuration
-EXPOSE 5000
+EXPOSE 5000 80 8080 27017
 #ENTRYPOINT ["./boot.sh"]

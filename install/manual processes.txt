@@ -1,3 +1,76 @@
+#Based on ubuntu 22.04 install
+#sudo apt install ubuntu-desktop-minimal -y
+
+#Install Ngix git and samba
+apt-get install -y nginx git samba
+cd ~
+sudo mkdir /Fileserver
+sudo mkdir /Fileserver/Deliverables
+sudo mkdir /Fileserver/Deliverables/temp
+sudo mkdir /Fileserver/Deliverables/temp/upload
+
+#Share with full write access
+ sudo chmod +777 /Fileserver -R
+
+- replace /etc/samba/smb.conf by ~Server/install/smb.conf
+
+sudo systemctl restart smbd.service
+
+
+
+#INSTALL python stuff
+sudo apt install python3-venv  python-pkg-resources -y
+
+#Create the webserver folder files
+mkdir ~/Server
+cd ~/Server
+git clone https://github.com/pzetairoi/TinyMRP.git
+cd ~/Server/TinyMRP
+cp TinyMRP_conf-template.xlsm TinyMRP_conf.xlsm
+cp data-dev-template.sqlite data-dev.sqlite
+
+#Virtual enviroment and libraries
+pip install virtualenv
+python3 -m venv venv
+
+source venv/bin/activate
+pip install --upgrade pip setuptools wheel
+pip install -r requirements.txt
+
+
+
+
+#Install Mongodb
+sudo apt-get install gnupg curl -y
+curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | \
+   sudo gpg -o /usr/share/keyrings/mongodb-server-7.0.gpg \
+   --dearmor
+echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list
+sudo apt-get update
+sudo apt-get install -y mongodb-org
+
+#Copy initial database
+sudo apt-get install unzip -y
+unzip /TinyMRP_mongodb_template.zip -d /tmp/mongodb_backup
+mongorestore --drop --gzip --archive=/tmp/mongodb_backup/TinyMRP
+rm -rf /tmp/mongodb_backup
+sudo systemctl restart mongodb.service
+
+
+
+
+-----------------------------------------------
+Previous
+-----------------------------------------------
+
+
+
+
+
+
+
+
+#-------------------------------------------
 #Install mongo DEB
 
 #Install the pdfkit and ubuntu packages
