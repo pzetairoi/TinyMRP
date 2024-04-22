@@ -68,6 +68,29 @@ cd ~/Server/TinyMRP
 cp app/static/images/logo.png /Fileserver/System/logo.png
 
 
+
+#Configure Nginx and copy the service
+sudo rm  /etc/nginx/nginx.conf
+
+cp ~/Server/TinyMRP/install/nginx.conf /etc/nginx/nginx.conf
+cp ~/Server/TinyMRP/install/nginx.conf  /etc/nginx/sites-available
+ln -s /etc/nginx/sites-available/tinymrp.conf  /etc/nginx/sites-enabled/tinymrp.conf
+rm  /etc/nginx/sites-enabled/default
+
+
+cp  ~/Server/TinyMRP/install/tinymrp_server.service  /etc/systemd/system/tinymrp_server.service 
+
+systemctl daemon-reload
+systemctl restart nginx.service
+systemctl restart tinymrp_server.service
+
+
+sudo systemctl enable tinymrp_server.service
+
+
+
+
+
 -----------------------------------------------
 Previous
 -----------------------------------------------

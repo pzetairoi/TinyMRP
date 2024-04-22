@@ -1,0 +1,14 @@
+[Unit]
+Description=TinyMRP Web Application Server using Gunicorn
+After=network.target
+
+[Service]
+User=tinymrp 
+Group=www-data 
+WorkingDirectory=/home/tinymrp/Server/TinyMRP
+Environment="PATH=/home/tinymrp/Server/TinyMRP/venv/bin" 
+ExecStart=/bin/bash -c 'source /home/tinymrp/Server/TinyMRP/venv/bin/activate; cd /home/tinymrp/Server/TinyMRP/; gunicorn -w 5 --timeout 60000 --bind unix:/home/tinymrp/Server/TinyMRP/tinyserver.sock -m 777 wsgi:app' 
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
