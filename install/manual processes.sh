@@ -15,7 +15,7 @@ sudo mkdir /Fileserver/System
 #Share with full write access
  sudo chmod +777 /Fileserver -R
 
-- replace /etc/samba/smb.conf by ~Server/install/smb.conf
+sudo cp  ~/Server/TinyMRP/install/smb.conf /etc/samba/smb.conf 
 
 sudo systemctl restart smbd.service
 
