@@ -9,6 +9,7 @@ sudo mkdir /Fileserver/Deliverables
 sudo mkdir /Fileserver/Deliverables/temp
 sudo mkdir /Fileserver/Deliverables/temp/upload
 sudo mkdir /Fileserver/Deliverables/png
+sudo mkdir /Fileserver/System
 
 #Share with full write access
  sudo chmod +777 /Fileserver -R
@@ -62,6 +63,9 @@ mongorestore --db TinyMRP --verbose /tmp/mongodb_backup/TinyMRP
 rm -rf /tmp/mongodb_backup
 
 
+#Copy generic image logo to Fileserver/System
+cd ~/Server/TinyMRP
+cp app/static/images/logo.png /Fileserver/System/logo.png
 
 
 -----------------------------------------------

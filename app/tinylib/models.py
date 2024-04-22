@@ -551,7 +551,7 @@ class mongoPart(DynamicDocument):
 
 
         if self['pngpath']=="" or self['pngpath']==None or self['pngpath']=="/static/images/logo.svg":
-            self['pngpath']=webfileserver+'/logo.png'
+            self['pngpath']=webfileserver+'System/logo.png'
             
         
         if 'thumbnail' not in self.to_dict().keys():
