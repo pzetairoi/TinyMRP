@@ -51,14 +51,15 @@ sudo apt-get install -y mongodb-org
 
 #Copy initial database
 sudo apt-get install unzip -y
+cd ~/Server/TinyMRP
 unzip TinyMRP_mongodb_template.zip -d /tmp/mongodb_backup
 mongorestore --db TinyMRP --verbose /tmp/mongodb_backup/TinyMRP
 rm -rf /tmp/mongodb_backup
 
 #Modify the mongodb configuration
-sudo cp ~/Server/TinyMRP/install/mongodb.conf /etc/mongod.conf
+sudo cp ~/Server/TinyMRP/install/mongod.conf /etc/mongod.conf
 
-sudo systemctl restart mongodb.service
+sudo systemctl restart mongod.service
 
 
 
