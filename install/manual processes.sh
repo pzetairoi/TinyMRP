@@ -4,6 +4,7 @@
 #Install Ngix git and samba
 apt-get install -y nginx git samba gunicorn
 cd ~
+
 sudo mkdir /Fileserver
 sudo mkdir /Fileserver/Deliverables
 sudo mkdir /Fileserver/Deliverables/temp
@@ -30,6 +31,7 @@ git clone https://github.com/pzetairoi/TinyMRP.git
 cd ~/Server/TinyMRP
 cp TinyMRP_conf-template.xlsm TinyMRP_conf.xlsm
 cp data-dev-template.sqlite data-dev.sqlite
+mkdir ~/Server/TinyMRP/temp
 
 #Virtual enviroment and libraries
 pip install virtualenv
@@ -50,6 +52,7 @@ curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | \
 echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list
 sudo apt-get update
 sudo apt-get install -y mongodb-org
+sudo systemctl enable mongod.service
 
 #Modify the mongodb configuration with the repository one
 sudo cp ~/Server/TinyMRP/install/mongod.conf /etc/mongod.conf
