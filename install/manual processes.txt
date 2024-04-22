@@ -8,6 +8,7 @@ sudo mkdir /Fileserver
 sudo mkdir /Fileserver/Deliverables
 sudo mkdir /Fileserver/Deliverables/temp
 sudo mkdir /Fileserver/Deliverables/temp/upload
+sudo mkdir /Fileserver/Deliverables
 
 #Share with full write access
  sudo chmod +777 /Fileserver -R
