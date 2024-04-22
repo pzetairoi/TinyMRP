@@ -49,17 +49,16 @@ echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gp
 sudo apt-get update
 sudo apt-get install -y mongodb-org
 
+#Modify the mongodb configuration with the repository one
+sudo cp ~/Server/TinyMRP/install/mongod.conf /etc/mongod.conf
+sudo systemctl restart mongod.service
+
 #Copy initial database
 sudo apt-get install unzip -y
 cd ~/Server/TinyMRP
 unzip TinyMRP_mongodb_template.zip -d /tmp/mongodb_backup
 mongorestore --db TinyMRP --verbose /tmp/mongodb_backup/TinyMRP
 rm -rf /tmp/mongodb_backup
-
-#Modify the mongodb configuration
-sudo cp ~/Server/TinyMRP/install/mongod.conf /etc/mongod.conf
-
-sudo systemctl restart mongod.service
 
 
 
