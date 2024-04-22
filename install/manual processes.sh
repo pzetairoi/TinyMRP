@@ -1,8 +1,8 @@
 #Based on ubuntu 22.04 install
-#sudo apt install ubuntu-desktop-minimal -y
+#sudo apt install ubuntu-desktop-minimal  -y
 
 #Install Ngix git and samba
-apt-get install -y nginx git samba
+apt-get install -y nginx git samba gunicorn
 cd ~
 sudo mkdir /Fileserver
 sudo mkdir /Fileserver/Deliverables
@@ -70,19 +70,25 @@ cp app/static/images/logo.png /Fileserver/System/logo.png
 
 
 #Configure Nginx and copy the service
-sudo rm  /etc/nginx/nginx.conf
 
-cp ~/Server/TinyMRP/install/nginx.conf /etc/nginx/nginx.conf
-cp ~/Server/TinyMRP/install/nginx.conf  /etc/nginx/sites-available
+#sudo rm  /etc/nginx/nginx.conf
+
+#sudo cp ~/Server/TinyMRP/install/nginx.conf /etc/nginx/nginx.conf
+sudo cp ~/Server/TinyMRP/install/tinymrp.conf   /etc/nginx/sites-available
+sudo cp ~/Server/TinyMRP/install/fileserver.conf   /etc/nginx/sites-available
 ln -s /etc/nginx/sites-available/tinymrp.conf  /etc/nginx/sites-enabled/tinymrp.conf
-rm  /etc/nginx/sites-enabled/default
+ln -s /etc/nginx/sites-available/fileserver.conf  /etc/nginx/sites-enabled/fileserver.conf
+sudo rm  /etc/nginx/sites-enabled/default
 
 
-cp  ~/Server/TinyMRP/install/tinymrp_server.service  /etc/systemd/system/tinymrp_server.service 
+sudo cp  ~/Server/TinyMRP/install/tinymrp_server.service  /etc/systemd/system/tinymrp_server.service 
 
-systemctl daemon-reload
-systemctl restart nginx.service
-systemctl restart tinymrp_server.service
+
+sudo chmod +777 ~/Server/TinyMRP -R
+
+sudo systemctl daemon-reload
+sudo systemctl restart nginx.service
+sudo systemctl restart tinymrp_server.service
 
 
 sudo systemctl enable tinymrp_server.service
