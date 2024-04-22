@@ -76,15 +76,15 @@ cp app/static/images/logo.png /Fileserver/System/logo.png
 #sudo cp ~/Server/TinyMRP/install/nginx.conf /etc/nginx/nginx.conf
 sudo cp ~/Server/TinyMRP/install/tinymrp.conf   /etc/nginx/sites-available
 sudo cp ~/Server/TinyMRP/install/fileserver.conf   /etc/nginx/sites-available
-ln -s /etc/nginx/sites-available/tinymrp.conf  /etc/nginx/sites-enabled/tinymrp.conf
-ln -s /etc/nginx/sites-available/fileserver.conf  /etc/nginx/sites-enabled/fileserver.conf
+sudo ln -s /etc/nginx/sites-available/tinymrp.conf  /etc/nginx/sites-enabled/tinymrp.conf
+sudo ln -s /etc/nginx/sites-available/fileserver.conf  /etc/nginx/sites-enabled/fileserver.conf
 sudo rm  /etc/nginx/sites-enabled/default
 
 
 sudo cp  ~/Server/TinyMRP/install/tinymrp_server.service  /etc/systemd/system/tinymrp_server.service 
 
 
-sudo chmod +777 ~/Server/TinyMRP -R
+sudo chmod +777 ~/Server/TinyMRP/
 
 sudo systemctl daemon-reload
 sudo systemctl restart nginx.service
