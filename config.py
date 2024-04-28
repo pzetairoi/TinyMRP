@@ -78,7 +78,7 @@ class TinyConfig:
 
     lowercase_properties=["process","process2","process3","finish","treatment"]
     LOWERCASE_PROPERTIES=["process","process2","process3","finish","treatment"]
-    HARDWARE_FOLDER=['toolbox','browser','fasteners']   
+    HARDWARE_FOLDER=['toolbox','browser','fasteners','bolts','nuts','washers','screws','rivets','pins','clips','studs','spacers','standoffs','inserts']   
 
     
     ########## IMPORTANT ENVIROMENT VARIABLES TO LOAD FROM THE EXCEL FILE
