@@ -1232,6 +1232,9 @@ class solidbom():
                                 
                             # partcol.update ( { "_id": mongoid },{ "$unset":fieldsdrop})
                             # partcol.update ( { "_id": mongoid },{ "$set":partdict})
+                            for field in partdict.keys():
+                                if field=='': del[partdict[field]]
+                                
 
                             partcol.update_one({"partnumber":partnumber, "revision":revision},{ "$unset":fieldsdrop})
                             partcol.update_one({"partnumber":partnumber, "revision":revision},{ "$set":partdict})
