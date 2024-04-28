@@ -1164,6 +1164,9 @@ class solidbom():
                             print(f"Failed to decode JSON from line: {line}")
                             continue
                             partdict = json.loads(line)
+                            
+                        #Make the partdict keys be all small caps to avoid errors
+                        partdict = {k.lower(): v for k, v in partdict.items()}
 
                         
 
