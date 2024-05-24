@@ -20,9 +20,12 @@
       <br>
       <br>
       <form method="post" enctype="multipart/form-data">
-        {{ excelform.hidden_tag() }}
-        {{ excelform.file }}
-        <input type="submit" value="Upload excel">
+        <p>{{ excelform.hidden_tag() }}</p>
+        <br>
+        <p>{{ excelform.file }}</p>
+        <br>
+        <p><input type="submit" value="Upload excel"></p>
+        <br>
         </form>
       {% endif %}
 
