@@ -358,8 +358,8 @@ def pdf_pagenum(pdf_page,page_number,color=colors.grey,stamps=[]):
         c.setFont("Helvetica-Bold", 12)
         c.setFillColor(colors.white)
         c.drawCentredString(PAGE_WIDTH-x,y-2*mm,footnote)
-        c.drawImage(logo,2.5*inch-PAGE_WIDTH/2,3*mm,height=0.15*inch, 
-                     preserveAspectRatio=True, mask='auto')
+        #c.drawImage(logo,2.5*inch-PAGE_WIDTH/2,3*mm,height=0.15*inch, 
+        #             preserveAspectRatio=True, mask='auto')
 
         c.setFillColorRGB(0,0,0.5)                     
         # c.drawString (1.0*inch*0.85,y+2*mm,"Created with TinyMRP")
@@ -372,7 +372,7 @@ def pdf_pagenum(pdf_page,page_number,color=colors.grey,stamps=[]):
     if 'quote' in stamps :
         #print(stamps)
         stamp="app/static/images/quote_stamp.png"
-        c.drawImage(stamp,0*mm, 70*mm,height=1*inch, 
+        c.drawImage(stamp,15*mm, -15*mm,width=2*inch, 
                     preserveAspectRatio=True, mask='auto')  
     if 'classified' in stamps:
         #print(stamps)
