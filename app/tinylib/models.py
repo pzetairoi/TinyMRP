@@ -527,10 +527,29 @@ class mongoPart(DynamicDocument):
                 else:
                     if filetype=='png' and extension=='png':print("NOT FOUND",filetag)
                     if filetype=='datasheet' and 'datasheet'in self.to_dict().keys():
-                        filename=config['DELIVERABLES'][filetype]['path']+os.path.basename(self.datasheet)
-                        if file_exists(filename):
-                            self[field]=filename
+                        filename=config['DELIVERABLES'][filetype]['path']+os.path.basename(self.datasheet)                           
+                        
+                        
+                        if is_web_link(self.datasheet):
+                            self[field]=self.datasheet
                             save=True
+                            
+                            
+                        else:
+                                                      
+                            
+                            if not file_exists(filename):
+                                extensions=['pdf','PDF','png','PNG','jpg','JPG','jpeg','JPEG'] 
+                                for extension in extensions:
+                                    full_filename = filename + '.' + extension
+                                    if file_exists(full_filename):
+                                        self[field] = full_filename
+                                        save = True
+                                        break
+                            else:
+                                self[field] = filename
+                                save = True
+
 
                     if filetype=='qr':
                          qrcode=qr_code(self,filename=filetag)
@@ -703,7 +722,13 @@ class mongoPart(DynamicDocument):
 
 
     
+def is_web_link(string):
 
+    if string.startswith("http://") or string.startswith("https://"):
+        return True
+    else:
+        return False
+    pass
 
 
 

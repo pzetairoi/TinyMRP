@@ -616,6 +616,8 @@ def custom_sort_key(item):
     return value
 
 
+def split_text(text, length):
+    return '\n'.join([text[i:i+length] for i in range(0, len(text), length)])
 
 def visual_list(dictlist, outputfolder="",title="",subtitle="",local=False,scopeofsupply=False):
     try:
@@ -764,7 +766,7 @@ def visual_list(dictlist, outputfolder="",title="",subtitle="",local=False,scope
             flowables.append(NextPageTemplate('index_next'))
             j=0
             firstrow=True
-        
+         
 
     if len(hardlist)>0:
         #Create the fasteners table
@@ -779,7 +781,11 @@ def visual_list(dictlist, outputfolder="",title="",subtitle="",local=False,scope
         flowables.append(para)
         table_data = [[item.upper() for item in ["partnumber", "description", "qty"]]]  # Capitalized header row
         for item in hardlist:
-            table_data.append([item["partnumber"], item["description"],  str(item["totalqty"])])  
+            partnumber = item["partnumber"]
+            if len(partnumber) > 15:
+                partnumber = split_text(partnumber, 15)
+                table_data.append([partnumber, item["description"], str(item["totalqty"])])
+                
 
     # Create the table with adjusted column widths
         table = Table(table_data, colWidths=[1.5*inch, 5*inch, 0.5*inch])  # Adjusted widths
@@ -1667,25 +1673,15 @@ def BinderPDF(dictlist,outputfolder="",title="",subtitle="",savevisual=False, st
     if len(dictlist)==0:
         return "NO LIST TO PROCESS BINDER PDF"
 
-    
-    
-    # data2=pd.DataFrame(dictlist).fillna('')
-    # data2.replace(webfileserver,fileserver_path)
-
-
-    #print('INSIDE INDEX')
-    #print(dictlist)
 
     
     #Pdf pages eference and set files to fileserver
     for line in dictlist:
         
-        line['pdfpages']=0
-        if 'pdfpath' in line.keys():
-            line['pdfpath']=line['pdfpath'].replace(webfileserver,fileserver_path)
-            # print(line['pdfpath'])
-        else:
-            line['pdfpath']=""
+        line['pdfpages'] = 0
+        line['datasheetpages'] = 0
+        line['pdfpath'] = line.get('pdfpath', '').replace(webfileserver, fileserver_path)
+        line['datasheet'] = line.get('datasheet', '').replace(webfileserver, fileserver_path)
     
     #Set the first page and genertate the wrtier object
     pageref=1
@@ -1693,7 +1689,7 @@ def BinderPDF(dictlist,outputfolder="",title="",subtitle="",savevisual=False, st
     
     
     #Index page code generation
-    dirtyindexfile="dirtyindex.pdf"
+    dirtyindexfile="temp/dirtyindex_"+ str(int(datetime.now().timestamp()*1e6))+".pdf"
     doc = SimpleDocTemplate(dirtyindexfile,    pagesize=A4,
                         rightMargin=40,      leftMargin=50,
                         topMargin=80,      bottomMargin=20)
@@ -1712,10 +1708,13 @@ def BinderPDF(dictlist,outputfolder="",title="",subtitle="",savevisual=False, st
 
 
     
+    #Build the index
+    index = SimpleIndex(dot='.', headers=False)
     
     
     #Compile all the files
     
+    #Compile PDF files first
     for i in range(len(dictlist)):
         #print(dictlist[i]["pdfpath"])
         if os.path.isfile(dictlist[i]["pdfpath"]):# or file_exists("http://"+dictlist[i]["pdfpath"]):
@@ -1794,14 +1793,89 @@ def BinderPDF(dictlist,outputfolder="",title="",subtitle="",savevisual=False, st
             dictlist[i]["pdfpath"]=""
             #print("No file for ",dictlist[i]["partnumber"])
     
+    
+    
+    
+       # Compile datasheets
+    if 'add_datasheet' in stamps: 
+        for i in range(len(dictlist)):
+            if os.path.isfile(dictlist[i]["datasheet"]):
+                pdfFileObj = open(dictlist[i]["datasheet"], 'rb')
+                pdfReader = PyPDF2.PdfFileReader(pdfFileObj)
+
+                # Bookmark and index string
+                bookmark = dictlist[i]["partnumber"] + "- Datasheet - " + dictlist[i]["description"]
+                bookmark = bookmark.replace(',', ',,')
+
+                # Add the page index ref and the amount of pages to dictlist
+                dictlist[i]["datasheetindex"] = pageref
+                dictlist[i]["datasheetpages"] = pdfReader.numPages
+
+                ptext = """ I'm a phantom page<index item=" """
+                ptext = ptext + bookmark.replace(',,', ';')
+                ptext = ptext + """ "/>bulletted paragraph"""
+                para = Paragraph(ptext, style=styles["Normal"], bulletText='-')
+                flowables.append(para)
+
+                # Opening each page of the PDF
+                for pageNum in range(dictlist[i]["datasheetpages"]):
+                    pageObj = pdfReader.getPage(pageNum)
+
+                    if 'classified' in dictlist[i].keys():
+                        if dictlist[i]["classified"] == 'yes':
+                            stampy = list(stamps)
+                            stampy.append('classified')
+                            pageObj = pdf_pagenum(pageObj, pageref + pageNum - 1, color=get_process_color(dictlist[i]["process"]), stamps=stampy)
+                        else:
+                            pageObj = pdf_pagenum(pageObj, pageref + pageNum - 1, color=get_process_color(dictlist[i]["process"]), stamps=stamps)
+                    else:
+                        pageObj = pdf_pagenum(pageObj, pageref + pageNum - 1, color=get_process_color(dictlist[i]["process"]), stamps=stamps)
+
+                    pdfWriter.addPage(pageObj)
+
+                    # Add the phantom pages
+                    flowables.append(NextPageTemplate('index_first'))
+                    logo = "app/static/images/logo.png"
+                    stylesheet = getSampleStyleSheet()
+                    normalStyle = stylesheet['Code']
+                    text = '''
+                    This is a non rearranging form of the <b>Paragraph</b> class;
+                    <b><font color=red>XML</font></b> tags are allowed in <i>text</i> and have the same
+                    meanings as for the <b>Paragraph</b> class.
+                    As for <b>Preformatted</b>, if dedent is non zero <font color="red" size="+1">dedent</font>
+                    User Guide Chapter 9 Other Useful Flowables
+                    Page 92
+                    common leading spaces will be removed from the
+                    front of each line.
+                    You can have &amp;amp; style entities as well for &amp; &lt; &gt; and &quot;.
+                    '''
+                    texto = XPreformatted(text, normalStyle, dedent=3)
+                    flowables.append(texto)
+
+                    flowables.append(PageBreak())
+
+                # Add bookmark
+                try:
+                    pdfWriter.addBookmark(bookmark, pageref - 1)
+                except:
+                    pass
+                pageref = pageref + dictlist[i]["datasheetpages"]
+
+
+        
 
     #print("LINE 1615")
     with open(tempPath, 'wb') as fh:
         pdfWriter.write(fh)
     
     
-    #Build the index
-    index = SimpleIndex(dot='.', headers=False)
+
+   
+    
+    
+    
+    
+    
     
     
     # headertext=makeParaRight(solidbom.partnumber + " Drawing Pack")
@@ -1838,7 +1912,7 @@ def BinderPDF(dictlist,outputfolder="",title="",subtitle="",savevisual=False, st
     
     splitter=PyPDF2.PdfFileWriter()
     dirtyindex=PdfFileReader(dirtyindexfile)
-    cleanindexfile="clean_index.pdf"
+    cleanindexfile="temp/clean_index"+ str(int(datetime.now().timestamp()*1e6))+".pdf"
     
     #Extract the index
     j=0

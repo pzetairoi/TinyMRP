@@ -169,8 +169,9 @@ class Compile(FlaskForm):
     filterprocess_opt= RadioField('Filter Process',
                              choices=[('yes','Only selected'),('no','All')],
                              default='no')
-    watermark_opt= MultiCheckboxField('Add watermark',choices=[('quote','For quotation only'),
+    watermark_opt= MultiCheckboxField('PDF binder options',choices=[('add_datasheet','Add datasheets'), ('quote','For quotation stamp'),
                 ('classified','Classified stamp'),('approved','Approval stamp')])
+    
     
     partnumber=HiddenField()
     revision=HiddenField()

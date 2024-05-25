@@ -2956,9 +2956,7 @@ def compile_pack():
         #print(form_dict)
         for key in form_dict.keys():
             if type(form_dict[key])==list: 
-                if len(form_dict[key])==1: form_dict[key]=form_dict[key][0]
-
-       
+                if len(form_dict[key])==1: form_dict[key]=form_dict[key][0]       
 
         if 'watermark_opt' in form_dict.keys():
             watermark=form_dict['watermark_opt']
@@ -2967,12 +2965,6 @@ def compile_pack():
                 watermark=[watermark]
         else:
             watermark=[]
-        print("^^^^^^^^^^^^^^^^^^^^")
-        print(watermark)
-        print("^^^^^^^^^^^^^^^^^^^^")
-
-
-
 
         #Get root mongopart instance
         part= mongoPart.objects(
@@ -2993,15 +2985,12 @@ def compile_pack():
             rootdict=part.to_dict()
             rootdict['qty']=1; rootdict['totalqty']=1;rootdict['branchqty']=1; rootdict['level']="+"
             temptreedata=[rootdict]+temptreedata            
-            #print("cuantas before process filter",len(temptreedata))
-
 
 
         #level normalization for sorting
         for parto in temptreedata:
             parto['level']=str(" ".join(parto['level']))            
                        
-
 
         #Classified filtering
         classified=form_dict['classified_opt']
@@ -3010,18 +2999,7 @@ def compile_pack():
         elif classified=='only':
             temptreedata=[obj for obj in temptreedata if obj['classified'] == 'yes']
 
-        #Process filter
-        # 
-        #     if process in form_dict['processes']:
-
-        #     for process in parto['process']:
-        # print("*****************************")
-        # print("*****************************")
-        # print("*****************************")
-        # print(len(temptreedata))
-        # print("*****************************")
-        # print("*****************************")
-        # print("*****************************")     
+   
         if form_dict['filterprocess_opt']=='yes':
             treedata=[]
             for parto in temptreedata:
@@ -3036,44 +3014,15 @@ def compile_pack():
                                         if keep:
                                             treedata.append(parto)
                                             
-                                        # print(parto['partnumber'],keep,parto['process'])  
         else:
             treedata=temptreedata
 
-                                    
-                                    
-        print("*****************************")
-        print("*****************************")
-        print("*****************************")
-        print(len(treedata))
-        print("*****************************")
-        print("*****************************")
-        print("*****************************")                
-                
-                
-                
 
-
-
-
-
-        #Final dict list of parts
-        
+        #Final dict list of parts        
         print(form_dict)
 
      
-        #for dicto in treedata:
-        #    print(dicto['pngpath'])
-
-                        
-
-
-        #Sort the treedata with the level
-        #treedata.sort(key=lambda item: item.get("process"))
-        
-
         #Temporary folder
-        # outputfolder=os.getcwd() +"/temp/"+"docpack" + \
         outputfolder="C:/TinyMRP/temp/"+"docpack" + \
                     datetime.now().strftime('%d_%m_%Y-%H_%M_%S_%f')+"/"
         
@@ -3131,8 +3080,7 @@ def compile_pack():
         threading.Thread(target=delayed_remove, args=(filepath, 30)).start()
               
         return render_template('tinylib/excelcompile.html', upload=True, weblink=weblink, filepath=os.path.basename(filepath))
-        # except:
-        #     return redirect(weblink)
+    
 
 
 def fabdict(partin, qty=1,level="+1",show_classified="show"):
