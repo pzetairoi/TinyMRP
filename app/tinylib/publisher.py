@@ -377,7 +377,12 @@ def pdf_pagenum(pdf_page,page_number,color=colors.grey,stamps=[]):
     if 'classified' in stamps:
         #print(stamps)
         stamp="app/static/images/classified_stamp.png"
-        c.drawImage(stamp,180*mm, 70*mm,height=1*inch, 
+        c.drawImage(stamp,15*mm, PAGE_HEIGHT-1.2*inch, 70*mm,height=1*inch, 
+                    preserveAspectRatio=True, mask='auto') 
+    if 'approved' in stamps:
+        #print(stamps)
+        stamp="app/static/images/approved_stamp.png"
+        c.drawImage(stamp,PAGE_WIDTH*(1/2-1/6), PAGE_HEIGHT*(1/2-1/6),height=PAGE_HEIGHT/3, 
                     preserveAspectRatio=True, mask='auto') 
 
     #Save page
