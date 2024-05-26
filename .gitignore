@@ -2,6 +2,8 @@ TinyMRP_conf.xlsm
 ~$TinyMRP_conf.xlsm
 custom_files/TinyMRP_conf.xlsm
 custom_files/~$TinyMRP_conf.xlsm
+custom_files/companylogo.png
+custom_files/companylogo.svg
 data-dev.sqlite
 tinyserver.sock
 git-pull.sh
