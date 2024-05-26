@@ -238,7 +238,7 @@ def index_page(canvas,doc):
     logo="custom_files/companylogo.png"
     logoheight=0.8*inch    
    
-    canvas.drawImage(logo,-PAGE_WIDTH/2-40*mm, PAGE_HEIGHT-1.2*inch,height=logoheight, 
+    canvas.drawImage(logo,-PAGE_WIDTH/2-80*mm, PAGE_HEIGHT-1.2*inch,height=logoheight, 
                      preserveAspectRatio=True, mask='auto')
     
 
