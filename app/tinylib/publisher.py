@@ -236,11 +236,11 @@ def index_page(canvas,doc):
     
     #Add custom compoany logo to topo left corner
     logo="custom_files/companylogo.png"
-    canvas.drawImage(logo,2.5*inch-PAGE_WIDTH, PAGE_HEIGHT-60,height=0.5*inch, 
+    logoheight=0.8*inch    
+   
+    canvas.drawImage(logo,-PAGE_WIDTH/2-40*mm, PAGE_HEIGHT-1.2*inch,height=logoheight, 
                      preserveAspectRatio=True, mask='auto')
-
-    # canvas.drawImage(logo,2.4*inch-PAGE_WIDTH, 25,height=0.25*inch, 
-                    # preserveAspectRatio=True, mask='auto')
+    
 
     canvas.setFillColorRGB(0,0,0.5)                     
     # canvas.drawString (1.0*inch*0.8,30+2*mm,"Created with TinyMRP")
