@@ -1,5 +1,7 @@
 TinyMRP_conf.xlsm
 ~$TinyMRP_conf.xlsm
+custom_files/TinyMRP_conf.xlsm
+custom_files/~$TinyMRP_conf.xlsm
 data-dev.sqlite
 tinyserver.sock
 git-pull.sh

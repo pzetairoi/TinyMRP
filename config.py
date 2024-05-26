@@ -11,7 +11,7 @@ class TinyConfig:
     
 ###Function for loading the tinymrp config file from excel, 
 ## to be integrated in a more elegant way
-    def loadconfiguration(filein='TinyMRP_conf.xlsm'):
+    def loadconfiguration(filein='custom_files\TinyMRP_conf.xlsm'):
 
             excelfile=pd.ExcelFile(filein)
             PROCESS_CONF=excelfile.parse('process').fillna('')

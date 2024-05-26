@@ -34,7 +34,7 @@ from flask import (
     jsonify, after_this_request
 )
 from cmath import nan
-from flask import jsonify
+from flask import jsonify, send_from_directory
 from flask_login import login_required, current_user
 from ..decorators import permission_required
 import json
@@ -51,7 +51,8 @@ from ..models import User, Permission
 # create config variables (to be cleaned in the future)
 
 from flasky import db
-from config import config as config_set
+from config import config as config_set 
+from config import basedir
 
 
 #To delete dowloaded files with a bit of a delay 
@@ -286,6 +287,12 @@ def zipfileset(partlist, filelist, outputfolder="", zipfolder=True, delTempFiles
         # shutil.rmtree(Path(summaryfolder), ignore_errors=False, onerror=None)
         return ""
 
+ 
+@tinylib.route('/custom/<filename>')
+@login_required
+def serve_custom_file(filename):
+    return send_from_directory(os.path.join(basedir, 'custom_files'), filename)
+# return send_from_directory('custom_files', filename)
 
 @tinylib.route('/api/listfileset', methods=('GET', 'POST'))
 @login_required
@@ -761,12 +768,14 @@ def mongotreepartdata(partnumber="",revision="",depth='toplevel',web=True,consum
                     "http://"+ part['pngpath'].replace(fileserver_path,webfileserver) +  """' width=auto height=30rm></a>"""
                 except:
                     part['pngpath']= '<a href="' + urllink + '">' + """<img src='""" + \
-                    "http://"+ webfileserver+'/logo.png' +  """' width=auto height=30rm></a>"""
+                    "http://"+ webserver[:-6]+'/static/images/tinylogo.png' +  """' width=auto height=30rm></a>"""
         elif part['partnumber'] != None:
             pass
 
         else:
-            part['pngpath']=webfileserver+'/logo.png'
+            # part['pngpath']=webfileserver+'/logo.png'
+            part['pngpath']= webserver[:-6]+ url_for('static', filename='images/tinylogo.thumbnail.png')
+
                 
                 
 
@@ -3034,11 +3043,14 @@ def compile_pack():
             title=part.partnumber+" REV "+part.revision + ":"  
             subtitle= "Consumed parts: " +form_dict['consumed_opt']+ " - Classified: " + form_dict['classified_opt'] + " - Depth: " + form_dict['bom_opt'] +   \
                         " - Processes: " 
-            if 'processes' in form_dict.keys():
-                if type (form_dict['processes'])== list:
-                    subtitle=subtitle+ ", ".join(form_dict['processes'])
-                else:
-                    subtitle=subtitle+ form_dict['processes']
+            subtitle=part.description
+            
+                        
+            # if 'processes' in form_dict.keys():
+            #     if type (form_dict['processes'])== list:
+            #         subtitle=subtitle+ ", ".join(form_dict['processes'])
+            #     else:
+            #         subtitle=subtitle+ form_dict['processes']
                 
             if 'fabpack' in form_dict['export_opt']:  
 

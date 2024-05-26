@@ -59,6 +59,7 @@ def create_app(config_name):
 
     from .tinylib import tinylib as tinylib_blueprint
     app.register_blueprint(tinylib_blueprint, url_prefix='/vault')
+    
 
 
     

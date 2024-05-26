@@ -8,6 +8,7 @@
 
 from flasky import db
 from config import config as config_set
+from config import basedir
 config=config_set['tinymrp'].__dict__
 
 folderout=config['FOLDEROUT']
@@ -220,17 +221,22 @@ def label_page(canvas,doc):
 
 def index_page(canvas,doc):
     
-    logo="app/static/images/logo.png"
+    logo="app/static/images/tinyfooter.png"
     # logo="/Fileserver/Deliverables/png/TMRP-011053_REV_1.png" 
     PAGE_HEIGHT = A4[1]
     PAGE_WIDTH = A4[0]
  
     #canvas.setFillColor(colors.red)
     #canvas.rect(0, PAGE_HEIGHT-90, PAGE_WIDTH, 90, stroke=1, fill=1)
-    # canvas.drawImage(logo,2.5*inch-PAGE_WIDTH, PAGE_HEIGHT-60,height=0.5*inch, 
-    #                  preserveAspectRatio=True, mask='auto')
 
-    canvas.drawImage(logo,25*mm, 3*mm,height=0.25*inch, 
+
+    canvas.drawImage(logo,PAGE_WIDTH/2-0.4*inch, 0*mm,width=0.8*inch, 
+                     preserveAspectRatio=True, mask='auto')
+    
+    
+    #Add custom compoany logo to topo left corner
+    logo="custom_files/companylogo.png"
+    canvas.drawImage(logo,2.5*inch-PAGE_WIDTH, PAGE_HEIGHT-60,height=0.5*inch, 
                      preserveAspectRatio=True, mask='auto')
 
     # canvas.drawImage(logo,2.4*inch-PAGE_WIDTH, 25,height=0.25*inch, 
@@ -259,11 +265,10 @@ def process_page(process):
     
     def process_genericpage(canvas,doc):
         #inputs process, process icon, and 
-        logo="app/static/images/"+'logo.png'
+        logo="custom_files/companylogo.png"
         PAGE_HEIGHT = A3[1]
         PAGE_WIDTH = A3[0]
      
-        
         
         # canvas.setStrokeColor(get_process_color(process))
         canvas.setFillColor(get_process_color(process,intensity=0.7))
@@ -276,6 +281,7 @@ def process_page(process):
         #Inser company logo and process icon
         canvas.drawImage(logo,inch*0.5-PAGE_WIDTH, PAGE_HEIGHT-70,height=0.5*inch, 
                          preserveAspectRatio=True, mask='auto')
+
         
         renderPDF.draw(drawing, canvas,PAGE_WIDTH-inch*1.5, PAGE_HEIGHT-80)
     
@@ -319,8 +325,8 @@ def pdf_pagenum(pdf_page,page_number,color=colors.grey,stamps=[]):
     c=canvas.Canvas(tempfile)
 
 
-    #Draw logo, rectangle and foot depending on orientation
-    logo="app/static/images/logo.png"
+    #Draw logo, rectangle and foot depending on orientation    
+    logo="app/static/images/tinyfooter.png"
 
     if PAGE_WIDTH<PAGE_HEIGHT:
                     
@@ -333,8 +339,8 @@ def pdf_pagenum(pdf_page,page_number,color=colors.grey,stamps=[]):
         c.setFont("Helvetica-Bold", 12)
         c.setFillColorRGB(0,0.8,0)
         c.drawCentredString(PAGE_WIDTH-x,yvert-2*mm,footnote)
-        c.drawImage(logo,2.5*inch-PAGE_WIDTH/2, yvert-2*mm,height=0.15*inch, 
-                     preserveAspectRatio=True, mask='auto')
+        # c.drawImage(logo,2.5*inch-PAGE_WIDTH/2, yvert-2*mm,height=0.15*inch, 
+        #              preserveAspectRatio=True, mask='auto')
         
         c.setFillColorRGB(0,0,0.5)
         
@@ -343,7 +349,9 @@ def pdf_pagenum(pdf_page,page_number,color=colors.grey,stamps=[]):
         #c.drawCentredString (PAGE_WIDTH/2,3*mm,"Made with TinyMRP               www.tinymrp.com")
         # drawCentredString
 
-        c.drawImage(logo,144*mm, 2*mm,height=0.3*inch, 
+        # c.drawImage(logo,144*mm, 2*mm,height=0.3*inch, 
+        #              preserveAspectRatio=True, mask='auto')
+        c.drawImage(logo,PAGE_WIDTH/2-0.4*inch, -10*mm,width=0.8*inch, 
                      preserveAspectRatio=True, mask='auto')
 
 
@@ -366,7 +374,7 @@ def pdf_pagenum(pdf_page,page_number,color=colors.grey,stamps=[]):
         # c.drawString (1.0*inch*0.85,y-2*mm,"Created with TinyMRP - www.tinymrp.com")
         #c.drawCentredString (PAGE_WIDTH/2,3*mm,"Made with TinyMRP               www.tinymrp.com")
 
-        c.drawImage(logo,144*mm,2*mm,height=0.3*inch, 
+        c.drawImage(logo,PAGE_WIDTH/2-0.4*inch, -10*mm,width=0.8*inch, 
                      preserveAspectRatio=True, mask='auto')
         
     if 'quote' in stamps :
@@ -382,6 +390,11 @@ def pdf_pagenum(pdf_page,page_number,color=colors.grey,stamps=[]):
     if 'approved' in stamps:
         #print(stamps)
         stamp="app/static/images/approved_stamp.png"
+        c.drawImage(stamp,PAGE_WIDTH*(1/2-1/6), PAGE_HEIGHT*(1/2-1/6),height=PAGE_HEIGHT/3, 
+                    preserveAspectRatio=True, mask='auto') 
+    if 'wip' in stamps:
+        #print(stamps)
+        stamp="app/static/images/wip_stamp.png"
         c.drawImage(stamp,PAGE_WIDTH*(1/2-1/6), PAGE_HEIGHT*(1/2-1/6),height=PAGE_HEIGHT/3, 
                     preserveAspectRatio=True, mask='auto') 
 
@@ -1661,7 +1674,8 @@ def BinderPDF(dictlist,outputfolder="",title="",subtitle="",savevisual=False, st
     #Output folder and files
     if outputfolder=="":
         # outputfolder=os.getcwd()+ "/temp/"
-        outputfolder="C:/TinyMRP/temp/"
+        outputfolder= os.path.join(fileserver_path,'/Deliverables/temp/' )
+
 
 
     if title=="": outputfile=outputfolder + secure_filename("PDFBINDER-"+ datetime.now().strftime('%d_%m_%Y-%H_%M_%S_%f')+".pdf")
@@ -1741,31 +1755,48 @@ def BinderPDF(dictlist,outputfolder="",title="",subtitle="",savevisual=False, st
                 para = Paragraph(ptext, style=styles["Normal"], bulletText='-')
                 flowables.append(para)
                 # print(para)
+                
+                
+                if 'property_stamp' in stamps:
+
+                    stampy=[]
+                    
+                    #Add the non property based stamps
+                    if 'add_datasheet' in stamps:
+                        stampy.append('add_datasheet')
+                    if 'quote' in stamps:
+                        stampy.append('quote')
+                    if 'classified' in stamps:
+                        stampy.append('classified')
+                        
+                    
+                    if 'classified' in dictlist[i].keys():
+                        if dictlist[i]["classified"]=='yes':
+                            stampy.append('classified')
+                            
+                    if 'approved' in dictlist[i].keys():
+                        if dictlist[i]["approved"]!='' and dictlist[i]["approved"].lower()!='wip':
+                            stampy.append('approved')
+                            print(dictlist[i]["partnumber"] +' APPROVED APPROVED')
+                        else:
+                            stampy.append('wip')
+                            print(dictlist[i]["partnumber"] +' WIP WIP')
+                else:
+                    stampy=stamps
             
                 #Opening each page of the PDF
                 for pageNum in range(dictlist[i]["pdfpages"]):
                     pageObj = pdfReader.getPage(pageNum)
+                    pageObj=pdf_pagenum(pageObj,pageref+pageNum-1,color=get_process_color(dictlist[i]["process"]),stamps=stampy)
 
-
-                    if 'classified' in dictlist[i].keys():
-                        if dictlist[i]["classified"]=='yes':
-                            stampy=list(stamps)
-                            stampy.append('classified')
-
-                            pageObj=pdf_pagenum(pageObj,pageref+pageNum-1,color=get_process_color(dictlist[i]["process"]),stamps=stampy)
-                        else:
-                            pageObj=pdf_pagenum(pageObj,pageref+pageNum-1,color=get_process_color(dictlist[i]["process"]),stamps=stamps)
-                    else:
-                        pageObj=pdf_pagenum(pageObj,pageref+pageNum-1,color=get_process_color(dictlist[i]["process"]),stamps=stamps)
                 
                     # pageObj=pdf_pagenum(pageObj,pageref+pageNum-1,color=colors.black)
                     pdfWriter.addPage(pageObj)
                 
                     #Add the phantom pages
-                    flowables.append(NextPageTemplate('index_first'))
-                    logo="app/static/images/logo.png"
-                    # canvas.drawImage(logo,40*mm, 3*mm,height=0.3*inch, 
-                    #  preserveAspectRatio=True, mask='auto')
+                    flowables.append(NextPageTemplate('index_first'))                    
+                    logo="app/static/images/tinyfooter.png"
+                    
                     stylesheet=getSampleStyleSheet()
                     normalStyle = stylesheet['Code']
                     text='''
@@ -1803,8 +1834,26 @@ def BinderPDF(dictlist,outputfolder="",title="",subtitle="",savevisual=False, st
     
        # Compile datasheets
     if 'add_datasheet' in stamps: 
+
+        
+        
         for i in range(len(dictlist)):
+            print(dictlist[i]["datasheet"])
+            print(dictlist[i]["datasheet"])
+            print(dictlist[i]["datasheet"])
+            print(os.path.isfile(dictlist[i]["datasheet"]))
+            print(os.path.isfile(dictlist[i]["datasheet"]))
+            print(os.path.isfile(dictlist[i]["datasheet"]))
+            print(os.path.isfile(dictlist[i]["datasheet"]))
+            
             if os.path.isfile(dictlist[i]["datasheet"]):
+                print("ADDING DATASHEETS")
+                print("ADDING DATASHEETS")
+                print("ADDING DATASHEETS")
+                print("ADDING DATASHEETS")
+                print("ADDING DATASHEETS")
+                print("ADDING DATASHEETS")
+                print("ADDING DATASHEETS")
                 pdfFileObj = open(dictlist[i]["datasheet"], 'rb')
                 pdfReader = PyPDF2.PdfFileReader(pdfFileObj)
 
@@ -1821,26 +1870,46 @@ def BinderPDF(dictlist,outputfolder="",title="",subtitle="",savevisual=False, st
                 ptext = ptext + """ "/>bulletted paragraph"""
                 para = Paragraph(ptext, style=styles["Normal"], bulletText='-')
                 flowables.append(para)
+                
+                
+                
+                if 'property_stamp' in stamps:
 
-                # Opening each page of the PDF
+                    stampy=[]
+                    
+                    #Add the non property based stamps
+                    if 'add_datasheet' in stamps:
+                        stampy.append('add_datasheet')
+                    if 'quote' in stamps:
+                        stampy.append('quote')
+                    if 'classified' in stamps:
+                        stampy.append('classified')
+                        
+                    
+                    if 'classified' in dictlist[i].keys():
+                        if dictlist[i]["classified"]=='yes':
+                            stampy.append('classified')
+                            
+                    if 'approved' in dictlist[i].keys():
+                        if dictlist[i]["approved"]!='' and dictlist[i]["approved"].lower()!='wip':
+                            stampy.append('approved')
+                            print(dictlist[i]["partnumber"] +' APPROVED APPROVED')
+                        else:
+                            stampy.append('wip')
+                            print(dictlist[i]["partnumber"] +' WIP WIP')
+                else:
+                    stampy=stamps
+            
+                #Opening each page of the PDF
                 for pageNum in range(dictlist[i]["datasheetpages"]):
                     pageObj = pdfReader.getPage(pageNum)
-
-                    if 'classified' in dictlist[i].keys():
-                        if dictlist[i]["classified"] == 'yes':
-                            stampy = list(stamps)
-                            stampy.append('classified')
-                            pageObj = pdf_pagenum(pageObj, pageref + pageNum - 1, color=get_process_color(dictlist[i]["process"]), stamps=stampy)
-                        else:
-                            pageObj = pdf_pagenum(pageObj, pageref + pageNum - 1, color=get_process_color(dictlist[i]["process"]), stamps=stamps)
-                    else:
-                        pageObj = pdf_pagenum(pageObj, pageref + pageNum - 1, color=get_process_color(dictlist[i]["process"]), stamps=stamps)
-
+                    pageObj=pdf_pagenum(pageObj,pageref+pageNum-1,color=get_process_color(dictlist[i]["process"]),stamps=stampy)
                     pdfWriter.addPage(pageObj)
 
                     # Add the phantom pages
-                    flowables.append(NextPageTemplate('index_first'))
-                    logo = "app/static/images/logo.png"
+                    flowables.append(NextPageTemplate('index_first'))                    
+                    logo="app/static/images/tinyfooter.png"
+                    
                     stylesheet = getSampleStyleSheet()
                     normalStyle = stylesheet['Code']
                     text = '''
@@ -1881,7 +1950,7 @@ def BinderPDF(dictlist,outputfolder="",title="",subtitle="",savevisual=False, st
     
     
     
-    
+    #Create first page content with title and etc
     
     # headertext=makeParaRight(solidbom.partnumber + " Drawing Pack")
     headertext=makeParaRight(" Drawing Pack")
@@ -1892,9 +1961,13 @@ def BinderPDF(dictlist,outputfolder="",title="",subtitle="",savevisual=False, st
 
 
     headertext=makeParaCenter(subtitle)
-    para = Paragraph(headertext, style=styles["Heading2"])
+    para = Paragraph(headertext, style=styles["Heading4"])
     flowables.append(para)
     
+    headertext=makeParaCenter(datetime.now().strftime('%d/%m/%Y %H:%M:%S'))
+    para = Paragraph(headertext, style=styles["Heading5"])
+    flowables.append(para)
+ 
     
     flowables.append (Spacer(0, 20))
     flowables.append(NextPageTemplate('index_next'))

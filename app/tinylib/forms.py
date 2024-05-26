@@ -169,8 +169,10 @@ class Compile(FlaskForm):
     filterprocess_opt= RadioField('Filter Process',
                              choices=[('yes','Only selected'),('no','All')],
                              default='no')
-    watermark_opt= MultiCheckboxField('PDF binder options',choices=[('add_datasheet','Add datasheets'), ('quote','For quotation stamp'),
-                ('classified','Classified stamp'),('approved','Approval stamp')])
+    watermark_opt= MultiCheckboxField('PDF binder options',
+                    choices=[('add_datasheet','Add datasheets'),('property_stamp','Approved/WIP - Confidential stamps based on item status'),
+                            ('quote','For quotation stamp'), ('classified','Confidential stamp'),
+                            ('approved','Approval stamp'),('wip','In progress/Not approved stamp')])
     
     
     partnumber=HiddenField()

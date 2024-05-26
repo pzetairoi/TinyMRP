@@ -6,6 +6,7 @@ from flasky import db
 from flask_login import login_required, current_user
 
 from config import config as config_set
+from config import basedir
 
 from app.models import User
 
@@ -565,15 +566,18 @@ class mongoPart(DynamicDocument):
                         pass
 
                 
+ 
 
-        
 
+        if self['pngpath']=="" or self['pngpath']==None or self['pngpath']=="/static/images/tinylogo.svg":
+            # self['pngpath']=webfileserver+'System/tinylogo.png'
+            self['pngpath']=webserver[:-6] + url_for('static', filename='images/tinylogo.png')
 
-        if self['pngpath']=="" or self['pngpath']==None or self['pngpath']=="/static/images/logo.svg":
-            self['pngpath']=webfileserver+'System/logo.png'
+            
             
         
         if 'thumbnail' not in self.to_dict().keys():
+
             self['thumbnail']=thumbnail(self['pngpath'],size=(100,100))        
         elif not file_exists( self['thumbnail']):
             self['thumbnail']=thumbnail(self['pngpath'],size=(100,100))
@@ -785,6 +789,15 @@ def create_folder_ifnotexists(path):
 def thumbnail(filein, size=(100, 100)):
     infile=filein.replace(webfileserver,fileserver_path)
     outfile = os.path.splitext(infile)[0] + ".thumbnail.png"
+
+    if 'images/tinylogo.png' in filein:        
+        outfile = os.path.join(fileserver_path,"/Deliverables/png/tinylogo.thumbnail.png")
+        if not file_exists(outfile):
+            copyfile(os.path.join(basedir,'app/static/images/tinylogo.thumbnail.png'),outfile)
+        return outfile
+    
+
+    
     if file_exists(outfile) :
         if os.path.getatime(infile)>os.path.getatime(outfile):
             try:
