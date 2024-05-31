@@ -1,4 +1,4 @@
-from flask import render_template, redirect, request, url_for, flash, session
+from flask import render_template, redirect, request, url_for, flash, Response, jsonify, session
 from flask_login import login_user, logout_user, login_required, \
     current_user
 from . import auth
@@ -10,13 +10,15 @@ from .forms import LoginForm, RegistrationForm, ChangePasswordForm,\
 from ..main.forms import SearchSimple
 
 
-@auth.route("/fileserver")
+@auth.route("/whoareyou")
 def nginx_auth():
-    #print('who is it?')
+    
+    print('who is it?')
     if current_user.is_authenticated and current_user.confirmed:
-        return "You are logged in!"
+        return Response("You are logged in!", status=200)
     else:
-        return 'Sorry, but unfortunately you\'re not logged in.', 401
+        return Response("Sorry, but unfortunately you're not logged in.", status=401)
+
 
 
 @auth.before_app_request
