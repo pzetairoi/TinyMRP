@@ -165,7 +165,9 @@ ul.checkbox li label {
                         <li><a href="{{ url_for('auth.change_password') }}">Change Password</a></li>
                         <li><a href="{{ url_for('auth.change_email_request') }}">Change Email</a></li>
                         <li><a href="{{ url_for('auth.logout') }}">Log Out</a></li>
+                        {% if current_user.can(Permission.MODERATE) %}
                         <li><a href="{{ url_for('main.admindashboard')}}">Admin dashboard</a></li>
+                        {% endif %}
             
 
                     </ul>
