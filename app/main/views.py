@@ -364,7 +364,7 @@ def moderate_disable(id):
   
 @main.route('/admindashboard')
 @login_required
-@permission_required(Permission.MODERATE)
+@permission_required(Permission.ADMIN)
 def admindashboard():
     # return "tesxt"
     searchform= SearchSimple()
