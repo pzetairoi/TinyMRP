@@ -328,7 +328,15 @@
 
                                         </td>
 
-                                        <td>{{ item['partnumber'] }}</td>
+                                        <td>
+                                                                                        {% if item['revision'] == "": %}
+                                            <a href="{{ url_for('tinylib.partnumber',partnumber=item['partnumber'],revision=" % ") }}">{{ item['partnumber'] }} </a>
+                                            {% else %}
+                                            <a href="{{ url_for('tinylib.partnumber',partnumber=item['partnumber'],revision=item['revision']) }}">{{ item['partnumber'] }}</a>
+                                            {% endif %}
+
+
+                                        </td>
                                         <td>{{ item['description'] }}</td>
                                         <td>{{ item['revision'] }}</td>
                                         <td>{{ item['qty'] }}</td>

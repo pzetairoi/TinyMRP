@@ -770,7 +770,10 @@ def mongotreepartdata(partnumber="",revision="",depth='toplevel',web=True,consum
                 except:
                     part['pngpath']= '<a href="' + urllink + '">' + """<img src='""" + \
                     "http://"+ webserver[:-6]+'/static/images/tinylogo.png' +  """' width=auto height=30rm></a>"""
+            
+            backup_partnumber=part['partnumber']
             part['partnumber'] = '<a href="' + urllink + '">' + part['partnumber']         
+            part['backup_partnumber']=backup_partnumber
             
         elif part['partnumber'] != None:
             pass
@@ -1098,6 +1101,7 @@ def mongopartdata():
                     'tinylib.partnumber', partnumber=part.partnumber, revision=part.revision)
                 # #print("the part link" , urllink)
             
+            backup_partnumber=part['partnumber']
             part['partnumber'] = '<a href="' + urllink + '">' + part['partnumber'] 
 
             try:
@@ -1109,6 +1113,7 @@ def mongopartdata():
                     "http://"+part.pngpath + """' width=auto height=30rm></a>"""
 
             partdict = part.to_dict()
+            partdict['backup_partnumber']=backup_partnumber
 
             if job != None:
                 for bom in job.bom:
@@ -2792,7 +2797,7 @@ def addtojobbom():
     # print("*********************************")
 
     jobnumber = request.values.get('jobnumber')
-    partnumber = request.values.get('partnumber')
+    partnumber = request.values.get('backup_partnumber')
     revision = request.values.get('revision')
 
     print(jobnumber, partnumber, revision)
