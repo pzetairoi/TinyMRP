@@ -77,15 +77,42 @@
             </div>
 
             <script type="text/javascript">
-            document.getElementById('deleteBtn').addEventListener('click', function() {
-                fetch('vault/cleandatabase', { method: 'POST' })
-                    .then(response => response.json())
-                    .then(data => {
-                        alert(data.message);
-                        $('#confirmModal').modal('hide');
-                    })
-                    .catch(error => console.error('Error:', error));
+
+
+            
+
+document.getElementById('deleteBtn').addEventListener('click', () => {
+    // Step 1: Show confirmation popup
+    showConfirmationPopup().then(response => {
+        if (response) {
+            // Step 2: Make API call and show information popup
+            fetch('vault/cleandatabase', { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                return showInfoPopup(data.message);
+            })
+
+            .catch(error => {
+                console.error('Error:', error);
             });
+        }
+    });
+});
+
+function showConfirmationPopup() {
+    return new Promise((resolve) => {
+        const userConfirmed = confirm('Are you sure you want to delete THE WHOLE DATABASE?');
+        resolve(userConfirmed);
+    });
+}
+
+function showInfoPopup(message) {
+    return new Promise((resolve) => {
+        alert(message);
+        resolve();
+    });
+}
+
 
         </script>
 
