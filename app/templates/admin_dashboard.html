@@ -45,6 +45,16 @@
                 {% endfor %}
             </tbody>
         </table>
+
+        <p>'Visitor': [Permission.ACCESS],</p><br>
+        <p> 'Customer employee':[Permission.ACCESS, Permission.COMMENT],</p><br>
+            <p> 'Customer manager': [Permission.ACCESS, Permission.COMMENT, Permission.COMPILE],</p><br>
+                <p>'Employee':[Permission.ACCESS,Permission.FULLACCESS, Permission.COMMENT],</p><br>
+                    <p>'Supervisor': [Permission.ACCESS,Permission.FULLACCESS, Permission.COMMENT, Permission.COMPILE],</p><br>
+                        <p>'Engineeer':[Permission.ACCESS,Permission.FULLACCESS, Permission.COMMENT, Permission.COMPILE, Permission.WRITE]</p><br>
+                            <p>'Manager':[Permission.ACCESS,Permission.FULLACCESS, Permission.COMMENT, Permission.COMPILE, Permission.WRITE, Permission.MODERATE]</p><br>
+                                <p>'Admin':[Permission.ACCESS,Permission.FULLACCESS, Permission.COMMENT, Permission.COMPILE, Permission.WRITE,  Permission.MODERATE, Permission.ADMIN]</p>
+                    
     </div>
 
     <div class="container">
