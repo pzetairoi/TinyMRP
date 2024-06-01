@@ -742,7 +742,7 @@ def mongotreepartdata(partnumber="",revision="",depth='toplevel',web=True,consum
     # Modify the imagelink if target is web and 
     # add missing attributes that are default
     # Account for ordered quantities
-
+ 
     for part in dictlist:
 
         #Add missing keys 
@@ -770,9 +770,11 @@ def mongotreepartdata(partnumber="",revision="",depth='toplevel',web=True,consum
                 except:
                     part['pngpath']= '<a href="' + urllink + '">' + """<img src='""" + \
                     "http://"+ webserver[:-6]+'/static/images/tinylogo.png' +  """' width=auto height=30rm></a>"""
+            part['partnumber'] = '<a href="' + urllink + '">' + part['partnumber']         
+            
         elif part['partnumber'] != None:
             pass
-
+ 
         else:
             # part['pngpath']=webfileserver+'/logo.png'
             part['pngpath']= webserver[:-6]+ url_for('static', filename='images/tinylogo.thumbnail.png')
@@ -899,8 +901,7 @@ def mongopartdata():
                 userparts=userparts+job.fullbomid() 
         allparts = allparts(id__in=userparts)
 
-
-
+  
     # # SearchPanes
     searchpanes = {}
 
@@ -1084,6 +1085,9 @@ def mongopartdata():
                 part[neededkey]=""
 
         if part.partnumber != None:
+            
+
+            
             if part.revision == "":
                 urllink = url_for(
                     'tinylib.partnumber', partnumber=part.partnumber, revision="%25")
@@ -1093,6 +1097,8 @@ def mongopartdata():
                 urllink = url_for(
                     'tinylib.partnumber', partnumber=part.partnumber, revision=part.revision)
                 # #print("the part link" , urllink)
+            
+            part['partnumber'] = '<a href="' + urllink + '">' + part['partnumber'] 
 
             try:
                 part['pngpath'] = '<a href="' + urllink + '">' + """<img src='""" + \

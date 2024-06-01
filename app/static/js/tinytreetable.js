@@ -249,90 +249,96 @@ function tinytreetablefunc(partnumber, revision, jobnumber, ordernumber, fileset
                     // },
 
 
-                    {
-                        text: "Visual list of selection",
-                        action: function() {
-                            var dataTable = $("#treetable").DataTable();
-                            var rowsel = dataTable.rows({ selected: true });
-                            var alldata = [];
+
+
+
+
+                    // {
+                    //     text: "Visual list of selection",
+                    //     action: function() {
+                    //         var dataTable = $("#treetable").DataTable();
+                    //         var rowsel = dataTable.rows({ selected: true });
+                    //         var alldata = [];
                 
-                            rowsel.data(1).each(function() {
-                                alldata = [];
-                                $(this).each(function() {
-                                    alldata.push($(this)[0]);
-                                });
-                            });
+                    //         rowsel.data(1).each(function() {
+                    //             alldata = [];
+                    //             $(this).each(function() {
+                    //                 alldata.push($(this)[0]);
+                    //             });
+                    //         });
                 
-                            var testdata = JSON.stringify(alldata);
+                    //         var testdata = JSON.stringify(alldata);
                 
-                            $.ajax({
-                                type: "POST",
-                                url: "/vault/api/listvisual",
-                                dataType: "json",
-                                data: { alldata: testdata },
-                                success: function(response) {
-                                    if (response != "") {
-                                        window.location = response;
-                                    } else {
-                                        alert("No parts selected for visual list");
-                                    }
-                                },
-                                error: function(error) {
-                                    console.log(error);
-                                },
-                            });
-                        },
-                    },
+                    //         $.ajax({
+                    //             type: "POST",
+                    //             url: "/vault/api/listvisual",
+                    //             dataType: "json",
+                    //             data: { alldata: testdata },
+                    //             success: function(response) {
+                    //                 if (response != "") {
+                    //                     window.location = response;
+                    //                 } else {
+                    //                     alert("No parts selected for visual list");
+                    //                 }
+                    //             },
+                    //             error: function(error) {
+                    //                 console.log(error);
+                    //             },
+                    //         });
+                    //     },
+                    // },
 
 
 
                     
-                    {
-                        text: "File extraction of selection and ticked files",
-                        action: function() {
-                            var dataTable = $("#treetable").DataTable();
-                            var rowsel = dataTable.rows({ selected: true });
-                            var alldata = [];
-                            var filelist = [];
+                    // {
+                    //     text: "File extraction of selection and ticked files",
+                    //     action: function() {
+                    //         var dataTable = $("#treetable").DataTable();
+                    //         var rowsel = dataTable.rows({ selected: true });
+                    //         var alldata = [];
+                    //         var filelist = [];
                 
-                            for (let i = 0; i < fileset.length; i++) {
-                                console.log( fileset[i]);
-                                var dicto = { checkbox: "#" + fileset[i]["filetype"] + "_cb" };
-                                var filecheck = "#" + fileset[i]["filetype"] + "_cb";
-                                var checkcheckbox = document.querySelector(filecheck).checked;
-                                if (checkcheckbox == true) {
-                                    filelist.push(fileset[i]["filetype"]);
-                                }
-                            }
+                    //         for (let i = 0; i < fileset.length; i++) {
+                    //             console.log( fileset[i]);
+                    //             var dicto = { checkbox: "#" + fileset[i]["filetype"] + "_cb" };
+                    //             var filecheck = "#" + fileset[i]["filetype"] + "_cb";
+                    //             var checkcheckbox = document.querySelector(filecheck).checked;
+                    //             if (checkcheckbox == true) {
+                    //                 filelist.push(fileset[i]["filetype"]);
+                    //             }
+                    //         }
                 
-                            rowsel.data(1).each(function() {
-                                alldata = [];
-                                $(this).each(function() {
-                                    alldata.push($(this)[0]);
-                                });
-                            });
+                    //         rowsel.data(1).each(function() {
+                    //             alldata = [];
+                    //             $(this).each(function() {
+                    //                 alldata.push($(this)[0]);
+                    //             });
+                    //         });
                 
-                            var testdata = JSON.stringify(alldata);
-                            var fileout = JSON.stringify(filelist);
+                    //         var testdata = JSON.stringify(alldata);
+                    //         var fileout = JSON.stringify(filelist);
                 
-                            $.ajax({
-                                type: "POST",
-                                url: "/vault/api/listfileset",
-                                dataType: "json",
-                                data: { alldata: testdata, filelist: fileout },
-                                success: function(response) {
-                                    if (response != "") {
-                                        window.location = response;
-                                    } else {
-                                        alert("No parts or files selected to extract");
-                                    }
-                                },
-                                error: function(error) {
-                                    console.log(error);
-                                },
-                            });
-                        },
-                    },
+                    //         $.ajax({
+                    //             type: "POST",
+                    //             url: "/vault/api/listfileset",
+                    //             dataType: "json",
+                    //             data: { alldata: testdata, filelist: fileout },
+                    //             success: function(response) {
+                    //                 if (response != "") {
+                    //                     window.location = response;
+                    //                 } else {
+                    //                     alert("No parts or files selected to extract");
+                    //                 }
+                    //             },
+                    //             error: function(error) {
+                    //                 console.log(error);
+                    //             },
+                    //         });
+                    //     },
+                    // },
+
+
 
 
 

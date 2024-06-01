@@ -23,8 +23,9 @@
 
     <h1>Inventory</h1>
     <p>Use the top-right search tab to filter partnumber and/or descrition, and use the bottom tabs for multifilter </p>
-    <p>Select the parts(multiple selection allowed) to extract the selected doc typoes</p>
-      
+   
+      <div  style="display: none;">
+        <p>Select the parts(multiple selection allowed) to extract the selected doc typoes</p>
      <p> <button type="button" class="btn mb-1 btn-primary" id="compile-dt">Extract documents</button> 
      
       {% for filetype in fileset %}
@@ -36,7 +37,7 @@
       {% endfor %}
 
     </p>
-    <div>
+    
     <button type="button" class="btn mb-1 btn-primary" id="all-dt">Select all ROWS</button>
     <button type="button" class="btn mb-1 btn-primary" id="none-dt">Select none ROWS</button>
   </div>
