@@ -289,7 +289,7 @@ def zipfileset(partlist, filelist, outputfolder="", zipfolder=True, delTempFiles
 
  
 @tinylib.route('/custom/<filename>')
-@login_required
+# @login_required
 def serve_custom_file(filename):
     return send_from_directory(os.path.join(basedir, 'custom_files'), filename)
 # return send_from_directory('custom_files', filename)
@@ -443,7 +443,8 @@ def mongotreepartdata(partnumber="",revision="",depth='toplevel',web=True,consum
 #####  USER BASED ACCESS APPLIED NOW FROM INITIAL FUNCTION FINDINGS
 ######################################################################
     #User access level and part filtering pre tasks
-    if str(current_user._get_current_object().role_id)==str(4):
+    #print("USER ACCESS LEVEL")
+    if current_user._get_current_object().role_id>5:
         userid=str(current_user._get_current_object().id)
         userjobs=[]
         userparts=[]
@@ -884,7 +885,11 @@ def mongopartdata():
 #####  USER BASED ACCESS APPLIED NOW FROM INITIAL FUNCTION FINDINGS
 ######################################################################
     #User access level and part filtering pre tasks
-    if str(current_user._get_current_object().role_id)==str(4):
+    print("USER ACCESS LEVEL")
+    print(current_user._get_current_object().role_id)
+    print(type(current_user._get_current_object().role_id))
+    if current_user._get_current_object().role_id>5:
+    
         userid=str(current_user._get_current_object().id)
         userjobs=[]
         userparts=[]
@@ -1063,7 +1068,8 @@ def mongopartdata():
             for id,qty in zip(allids,allqtys):
                 if id==part.id:
                     
-                    print(part['qty'],part)
+                    # print(part['qty'],part)
+                    print(part)
         else:
             part['qty']=0
 
@@ -1318,7 +1324,9 @@ def partnumber(partnumber, revision):
 #####  USER BASED ACCESS APPLIED NOW FROM INITIAL FUNCTION FINDINGS
 ######################################################################
     #User access level and part filtering pre tasks
-        if str(current_user._get_current_object().role_id)==str(4):
+        #print("USER ACCESS LEVEL")
+        if current_user._get_current_object().role_id>5:
+            
             userid=str(current_user._get_current_object().id)
             userjobs=[]
             userparts=[]
@@ -1522,7 +1530,7 @@ def upload_file():
 
 @tinylib.route('/part/excelcompile', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MODERATE)
+@permission_required(Permission.COMPILE)
 def excelcompile():
     weblink = False
     excelform = UploadForm()
@@ -2200,6 +2208,7 @@ def pdfwithdescription(partnumber, revision=""):
 
 
 @tinylib.route('/createjob', methods=['GET', 'POST'])
+@permission_required(Permission.WRITE)
 def createjob():
     jobs = mongoJob.objects()
 
@@ -2246,7 +2255,7 @@ def isjobnumber(jobnumber):
   
 @tinylib.route('/checkjobnumber', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MODERATE)
+@permission_required(Permission.WRITE)
 def checkjobnumber():
     # resp=jsonify("Hello World")
     # resp.status_code = 200
@@ -2284,6 +2293,7 @@ def checkjobnumber():
 
 @tinylib.route('/jobs', methods=['GET', 'POST'])
 @login_required
+@permission_required(Permission.WRITE)
 def jobs_home():
 
     # Simple search snippet to add to every view   methods=['GET', 'POST'])
@@ -2301,6 +2311,7 @@ def jobs_home():
 
 @tinylib.route('/jobs/manage/<jobnumber>', methods=['GET', 'POST'])
 @login_required
+@permission_required(Permission.MODERATE)
 def job_manage(jobnumber):
 
     # Simple search snippet to add to every view   methods=['GET', 'POST'])
@@ -2355,6 +2366,7 @@ def job_manage(jobnumber):
 
 @tinylib.route('/jobs/link/', methods=['GET', 'POST'])
 @login_required
+@permission_required(Permission.WRITE)
 def job_link():
     jobnumber = request.values.get('jobnumber')
     job = mongoJob.objects(jobnumber=jobnumber).first()
@@ -2366,6 +2378,7 @@ def job_link():
 
 @tinylib.route('/jobs/orderlink/', methods=['GET', 'POST'])
 @login_required
+@permission_required(Permission.WRITE)
 def job_orders_link():
     jobnumber = request.values.get('jobnumber')
     ordernumber = request.values.get('ordernumber')
@@ -2375,11 +2388,11 @@ def job_orders_link():
     # print(joblink)
 
     return joblink
-
+ 
 
 @tinylib.route('/downloads', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MODERATE)
+@permission_required(Permission.WRITE)
 def downloads():
 
     # Simple search snippet to add to every view   methods=['GET', 'POST'])
@@ -2393,6 +2406,7 @@ def downloads():
 
 
 @tinylib.route('/partapi/delete', methods=['GET', 'POST'])
+@permission_required(Permission.WRITE)
 def deletepart_api():
     partnumber = request.values.get('partnumber')
     revision = request.values.get('revision')
@@ -2405,6 +2419,7 @@ def deletepart_api():
 
 
 @tinylib.route('/partapi/update', methods=['GET', 'POST'])
+@permission_required(Permission.WRITE)
 def updatepart_api():
 
     partid = request.values.get('partid')
@@ -2429,6 +2444,7 @@ def updatepart_api():
 
 
 @tinylib.route('/jobapi/delete', methods=['GET', 'POST'])
+@permission_required(Permission.MODERATE)
 def deletejob():
 
     request_data = request.values.get('jobnumber')
@@ -2454,6 +2470,7 @@ def deletejob():
 
 
 @tinylib.route('/jobapi/update', methods=['GET', 'POST'])
+@permission_required(Permission.MODERATE)
 def updatejob():
 
     jobid = request.values.get('_id')
@@ -2480,6 +2497,7 @@ def updatejob():
 
 
 @tinylib.route('/jobdata', methods=['GET', 'POST'])
+@permission_required(Permission.WRITE)
 def data():
     # jobs=Job.query.order_by(desc(Job.id))
 
@@ -2608,6 +2626,7 @@ def tree_dict(partin):
 
 
 @tinylib.route('/createsupplier', methods=['GET', 'POST'])
+@permission_required(Permission.MODERATE)
 def createsupplier():
     suppliers = mongoSupplier.objects()
 
@@ -2657,7 +2676,7 @@ def issuppliername(suppliername):
 
 @tinylib.route('/checksuppliername', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MODERATE)
+@permission_required(Permission.WRITE)
 def checksuppliername():
 
     suppliername = request.form['suppliername']
@@ -2682,6 +2701,7 @@ def checksuppliername():
 
 
 @tinylib.route('/createorder', methods=['GET', 'POST'])
+@permission_required(Permission.WRITE)
 def createorder():
     orders = mongoOrder.objects()
 
@@ -2729,7 +2749,7 @@ def isordernumber(ordernumber):
 
 @tinylib.route('/checkordernumber', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MODERATE)
+@permission_required(Permission.WRITE)
 def checkordernumber():
 
     ordernumber = request.form['ordernumber']
@@ -2757,6 +2777,7 @@ def checkordernumber():
 
 
 @tinylib.route('/jobapi/addtobom', methods=['GET', 'POST'])
+@permission_required(Permission.WRITE)
 def addtojobbom():
 
     # print("*********************************")
@@ -2791,6 +2812,8 @@ def addtojobbom():
 
 
 @tinylib.route('/jobapi/removefrombom', methods=['GET', 'POST'])
+@login_required
+@permission_required(Permission.WRITE)
 def removefrombom():
 
     # print("*********************************")
@@ -2830,6 +2853,7 @@ def removefrombom():
 
 @tinylib.route('/jobs/manageorders/<jobnumber>/<ordernumber>', methods=['GET', 'POST'])
 @login_required
+@permission_required(Permission.WRITE)
 def job_orders(jobnumber, ordernumber):
 
     # Simple search snippet to add to every view   methods=['GET', 'POST'])
@@ -2879,6 +2903,8 @@ def job_orders(jobnumber, ordernumber):
 
 
 @tinylib.route('/jobapi/addtoorder', methods=['GET', 'POST'])
+@login_required
+@permission_required(Permission.WRITE)
 def addtoorder():
 
     # print("*********************************")

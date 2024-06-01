@@ -14,11 +14,15 @@ from . import db, login_manager
 
 
 class Permission:
-    FOLLOW = 1
+    FOLLOW = 1  
+    ACCESS=1    
     COMMENT = 2
-    WRITE = 4
-    MODERATE = 8
-    ADMIN = 16
+    COMPILE = 4
+    FULLACCESS = 8    
+    WRITE = 16
+    MODERATE = 32
+    ADMIN = 64
+    
 
 
 class Role(db.Model):
@@ -39,13 +43,29 @@ class Role(db.Model):
         roles = {
             'User': [Permission.FOLLOW, Permission.COMMENT, Permission.WRITE],
             'Moderator': [Permission.FOLLOW, Permission.COMMENT,
-                          Permission.WRITE, Permission.MODERATE],
+                  Permission.WRITE, Permission.MODERATE],
             'test': [Permission.FOLLOW, Permission.COMMENT,
-                          Permission.WRITE, Permission.MODERATE],
+                  Permission.WRITE, Permission.MODERATE],
             'Administrator': [Permission.FOLLOW, Permission.COMMENT,
-                              Permission.WRITE, Permission.MODERATE,
-                              Permission.ADMIN],
+                      Permission.WRITE, Permission.MODERATE,
+                      Permission.ADMIN],
+            
+            'Visitor': [Permission.ACCESS],
+            'Customer employee':[Permission.ACCESS, Permission.COMMENT],
+            'Customer manager': [Permission.ACCESS, Permission.COMMENT, Permission.COMPILE],
+            'Employee':[Permission.ACCESS,Permission.FULLACCESS, Permission.COMMENT],
+            'Supervisor': [Permission.ACCESS,Permission.FULLACCESS, Permission.COMMENT, Permission.COMPILE],
+            'Engineeer':[Permission.ACCESS,Permission.FULLACCESS, Permission.COMMENT, Permission.COMPILE, Permission.WRITE], 
+            'Manager':[Permission.ACCESS,Permission.FULLACCESS, Permission.COMMENT, Permission.COMPILE, Permission.WRITE, Permission.MODERATE],            
+            'Admin':[Permission.ACCESS,Permission.FULLACCESS, Permission.COMMENT, Permission.COMPILE, Permission.WRITE,  Permission.MODERATE, Permission.ADMIN]           
+                    
         }
+
+        unique_permissions = set()
+        for role_permissions in roles.values():
+            unique_permissions.update(role_permissions)
+
+        print(unique_permissions)
         default_role = 'User'
         for r in roles:
             role = Role.query.filter_by(name=r).first()
