@@ -799,6 +799,7 @@ def thumbnail(filein, size=(100, 100)):
     if 'images/tinylogo.png' in filein:        
         outfile = os.path.join(fileserver_path,"/Deliverables/png/tinylogo.thumbnail.png")
         if not file_exists(outfile):
+            print(basedir)
             copyfile(os.path.join(basedir,'app/static/images/tinylogo.thumbnail.png'),outfile)
         return outfile
     
