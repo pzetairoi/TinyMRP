@@ -553,9 +553,15 @@ class mongoPart(DynamicDocument):
 
 
                     if filetype=='qr':
-                         qrcode=qr_code(self,filename=filetag)
-                         self[field]=qrcode
-                         save=True
+                         try: 
+                            qrcode=qr_code(self,filename=filetag)
+                            self[field]=qrcode
+                            save=True
+                         except:
+                            qrcode=qr_code(self,filename=secure_filename(filetag))
+                            self[field]=qrcode
+                            save=True
+                             
  
  
                 if web :
