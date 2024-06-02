@@ -7,6 +7,7 @@ custom_files/companylogo.svg
 data-dev.sqlite
 tinyserver.sock
 git-pull.sh
+flaskrun.sh
 temp/
 venv/
 
