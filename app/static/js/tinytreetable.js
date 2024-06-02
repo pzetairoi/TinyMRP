@@ -85,8 +85,8 @@ function tinytreetablefunc(partnumber, revision, jobnumber, ordernumber, fileset
                   },
 
                 lengthMenu: [
-                    [-1, 10, 25, 50, 100, 250, -1],
-                    ["All", 10, 25, 50, 100, 250, "All"],
+                    [-1, 20, 25, 50, 100, 250, -1],
+                    ["All", 20, 25, 50, 100, 250, "All"],
                 ],
                 // oSearch: {"sSearch": inputsearch},
                 columns: [

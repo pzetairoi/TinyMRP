@@ -846,7 +846,7 @@ def mongopartdata():
     root = mongoPart.objects(partnumber=rootnumber,
                              revision=rootrevision).first()
 
-
+ 
 
     if order_in != None:
         allqtys=[]
@@ -890,9 +890,9 @@ def mongopartdata():
 #####  USER BASED ACCESS APPLIED NOW FROM INITIAL FUNCTION FINDINGS
 ######################################################################
     #User access level and part filtering pre tasks
-    print("USER ACCESS LEVEL")
-    print(current_user._get_current_object().role_id)
-    print(type(current_user._get_current_object().role_id))
+    # print("USER ACCESS LEVEL")
+    # print(current_user._get_current_object().role_id)
+    # print(type(current_user._get_current_object().role_id))
     if current_user._get_current_object().role_id>5:
     
         userid=str(current_user._get_current_object().id)
@@ -984,8 +984,8 @@ def mongopartdata():
             else:
                 allparts = allparts(mass__gte=minval)
 
-
-
+  
+ 
 
     # search = request.args.get('columns[11][search][value]')
     # if search:
@@ -1084,7 +1084,7 @@ def mongopartdata():
         #Add the missing attributes just in case:
     
         for neededkey in  config['PROPERTY_CONF'].keys():
-            if neededkey not in part._fields.keys() or part[neededkey]==None:
+            if neededkey not in part.to_dict().keys() or part[neededkey]==None:
                 part[neededkey]=""
 
         if part.partnumber != None:
@@ -1131,9 +1131,10 @@ def mongopartdata():
 
                  }
     # #print(tabledata)
-    #print("eeoeoeoeooeoeoeo")
-    #print(tabledata)
-    #print("eeoeoeoeooeoeoeo")
+    # print("eeoeoeoeooeoeoeo")
+    # for dato in webdata:
+    #     print(dato)
+    # print("eeoeoeoeooeoeoeo")
     return mongoToJson(tabledata)
 
 
@@ -1214,7 +1215,7 @@ def partdata():
     # print(tabledata)
     # response
     return jsonify(tabledata)
-
+ 
 
 @tinylib.route('/inventory', methods=('GET', 'POST'))
 @login_required
@@ -1225,14 +1226,14 @@ def allparts():
     if searchform.validate_on_submit():
         searchstring = searchform.search.data
         # flash(searchstring)
-        session['search'] = searchstring
+        session['search'] = searchstring.rstrip().lstrip()
         return redirect(url_for('tinylib.search', searchstring=searchstring, page=1, searchform=searchform))
     else:
         if 'search' in session.keys():
-            searchstring = session['search']
+            searchstring = session['search'].rstrip().lstrip()
 
         # flash("else"+searchstring)
-
+ 
     # print(config['FILES_CONF'])
     # fileset=[]
     # for filetype in config['FILES_CONF'].keys():
@@ -1242,7 +1243,7 @@ def allparts():
     #         fileset.append(refdict)
 
     return render_template('tinylib/part/inventory.html', title="Part list", searchform=searchform, legend=config['PROCESS_LEGEND'], fileset=config['FILESET'])
-
+ 
 
 @tinylib.route('/part/search', methods=('GET', 'POST'))
 @login_required
