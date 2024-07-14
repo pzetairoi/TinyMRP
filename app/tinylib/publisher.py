@@ -1512,8 +1512,8 @@ def loadexcelcompilelist(filein,export_objects=False):
     # db.session.refresh()
     #Loop and find parts
     for item, row in partlist.iterrows():
-        # #print(row['partnumber'])
-        # #print(row['revision'])
+        print(row['partnumber'])
+        print(row['revision'])
 
 
         #Find if the part is already in database
@@ -1521,11 +1521,11 @@ def loadexcelcompilelist(filein,export_objects=False):
         if database_part!=None:
             database_part.updateFileset()
             dicto=database_part.to_dict()
-            dicto['qty']=row['qty']
-            dicto['totalqty']=row['qty']
+            dicto['qty']=int(row['qty'])
+            dicto['totalqty']=int(row['qty'])
             object_dict_list.append(dicto)
-        else:
-            flash("Couldn't find " + row['partnumber']+" rev " +row['revision'])
+        elif row['partnumber']!="":
+            flash("Couldn't find " + str(row['partnumber'])+" rev " +str(row['revision']))
         # #print(database_part)
     
     flatbom=pd.DataFrame( object_dict_list)
