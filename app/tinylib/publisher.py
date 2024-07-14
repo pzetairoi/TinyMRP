@@ -795,17 +795,29 @@ def visual_list(dictlist, outputfolder="",title="",subtitle="",local=False,scope
         flowables.append(NextPageTemplate('index_next'))
         flowables.append(pagebreak)
         headertext=makeParaCenter("Hardware Summary")
+        print("HARDWARE")
+        print("HARDWARE")
+        print("HARDWARE")
+        print(hardlist)
+        print("HARDWARE")
+        print("HARDWARE")
+        print("HARDWARE")
         para = Paragraph(headertext, style=styles["Heading2"])
         flowables.append(para)
         table_data = [[item.upper() for item in ["partnumber", "description", "qty"]]]  # Capitalized header row
+        print(table_data)
         for item in hardlist:
             partnumber = item["partnumber"]
+            #print(item)
             if len(partnumber) > 15:
                 partnumber = split_text(partnumber, 15)
-                table_data.append([partnumber, item["description"], str(item["totalqty"])])
+            print(partnumber)
+            print(item["description"], str(item["totalqty"]))
+            table_data.append([partnumber, item["description"], str(item["totalqty"])])
                 
 
     # Create the table with adjusted column widths
+        print(table_data)
         table = Table(table_data, colWidths=[1.5*inch, 5*inch, 0.5*inch])  # Adjusted widths
 
         # Apply table styles
@@ -1777,10 +1789,10 @@ def BinderPDF(dictlist,outputfolder="",title="",subtitle="",savevisual=False, st
                     if 'approved' in dictlist[i].keys():
                         if dictlist[i]["approved"]!='' and dictlist[i]["approved"].lower()!='wip':
                             stampy.append('approved')
-                            print(dictlist[i]["partnumber"] +' APPROVED APPROVED')
+                            #print(dictlist[i]["partnumber"] +' APPROVED APPROVED')
                         else:
                             stampy.append('wip')
-                            print(dictlist[i]["partnumber"] +' WIP WIP')
+                            #print(dictlist[i]["partnumber"] +' WIP WIP')
                 else:
                     stampy=stamps
             

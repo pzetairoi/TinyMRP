@@ -708,7 +708,7 @@ class mongoPart(DynamicDocument):
             part['level']=[]
             part['qty']=[]
             part['branchqty']=[]
-            print(part,part['totalqty'])
+            #print(part,part['totalqty'])
             
             for partdict in bomlist:
                 if partdict['partnumber']==part.partnumber and partdict['revision']==part.revision:
@@ -1251,10 +1251,10 @@ class solidbom():
                         
 
                         #Enforcing all the partnumbers to be capitalized
-                        print(partdict)
+                        #print(partdict)
                         partdict["partnumber"]=partdict["partnumber"].upper()
                         partnumber=partdict["partnumber"]
-                        print(partnumber)
+                        #print(partnumber)
                         
 
 
@@ -1299,14 +1299,14 @@ class solidbom():
                             #print("-----------------------------------------------------")
                         
                         #Update fileset and check that the min fields exists
-                        print(partnumber)
+                        #print(partnumber)
                         part=mongoPart.objects(partnumber=partnumber,revision=revision).first()
                         part.CheckNeededFields()
                         part.updateFileset(persist=True)
 
                         #Crop image and remove backtround
                         if part['pngpath']!="":
-                            print(part['pngpath'])
+                            #print(part['pngpath'])
                             # part['thumbnail']=thumbnail(part['pngpath'].replace(fileserver_path,webfileserver),size=(100,100)) 
                             try:
                                 cropandbackground(part['pngpath'])
@@ -1430,7 +1430,7 @@ class solidbom():
                 # self.clean_data()
                 
                 #Get the root component definition
-                print(self.data)
+                #print(self.data)
                 self.root_definition()
                 
                 
