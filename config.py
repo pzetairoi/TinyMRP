@@ -190,7 +190,7 @@ class Config(TinyConfig):
     MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'true').lower() in \
        ['true', 'on', '1']
     MAIL_USERNAME = "admin@tinymrp.com"
-    MAIL_PASSWORD ="Tespro"
+    MAIL_PASSWORD =""
     # MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     # MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
 
