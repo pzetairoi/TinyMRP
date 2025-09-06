@@ -172,39 +172,32 @@ EOF
 
 write_clean_mongod_conf(){
   # One-time backup if not already saved
-  if [[ ! -f /etc/mongod.conf.installer.bak ]]; then
-    cp -a /etc/mongod.conf /etc/mongod.conf.installer.bak 2>/dev/null || true
+  if [[ ! -f /etc/mongod.conf.installer.bak && -f /etc/mongod.conf ]]; then
+    cp -a /etc/mongod.conf /etc/mongod.conf.installer.bak || true
   fi
 
-  # Build a minimal, valid config (NO 'security:' block at all)
   local bindip="127.0.0.1"
   [[ "${MONGO_ALLOW_REMOTE}" == "true" ]] && bindip="0.0.0.0"
 
+  # Minimal, valid MongoDB 8.x config — no 'security:' and no deprecated 'storage.journal'
   cat >/etc/mongod.conf <<EOF
-# Minimal mongod.conf written by installer
-# Auth is disabled by omission of the 'security' section.
 systemLog:
   destination: file
-  logAppend: true
   path: /var/log/mongodb/mongod.log
+  logAppend: true
 
 storage:
   dbPath: /var/lib/mongodb
-  journal:
-    enabled: true
-
-processManagement:
-  fork: false
 
 net:
   port: 27017
   bindIp: ${bindip}
 EOF
 
-  # Ensure dirs/ownership exist as expected
   install -d -o mongodb -g mongodb /var/lib/mongodb /var/log/mongodb || true
   chown -R mongodb:mongodb /var/lib/mongodb /var/log/mongodb || true
 }
+
 # -----------------------------
 
 need_root
